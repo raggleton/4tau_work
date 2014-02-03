@@ -1,0 +1,149 @@
+#########################################
+#            Model Info                 #
+#########################################
+Model:     NMSSM(nmhdecay)
+#
+Gauge:     Feynman
+
+
+#########################################
+#            Processes                  #
+#########################################
+Process   :    G,G->ha,ha
+Decay     :     ha->l,L
+Decay     :     l->q,q,lepton
+Decay     :     L->q,q,lepton
+Decay     :     l->lepton,lepton,lepton
+Decay     :     L->lepton,lepton,lepton
+Remove    :0: G,h2,h3
+Alias :    lepton=l,e,m,L,E,M,nl,ne,nm,Nl,Ne,Nm
+Alias :    q=u,U,d,D,c,C,s,S
+
+#########################################
+#            PDF's                      #
+#########################################
+pdf1 :       cteq6l(proton)
+pdf2 :       cteq6l(proton)
+
+
+#########################################
+#            Momenta                    #
+#########################################
+p1 :         4000
+p2 :         4000
+
+
+#########################################
+#            Parameters                 #
+#########################################
+Parameter:   EE=0.312853
+Parameter:   SW=0.482
+Parameter:   MZ=91.2
+Parameter:   GG=1.117
+Parameter:   alfSMZ=0.1184
+Parameter:   MbMb=4.5
+Parameter:   McMc=1.3
+Parameter:   Mtp=174.5
+Parameter:   Ml=1.777
+Parameter:   wt=1.442
+Parameter:   tb=1.000000000000000E+01
+Parameter:   Lambda=3.000000000000000E-02
+Parameter:   Kappa=5.000000000000000E-01
+Parameter:   aLambda=1.300000000000000E+03
+Parameter:   aKappa=0.000000000000000E+00
+Parameter:   mu=4.000000000000000E+02
+Parameter:   MG1=2.000000000000000E+02
+Parameter:   MG2=4.000000000000000E+02
+Parameter:   MG3=6.000000000000000E+02
+Parameter:   At=-2.500000000000000E+03
+Parameter:   Ab=-2.500000000000000E+03
+Parameter:   Al=-2.500000000000000E+03
+Parameter:   Ml2=1.000000000000000E+03
+Parameter:   Ml3=1.000000000000000E+03
+Parameter:   Mr2=1.000000000000000E+03
+Parameter:   Mr3=1.000000000000000E+03
+Parameter:   Mq2=1.000000000000000E+03
+Parameter:   Mq3=1.000000000000000E+03
+Parameter:   Mu2=1.000000000000000E+03
+Parameter:   Mu3=1.000000000000000E+03
+Parameter:   Md2=1.000000000000000E+03
+Parameter:   Md3=1.000000000000000E+03
+Parameter:   Q=100
+Parameter:   Maux=1
+
+#########################################
+#            QCD running info           #
+#########################################
+parton dist. alpha : 0
+alpha(MZ)          : 0.1172
+alpha nf           : 5
+alpha order        : 2
+mb(mb)             : 4.2
+Mtop(pole)         : 175
+alpha Fact Q :0: Mh1
+alpha Ren Q :0: Mh1
+
+#########################################
+#            Breit-Wigner               #
+#########################################
+Breit Wigner range : 2.7
+T-channel widths   : OFF
+GI in T-channel    : OFF
+GI in S-channel    : OFF
+
+#########################################
+#            Cuts                       #
+#########################################
+
+#########################################
+#            Kinematics                 #
+#########################################
+
+#########################################
+#            Regularization             #
+#########################################
+Regularization momentum :0: 34
+Regularization mass     :0: Mh1
+Regularization width    :0: wh1
+Regularization power    :0: 2
+
+#########################################
+#            Distributions              #
+#########################################
+
+#########################################
+#            Events Generation          #
+#########################################
+Number of events (per run step): 50000
+Max lumi [1/fb]                : 1000000000
+Filename                       : GG_H_aa_4taus_decay-single-single
+Cleanup                        : True
+
+#########################################
+#            Parallelization info       #
+#########################################
+Parallelization method : local
+Que                    : 
+Walltime               : 0
+Memory                 : 0
+email                  : 
+Max number of cpus     : 12
+sleep time             : 3
+nice level             : 19
+
+#########################################
+#            Vegas                      #
+#########################################
+nSess_1  : 5
+nCalls_1 : 10000
+nSess_2  : 5
+nCalls_2 : 10000
+
+#########################################
+#           Event Generator             #
+#########################################
+sub-cubes      : 10000
+random search  : 100
+simplex search : 50
+MAX*N          : 2.000000
+find new MAX   : 50
