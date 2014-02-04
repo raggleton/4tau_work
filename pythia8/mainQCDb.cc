@@ -11,11 +11,13 @@ using namespace Pythia8;
  
 int main(int argc, char* argv[]) {
 
-  bool outputEvent  = false; // output entire event listing to STDOUT (long!), for debugging only
-  bool writeToHEPMC = true; // output to HEPMC
-  bool muOnly = true;
-  
+  bool outputEvent  = true; // output entire event listing to STDOUT (long!), for debugging only
+  bool writeToHEPMC = false; // output to HEPMC
+  bool muOnly       = true; // Only allow b hadrons to decay to muons or taus
+  bool tauToMuOnly  = true; // Only allow those taus from b hadrons to decay to muons 
+
   // Check that correct number of command-line arguments
+  // Unfortunately required even if writeToHEPMC = false
   if (argc != 2) {
     cerr << " Unexpected number of command-line arguments. \n "
          <<  "You are expected to provide one output file name. \n"
@@ -43,7 +45,7 @@ int main(int argc, char* argv[]) {
   // Number of events. 
   // Warning, 5K events ~900MB hepmc file and takes ~5 min.
   // Warning, 50K events ~9GB hepmc file and takes ~40 min.
-  pythia.readString("Main:numberOfEvents = 25000");
+  pythia.readString("Main:numberOfEvents = 5000");
   int nEvent = pythia.mode("Main:numberOfEvents");
   pythia.readString("Next:numberShowEvent = 00");
   // pythia.readString("Next:numberShowProcess = 100");
@@ -69,11 +71,10 @@ int main(int argc, char* argv[]) {
   pythia.readString("6: onMode = off");
   pythia.readString("6: onIfAny = 5");
   pythia.readString("PhaseSpace:pTHatMin = 10.");  
-  pythia.readString("HadronLevel:all = on");
+  // pythia.readString("HadronLevel:all = on");
     // pythia.readString("ProcessLevel:all = off");   
   // pythia.readString("PartonLevel:all = off");   
   // pythia.readString("HadronLevel:all = off");   
-
 
   // All B hadrons from PDG
   int bCodes[90] = {511,521,10511,10521,513,523,10513,10523,20513,20523,515,525,531,10531,533,10533,
@@ -108,9 +109,12 @@ int main(int argc, char* argv[]) {
     }
     // pythia.particleData.list(511);
   }
+
   // For tau, turn off decays. We want any tau from B hadrons to decay to muons,
   // but all other taus can decay however they want.
-  // pythia.readString("15:onMode = off");
+  if(tauToMuOnly)
+    pythia.readString("15:onMode = off");
+  
   std::vector<int> tausFromB;
   std::vector<int> tausNotFromB;
 
@@ -120,14 +124,12 @@ int main(int argc, char* argv[]) {
   // Some basic historgrams
   Hist nMuInEvent("number of muons in an event", 10, -0.5, 9.5); 
   Hist muPt("pT muons in an event", 40, 0.0, 20.0); 
-  Hist oppSignMass("mass of opposite-sign muon pair", 100, 0.0, 100.0);
-  Hist sameSignMass("mass of same-sign muon pair", 100, 0.0, 100.0);
   int nWithPair = 0;
 
   // Begin event loop.
   for (int iEvent = 0; iEvent < nEvent; ++iEvent) {
 
-    if (muOnly){
+    if (tauToMuOnly){
       // have to turn off tau decays for each event
       pythia.readString("15:onMode = off"); 
       // reset tau vectors to empty
@@ -138,7 +140,7 @@ int main(int argc, char* argv[]) {
     // Generate event. Skip it if error.
     if (!pythia.next()) continue;
     
-    if (muOnly) {
+    if (tauToMuOnly) {
       // begin particles-in-event loop
       // Let's find all the taus, and store their positions.
       // We want to store those from B hadrons differently to those not from B hadrons
@@ -203,34 +205,19 @@ int main(int argc, char* argv[]) {
       }
     }
     
-    // Check whether pair(s) present.
+    // Check whether SS pair(s) present.
     int nMuNeg = iMuNeg.size();
     int nMuPos = iMuPos.size();
-    if (nMuNeg + nMuPos > 1) {
+    if ((nMuNeg  > 1) || (nMuPos > 1)) {
       ++nWithPair;
-
-      // Fill masses of opposite-sign pairs.
-      for (int iN = 0; iN < nMuNeg; ++iN){
-        for (int iP = 0; iP < nMuPos; ++iP) 
-          oppSignMass.fill((event[iMuNeg[iN]].p() + event[iMuPos[iP]].p()).mCalc());
-      }
-
-      // Fill masses of same-sign pairs.
-      for (int i1 = 0; i1 < nMuNeg - 1; ++i1) {
-        for (int i2 = i1 + 1; i2 < nMuNeg; ++i2) 
-          sameSignMass.fill((event[iMuNeg[i1]].p() + event[iMuNeg[i2]].p()).mCalc());
-      }
-      
-      for (int i1 = 0; i1 < nMuPos - 1; ++i1){
-        for (int i2 = i1 + 1; i2 < nMuPos; ++i2) 
-          sameSignMass.fill((event[iMuPos[i1]].p() + event[iMuPos[i2]].p()).mCalc());
-      }
-
-    // Finished analysis of current round. 
     }
 
-    nMuInEvent.fill(iMuPos.size() + iMuNeg.size());
-    // Output the event
+    if ((nMuPos+nMuNeg < 2) && writeToHEPMC)
+      writeToHEPMC = false; // Don't output to hepmc is there's only 1 muon
+
+    nMuInEvent.fill(nMuPos + nMuNeg);
+
+    // Output the event to screen
     if (outputEvent)
       event.list();
 
@@ -249,7 +236,7 @@ int main(int argc, char* argv[]) {
 
   // Statistics. Histograms. 
   pythia.stat();
-  cout << muPt << nMuInEvent << oppSignMass << sameSignMass << endl;
+  cout << muPt << nMuInEvent << endl;
   cout << "Number of events with pair: " << nWithPair << endl;
 
   // Done. 

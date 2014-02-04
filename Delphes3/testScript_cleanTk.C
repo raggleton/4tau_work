@@ -1,3 +1,4 @@
+#include <vector>
 /*
 root -l examples/myScript.C\(\"QCDoutput5.root\"\)
 
@@ -11,7 +12,7 @@ void testScript_cleanTk()
 
   gSystem->Load("libDelphes");
 
-  bool doSignal = false;
+  bool doSignal = true;
   bool doMu = true;
 
   // Create chain of root trees
@@ -64,15 +65,17 @@ void testScript_cleanTk()
   // Use the data_flow.png and tcl file to figure out what branches are available, and what class they are
   // and use https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription
   // TClonesArray *branchMuon = treeReader->UseBranch("Muon");
-  TClonesArray *branchTracks = treeReader->UseBranch("Track");
+  TClonesArray *branchTracks   = treeReader->UseBranch("Track");
   TClonesArray *branchGenMuons = treeReader->UseBranch("OnlyGenMuons");
-  TClonesArray *branchStable = treeReader->UseBranch("StableParticle");
+  TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
+  TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
   // Book histograms
   TH1D *histNTracks1OS = new TH1D("hNTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 10,0,1.0);
   TH1D *histNTracks1 = new TH1D("hNTracks1" ,"Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 10,0,1.0);
   TH1D *histNTracks2OS = new TH1D("hNTracks2OS" ,"Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 10,0,1.0);
   TH1D *histNTracks2 = new TH1D("hNTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 10,0,1.0);
+
   TH1D *histNTracksCum1OS = new TH1D("hNTracksCum1OS" ,"Cumu Number of tracks about mu1, OS,p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 10,0,1.0);
   TH1D *histNTracksCum1 = new TH1D("hNTracksCum1" ,"Cumu Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 10,0,1.0);
   TH1D *histNTracksCum2OS = new TH1D("hNTracksCum2OS" ,"Cumu Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 10,0,1.0);
@@ -92,8 +95,11 @@ void testScript_cleanTk()
   
   TH1D *histDRMuMu = new TH1D("hDRMuMu", "#Delta R(#mu-#mu), muon selection;#Delta R(#mu_{1}-#mu_{2}); N_{events}", 20,0,TMath::Pi());
   
+  TH1D *histDRa1 = new TH1D("hDRa1","#Delta R(#tau-#tau) 1st a_{0}, no muon selection;#Delta R(#tau-#tau); N_{events}", 10,0,1.);
+  TH1D *histDRa2 = new TH1D("hDRa2","#Delta R(#tau-#tau) 2nd a_{0}, no muon selection;#Delta R(#tau-#tau); N_{events}", 10,0,1.);
+
   int nMu(0);
-    int n1(0), n2(0), nMuPass(0);
+  int n1(0), n2(0), nMuPass(0);
 
   // Loop over all events
   // for(Int_t entry = 0; entry < 500; ++entry){
@@ -104,12 +110,13 @@ void testScript_cleanTk()
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
       
+     // cout << "*** Event" <<endl; 
     // Do at gen particle level.
-    // First, find the highest pt muons.
     // Note this method works fine for highest pt muon but is slow for highest two.
     // Really we want an ordered list
     histNMu->Fill(branchGenMuons->GetEntries());
-    if (branchGenMuons->GetEntries() < 2) continue;
+
+    if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons!
     
     GenParticle *cand(0),*mu1(0), *mu2(0);
     Track *candTk(0);
@@ -138,6 +145,68 @@ void testScript_cleanTk()
     TLorentzVector mu1Mom, mu2Mom;
     mu1Mom = mu1->P4();
     mu2Mom = mu2->P4();
+
+    //////////////////////////////////////////
+    // Get the hard interaction for signal  //
+    //////////////////////////////////////////
+    if (doSignal) {
+      GenParticle *a1(0), *a2(0); 
+      // Get a0s    
+      for(int j = 0; j < branchAll->GetEntries(); j++){
+        cand = (GenParticle*) branchAll->At(j);
+        if ((abs(cand->PID)==36) && (abs(cand->Status)==62)){
+          if (a1==0){
+            a1=cand;
+            // cout << "found first a1 at " << j << endl;
+          } else {
+            // cout << "found second a1 at " << j << endl;
+            a2=cand;
+          }
+        }
+      }
+
+      // Get the tau daughters from a1 and a2
+      GenParticle *tau1a(0), *tau1b(0), *tau2a(0), *tau2b(0);
+      tau1a = (GenParticle*) branchAll->At(a1->D1);
+      tau1b = (GenParticle*) branchAll->At(a1->D2);
+      tau2a = (GenParticle*) branchAll->At(a2->D1);
+      tau2b = (GenParticle*) branchAll->At(a2->D2);
+
+      // Get the tau decay products
+      std::vector<GenParticle*> tau1aDaughters;
+      std::vector<GenParticle*> tau1bDaughters;
+      std::vector<GenParticle*> tau2aDaughters;
+      std::vector<GenParticle*> tau2bDaughters;
+
+      for(int i = tau1a->D1; i <= tau1a->D2; i++){
+        tau1aDaughters.push_back((GenParticle*) branchAll->At(i));
+      }
+      for(int i = tau1b->D1; i <= tau1b->D2; i++){
+        tau1bDaughters.push_back((GenParticle*) branchAll->At(i));
+      }
+      for(int i = tau2a->D1; i <= tau2a->D2; i++){
+        tau2aDaughters.push_back((GenParticle*) branchAll->At(i));
+      }
+      for(int i = tau2b->D1; i <= tau2b->D2; i++){
+        // cout << i << " PDGID: " << ((GenParticle*) branchAll->At(i))->PID << " charge: " << ((GenParticle*) branchAll->At(i))->Charge << endl;
+        tau2bDaughters.push_back((GenParticle*) branchAll->At(i));
+      }
+
+      TLorentzVector tau1aMom,tau1bMom, tau2aMom, tau2bMom;
+      tau1aMom = tau1a->P4();
+      tau1bMom = tau1b->P4();
+      tau2aMom = tau2a->P4();
+      tau2bMom = tau2b->P4();
+
+      histDRa1->Fill(tau1aMom.DeltaR(tau1bMom));
+      histDRa2->Fill(tau2aMom.DeltaR(tau2bMom));
+    
+      // cout << "Tau1a has "  << tau1aDaughters.size() << endl;
+      // cout << "Tau1b has "  << tau1bDaughters.size() << endl;
+      // cout << "Tau2a has "  << tau2aDaughters.size() << endl;
+      // cout << "Tau2b has "  << tau2bDaughters.size() << endl;
+    }
+
 
     ////////////////////
     // Muon selection //
@@ -293,6 +362,13 @@ void testScript_cleanTk()
   c.SaveAs((name+"cleanTk/NTk1_clean"+app+".pdf").c_str());
   histNTk25->Draw("HISTE");
   c.SaveAs((name+"cleanTk/NTk25_clean"+app+".pdf").c_str());
+
+  if (doSignal){
+    histDRa1->Draw("HISTE");
+    c.SaveAs((name+"cleanTk/DRa1_clean"+app+".pdf").c_str());
+    histDRa2->Draw("HISTE");
+    c.SaveAs((name+"cleanTk/DRa2_clean"+app+".pdf").c_str());
+  }
 
   TFile* outFile = TFile::Open((name+"cleanTk/output"+app+".root").c_str(),"RECREATE");
   histNMu->Write("",TObject::kOverwrite);

@@ -3,19 +3,8 @@
 // PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 // Please respect the MCnet Guidelines, see GUIDELINES for details.
 
-// This is a simple test program. 
-// It illustrates how Les Houches Event File input can be used in PYTHIA.
-// It uses two LHE files, ttbar.lhe and ttbar2.lhe, which are combined
-// using Beams:newLHEFsameInit = on to skip new initialization second time.
-// Then the second file is viewed as a simple continuation of the first,
-// just split for practical reasons, rather than as a separate new run 
-// with a new set of processes.
-// In the first file top decays have been performed, in the second not,
-// and are instead handled by the internal PYTHIA resonance-decay machinery. 
-// Furthermore the internal top production processes are switched on and
-// mixed in, giving an unrealistic "double up" total top cross section.
-// Much of this of course is not intended to be realistic, 
-// but rather illustrates several tricks that can be useful.
+// This takes in a LHE file and hadronises it, and output to hepmc
+// Based on main12.cc in pythia/examples
 
 #include "Pythia8/Pythia.h"
 #include "Pythia8/Pythia8ToHepMC.h"
@@ -114,7 +103,7 @@ void lookAtTauProducts(Event& event, int &nProngs, int &nMu, int p1, int p2, int
 int main(int argc, char* argv[]) {
 
   // bool outputEvent  = true; // output entire event listing to STDOUT (long!), for debugging only
-  bool writeToHEPMC = true; // output to HEPMC
+  bool writeToHEPMC = false; // output to HEPMC
 
   // Check that correct number of command-line arguments
   if (argc != 2) {
@@ -215,7 +204,7 @@ int main(int argc, char* argv[]) {
       }
       
       // After looking at all taus, have we got 2 muons and 2 1-prong decays?
-      if ((n3Prong == 1) && (nMus>=2))
+      if ((n1Prong == 2) && (nMus>=2))
         wanted = true;
       else
         wanted = false;
