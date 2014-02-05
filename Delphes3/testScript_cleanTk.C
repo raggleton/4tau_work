@@ -1,11 +1,128 @@
 #include <vector>
+
 /*
 root -l examples/myScript.C\(\"QCDoutput5.root\"\)
 
 for clean tracks ie efficiency = 1, no smearing
 */
 using namespace std;
-// void myScript(const char *inputFile="")
+
+std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *tau) { // get the 3 correct daughters of the tau
+
+  // cout << "get tau daughters" << endl;
+
+  std::vector<GenParticle*> tauDaughters;
+
+  bool foundProduct = false;
+  while(!foundProduct){      
+    if(tau->D1 == tau->D2) { // tau -> tau
+      tau = (GenParticle*) branchAll->At(tau->D1);  
+      // cout << "self to self !!!!!!!!!!!!!!!!!!!!" << endl;
+    } else if (tau->D2-tau->D1 == 1) { //tau->tau+gamma
+      // cout << "tau to gamma!!!!!!!!!!!!!!!!!!!!!!" << endl;
+      if ( abs(((GenParticle*) branchAll->At(tau->D1))->PID) == 22) {
+        tau = (GenParticle*) branchAll->At(tau->D2);
+      } else{
+        tau = (GenParticle*) branchAll->At(tau->D1);
+      }
+    } else {   
+      for(int i = tau->D1; i <= tau->D2; i++){
+        tauDaughters.push_back((GenParticle*) branchAll->At(i));
+        // tauDaughters.push_back(i);
+      }
+      if (tauDaughters.size() ==3){
+        // cout << "3 products" << endl;
+        foundProduct = true;
+        return tauDaughters;  
+      }
+    }
+  }
+}
+
+GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { // from tau decay products, get the final stable products
+
+  // cout << "get charged obj" << endl;
+  
+  std::vector<GenParticle*> history; // hold all unique particles in the decay chain (stores event posiiton number)
+  std::vector<GenParticle*> current = getTauDaughters(branchAll, tau);
+  // std::vector<int> current; // holds position no.s for current step
+  std::vector<GenParticle*> next; // holds decay products, not nec. all unique
+  GenParticle *prong(0);
+
+bool foundOne = false;
+
+  while (current.size()>0){ // if current > 0 we haven't exhausted all the particles
+    // cout << "STEP! size " << current.size() << endl;
+    for (unsigned a = 0; a < current.size(); a++){
+      // cout << "Particle " << current[a] << " id: " << event[current[a]].id() << endl;
+      // Check 1 - is this already in current?
+      // Could probably do more efficiently using the unique function on std::vector
+      bool alreadyDone = false;
+
+      for (unsigned b = 0; b < a; b++){
+        if ((current[a] == current[b]) && (a != 0)) {
+          // cout << "--Found a duplicate" << endl;
+          alreadyDone = true;
+        }
+      }
+
+      // Check 2 - is this already in history?
+      if (!alreadyDone){
+        // cout << "-not in current" << endl;
+        for (unsigned c = 0; c < history.size(); c++){
+          if ((current[a] == history[c]) && (c!=0)){
+            // cout << "--Found a dupicate in history" << endl;
+            alreadyDone = true;
+          }
+        }
+      }
+
+      // Check 3 - is this final state?
+      // cout << alreadyDone << endl;
+      if (!alreadyDone){
+        // cout << "-not in history" << endl;
+        
+        // Check if final state. Either status 1, or D1 == D2 == -1
+        if (current[a]->Status == 1) {
+          // cout << "status == 1" <<endl;
+          // cout << " ID: " << current[a]->PID << " status: " << current[a]->Status << " charge: " << current[a]->Charge << endl;
+
+          // Check if charged
+          if (current[a]->Charge != 0) {
+            // cout << "FINAL PRONG " << current[a]->PID << endl;
+            prong = current[a];
+            foundOne = true;
+          }
+                    
+          history.push_back(current[a]);
+          // cout << "pushed into history" << endl;
+        } else {
+          // Load its daughters no. into next
+          for (int d = current[a]->D1; d <= current[a]->D2; d++) {
+            // cout << "pushing" << endl;
+            next.push_back((GenParticle*) branchAll->At(d));
+          } 
+          
+          // Load it into history
+          history.push_back(current[a]);
+        }
+      
+      }// end of alreadyDone
+    } // end of loop over current
+
+    // Clear current - don't need to do as = assignment auto does this
+    // current.clear();
+    // Copy next into current
+    current = next;
+    // Empty next
+    next.clear();
+  } // end of while(!done)
+
+if (!foundOne) cout << "SHIT!!!!!" << endl;
+return prong;
+
+}
+
 void testScript_cleanTk()
 {
   TH1::SetDefaultSumw2();
@@ -19,8 +136,9 @@ void testScript_cleanTk()
   TChain chain("Delphes");
   if (doSignal){
     // chain.Add("GG_H_aa.root");
+    chain.Add("sig_test.root");
     // chain.Add("Signal_cleanTk/signal_clean.root");
-    chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
+    // chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
     // chain.Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
     cout << "Doing signal" << endl;
   } else {
@@ -98,6 +216,11 @@ void testScript_cleanTk()
   TH1D *histDRa1 = new TH1D("hDRa1","#Delta R(#tau-#tau) 1st a_{0}, no muon selection;#Delta R(#tau-#tau); N_{events}", 10,0,1.);
   TH1D *histDRa2 = new TH1D("hDRa2","#Delta R(#tau-#tau) 2nd a_{0}, no muon selection;#Delta R(#tau-#tau); N_{events}", 10,0,1.);
 
+  TH1D *histdxy = new TH1D("hDxy","d_{xy} for stable particles in QCDb events;d_{xy}; N_{events}", 20,0,100.);
+  TH1D *histdz = new TH1D("hDz","d_{z} for stable particles in QCDb events;d_{z}; N_{events}", 20,0,100.);
+
+  TH1D *histPID = new TH1D("hPID","PID of tau 1-prong; PID; N_{events}", 350,0,350);
+
   int nMu(0);
   int n1(0), n2(0), nMuPass(0);
 
@@ -107,6 +230,7 @@ void testScript_cleanTk()
   cout << "Nevts : " << numberOfEntries <<endl;
 
   for(Int_t entry = 0; entry < numberOfEntries; ++entry){
+  // for(Int_t entry = 0; entry < 500; ++entry){
     // Load selected branches with data from specified event
     treeReader->ReadEntry(entry);
       
@@ -154,6 +278,8 @@ void testScript_cleanTk()
       // Get a0s    
       for(int j = 0; j < branchAll->GetEntries(); j++){
         cand = (GenParticle*) branchAll->At(j);
+        // cout << j << " ID: " << cand->PID << " status: " << cand->Status << endl;
+        
         if ((abs(cand->PID)==36) && (abs(cand->Status)==62)){
           if (a1==0){
             a1=cand;
@@ -172,25 +298,17 @@ void testScript_cleanTk()
       tau2a = (GenParticle*) branchAll->At(a2->D1);
       tau2b = (GenParticle*) branchAll->At(a2->D2);
 
-      // Get the tau decay products
-      std::vector<GenParticle*> tau1aDaughters;
-      std::vector<GenParticle*> tau1bDaughters;
-      std::vector<GenParticle*> tau2aDaughters;
-      std::vector<GenParticle*> tau2bDaughters;
+      GenParticle *charged1a = getChargedObject(branchAll, tau1a);
+      GenParticle *charged1b = getChargedObject(branchAll, tau1b);
+      GenParticle *charged2a = getChargedObject(branchAll, tau2a);
+      GenParticle *charged2b = getChargedObject(branchAll, tau2b);
 
-      for(int i = tau1a->D1; i <= tau1a->D2; i++){
-        tau1aDaughters.push_back((GenParticle*) branchAll->At(i));
-      }
-      for(int i = tau1b->D1; i <= tau1b->D2; i++){
-        tau1bDaughters.push_back((GenParticle*) branchAll->At(i));
-      }
-      for(int i = tau2a->D1; i <= tau2a->D2; i++){
-        tau2aDaughters.push_back((GenParticle*) branchAll->At(i));
-      }
-      for(int i = tau2b->D1; i <= tau2b->D2; i++){
-        // cout << i << " PDGID: " << ((GenParticle*) branchAll->At(i))->PID << " charge: " << ((GenParticle*) branchAll->At(i))->Charge << endl;
-        tau2bDaughters.push_back((GenParticle*) branchAll->At(i));
-      }
+
+
+      histPID->Fill(abs(charged1a->PID));
+      histPID->Fill(abs(charged1b->PID));
+      histPID->Fill(abs(charged2a->PID));
+      histPID->Fill(abs(charged2b->PID));
 
       TLorentzVector tau1aMom,tau1bMom, tau2aMom, tau2bMom;
       tau1aMom = tau1a->P4();
@@ -205,8 +323,7 @@ void testScript_cleanTk()
       // cout << "Tau1b has "  << tau1bDaughters.size() << endl;
       // cout << "Tau2a has "  << tau2aDaughters.size() << endl;
       // cout << "Tau2b has "  << tau2bDaughters.size() << endl;
-    }
-
+    } // end if(doSignal)
 
     ////////////////////
     // Muon selection //
@@ -249,14 +366,12 @@ void testScript_cleanTk()
 
             nTk1++;
             if (candTk->PT > 2.5){
-            nTk25++;
+              nTk25++;
               double dR1 = (candTk->P4()).DeltaR(mu1Mom);
               double dR2 = (candTk->P4()).DeltaR(mu2Mom);
               
-              // if ((candTk->Charge) * (mu1->Charge) < 0){ // only need one if statement because SS muons
-                hNTracks1->Fill(dR1);
-                hNTracks2->Fill(dR2);
-              // } 
+              hNTracks1->Fill(dR1);
+              hNTracks2->Fill(dR2);
              
              if ((candTk->Charge) * (mu1->Charge) < 0){ // only need one if statement because SS muons
                 hNTracks1OS->Fill(dR1);
@@ -363,14 +478,23 @@ void testScript_cleanTk()
   histNTk25->Draw("HISTE");
   c.SaveAs((name+"cleanTk/NTk25_clean"+app+".pdf").c_str());
 
+  c.SetLogy();
+  histdxy->Draw("HISTE");
+  c.SaveAs((name+"cleanTk/dxy_clean"+app+".pdf").c_str());
+  histdz->Draw("HISTE");
+  c.SaveAs((name+"cleanTk/dz_clean"+app+".pdf").c_str());
+
   if (doSignal){
     histDRa1->Draw("HISTE");
     c.SaveAs((name+"cleanTk/DRa1_clean"+app+".pdf").c_str());
     histDRa2->Draw("HISTE");
     c.SaveAs((name+"cleanTk/DRa2_clean"+app+".pdf").c_str());
+    histPID->Draw("HISTE");
+    c.SaveAs((name+"cleanTk/PID_clean"+app+".pdf").c_str());
   }
 
   TFile* outFile = TFile::Open((name+"cleanTk/output"+app+".root").c_str(),"RECREATE");
+
   histNMu->Write("",TObject::kOverwrite);
   histMu1Pt->Write("",TObject::kOverwrite);
   histMu2Pt->Write("",TObject::kOverwrite);
@@ -378,8 +502,24 @@ void testScript_cleanTk()
   histMu2PtSel->Write("",TObject::kOverwrite);
   histNTracks1->Write("",TObject::kOverwrite);
   histNTracks2->Write("",TObject::kOverwrite);
+  histNTracks1OS->Write("",TObject::kOverwrite);
+  histNTracks2OS->Write("",TObject::kOverwrite);
   histNTracks1Cum->Write("",TObject::kOverwrite);
   histNTracks2Cum->Write("",TObject::kOverwrite);
+  histNTracks1CumOS->Write("",TObject::kOverwrite);
+  histNTracks2CumOS->Write("",TObject::kOverwrite);
+  histDRMuMu->Write("",TObject::kOverwrite);
+  histNTk->Write("",TObject::kOverwrite);
+  histNTk1->Write("",TObject::kOverwrite);
+  histNTk25->Write("",TObject::kOverwrite);
+  histdxy->Write("",TObject::kOverwrite);
+  histdz->Write("",TObject::kOverwrite);
+  if (doSignal){
+    histDRa1->Write("",TObject::kOverwrite);
+    histDRa2->Write("",TObject::kOverwrite);
+    histPID->Write("",TObject::kOverwrite);
+  }
+
   outFile->Close();
 
 }

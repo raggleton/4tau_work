@@ -126,7 +126,7 @@ int main(int argc, char* argv[]) {
   int nPrintLHA  = 1;             
   int nPrintRest = 0;             
   int nAbort     = 10;
-  int nMaxEvent  = 500000;
+  int nMaxEvent  = 50000;
   
   // Generator           
   Pythia pythia;                            
