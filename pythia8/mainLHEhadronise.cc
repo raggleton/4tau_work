@@ -13,15 +13,10 @@
 
 using namespace Pythia8; 
 
-void lookAtTauProducts(Event& event, int &nProngs, int &nMu, int p1, int p2, int p3) {
+void lookAtTauProducts(Event& event, int &nProngs, int &nMu, std::vector<int> current) {
   std::vector<int> history; // hold all unique particles in the decay chain (stores event posiiton number)
-  std::vector<int> current; // holds position no.s for current step
+  // std::vector<int> current; // holds position no.s for current step
   std::vector<int> next; // holds decay products, not nec. all unique
-
-  // The 3 tau decay products
-  current.push_back(p1);
-  current.push_back(p2);
-  current.push_back(p3);
 
   while (current.size()>0){ // if current > 0 we haven't exhausted all the particles
     // cout << "STEP! size " << current.size() << endl;
@@ -126,7 +121,7 @@ int main(int argc, char* argv[]) {
   int nPrintLHA  = 1;             
   int nPrintRest = 0;             
   int nAbort     = 10;
-  int nMaxEvent  = 50000;
+  int nMaxEvent  = 50;
   
   // Generator           
   Pythia pythia;                            
@@ -196,23 +191,35 @@ int main(int argc, char* argv[]) {
         // cout << i << " : " << endl;
         // cout << "- daughters: " << event[i].daughter2() << " -> " << event[i].daughter1() << endl;
         int nProngs(0), nMu(0);
-        lookAtTauProducts(event, nProngs, nMu, event[i].daughter1(), (event[i].daughter1())+1, event[i].daughter2());
+        std::vector<int> daughters;
+        for (int d = event[i].daughter1(); d <= event[i].daughter2() && d>0; d++){
+          daughters.push_back(d);
+        }
+        lookAtTauProducts(event, nProngs, nMu, daughters);
         // cout << "There were " << nMu << " muons from this tau, and " << nProngs << " charged tracks from this tau" << endl;
         if (nProngs == 1) n1Prong++;
         else if (nProngs > 1) n3Prong++;
         nMus += nMu;
       }
       
-      // After looking at all taus, have we got 2 muons and 2 1-prong decays?
-      if ((n1Prong == 2) && (nMus>=2))
-        wanted = true;
-      else
-        wanted = false;
     
     } // end loop over particles in event
-
-    // cout << "This event had " << n1Prong << " 1-prong taus, " << n3Prong << " 3-prong taus and " << nMus << " tau to mu decays." << endl;
     
+    // After looking at all taus, have we got 2 muons and 2 1-prong decays?
+    if ((n1Prong == 2) && (nMus>=2)){
+      wanted = true;
+      cout << "+++++++++++++++++ YAYYYY +++++++++++++" <<endl;
+    } else
+      wanted = false;
+
+    cout << "This event had " << n1Prong << " 1-prong taus, " << n3Prong << " 3-prong taus and " << nMus << " tau to mu decays." << endl;
+    if (n3Prong+n1Prong+nMus > 4) {
+      cout << "*********** SHIT > 4 --------------------------------------" <<endl;
+            pythia.event.list();  
+
+
+    }
+
     if (wanted && writeToHEPMC){
       nWanted++;
       // Construct new empty HepMC event and fill it.
