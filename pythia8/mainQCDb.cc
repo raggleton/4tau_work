@@ -11,9 +11,9 @@ using namespace Pythia8;
  
 int main(int argc, char* argv[]) {
 
-  bool outputEvent  = true; // output entire event listing to STDOUT (long!), for debugging only
-  bool writeToHEPMC = false; // output to HEPMC
-  bool muOnly       = true; // Only allow b hadrons to decay to muons or taus
+  bool outputEvent  = false; // output entire event listing to STDOUT (long!), for debugging only
+  bool writeToHEPMC = true; // output to HEPMC
+  bool muOnly       = false; // Only allow b hadrons to decay to muons or taus
   bool tauToMuOnly  = true; // Only allow those taus from b hadrons to decay to muons 
 
   // Check that correct number of command-line arguments
@@ -126,8 +126,10 @@ int main(int argc, char* argv[]) {
   Hist muPt("pT muons in an event", 40, 0.0, 20.0); 
   int nWithPair = 0;
 
+
   // Begin event loop.
   for (int iEvent = 0; iEvent < nEvent; ++iEvent) {
+    bool wanted = true;
 
     if (tauToMuOnly){
       // have to turn off tau decays for each event
@@ -212,8 +214,8 @@ int main(int argc, char* argv[]) {
       ++nWithPair;
     }
 
-    if ((nMuPos+nMuNeg < 2) && writeToHEPMC)
-      writeToHEPMC = false; // Don't output to hepmc is there's only 1 muon
+    if (muOnly && (nMuPos+nMuNeg < 2) && writeToHEPMC)
+      wanted = false; // Don't output to hepmc is there's only 1 muon
 
     nMuInEvent.fill(nMuPos + nMuNeg);
 
@@ -221,7 +223,7 @@ int main(int argc, char* argv[]) {
     if (outputEvent)
       event.list();
 
-    if (writeToHEPMC){
+    if (wanted && writeToHEPMC){
       // Construct new empty HepMC event and fill it.
       // Units will be as chosen for HepMC build, but can be changed
       // by arguments, e.g. GenEvt( HepMC::Units::GEV, HepMC::Units::MM)  
