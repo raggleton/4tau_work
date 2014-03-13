@@ -133,9 +133,9 @@ void testScript_cleanTk()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
+	bool doSignal = false;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-    bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly. Otherwise, does 1 = leading, 2 = subleading
+    bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly. Otherwise, does 1 = leading, 2 = subleading
 	
     // Create chain of root trees
 	TChain chain("Delphes");
@@ -194,10 +194,10 @@ void testScript_cleanTk()
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
 	// Book histograms
-	TH1D *histNTracks1OS       = new TH1D("hNTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 25,0,5);
-	TH1D *histNTracks1         = new TH1D("hNTracks1" ,"Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 25,0,5);
-	TH1D *histNTracks2OS       = new TH1D("hNTracks2OS" ,"Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 25,0,5);
-	TH1D *histNTracks2         = new TH1D("hNTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 25,0,5);
+	TH1D *histNTracks1OS       = new TH1D("hNTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 50,0,5);
+	TH1D *histNTracks1         = new TH1D("hNTracks1" ,"Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 50,0,5);
+	TH1D *histNTracks2OS       = new TH1D("hNTracks2OS" ,"Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 50,0,5);
+	TH1D *histNTracks2         = new TH1D("hNTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 50,0,5);
 
 	TH1D *histNTracksCum1OS    = new TH1D("hNTracksCum1OS" ,"Cumu Number of tracks about mu1, OS,p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 10,0,1.0);
 	TH1D *histNTracksCum1      = new TH1D("hNTracksCum1" ,"Cumu Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 10,0,1.0);
@@ -238,8 +238,8 @@ void testScript_cleanTk()
     TH1D *histTroubleDEtaMuMu  = new TH1D("hTroubleDEtaMuMu","Testing ; Value; N_{events}", 20,-5,5);
     TH1D *histTroubleMu1Pt     = new TH1D("hTroubleMu1Pt","Testing ; Value; N_{events}", 25,0,35);
     TH1D *histTroubleMu2Pt     = new TH1D("hTroubleMu2Pt","Testing ; Value; N_{events}", 20,0,25);
-    TH2D *histTroubleEtaVsPhi1 = new TH2D("hTroubleEtaVsPhi1","dPhi vs dEta of tracks (>2.5 GeV) vs muon 1 ; #Delta #eta; #Delta #phi", 15,0,3, 20, 0, TMath::Pi());
-    TH2D *histTroubleEtaVsPhi2 = new TH2D("hTroubleEtaVsPhi2","dPhi vs dEta of tracks (>2.5 GeV) vs muon 2 ; #Delta #eta; #Delta #phi", 15,0,3, 20, 0, TMath::Pi());
+    TH2D *histTroubleEtaVsPhi1 = new TH2D("hTroubleEtaVsPhi1","dPhi vs dEta of tracks (>2.5 GeV) vs muon 1 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
+    TH2D *histTroubleEtaVsPhi2 = new TH2D("hTroubleEtaVsPhi2","dPhi vs dEta of tracks (>2.5 GeV) vs muon 2 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
 
 	int nMu(0);
 	int n1(0), n2(0), nMuPass(0);
@@ -399,11 +399,11 @@ void testScript_cleanTk()
 				candTk = (Track*) branchTracks->At(a);
 
 				if ( (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
-						&& (candTk->PT != mu2->PT)
-						&& (candTk->PT > 1.)
-						&& (fabs(candTk->Z) < 1.) //dz < 1mm
-						&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
-                        && (fabs(candTk->Eta)<3)
+    				&& (candTk->PT != mu2->PT)
+    				&& (candTk->PT > 1.)
+    				&& (fabs(candTk->Z) < 1.) //dz < 1mm
+    				&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
+                    && (fabs(candTk->Eta)<3)
 				){
 
 					nTk1++;
@@ -585,16 +585,22 @@ void testScript_cleanTk()
     // double etaMax = 3.;
     // double phiMax = histTroubleEtaVsPhi1->GetBinLowEdge(histTroubleEtaVsPhi1->GetNbinsY+1);
     // double phiMax = TMath::Pi();
-    TEllipse problemRingInner(0,0,1, 1);
-    problemRingInner.SetLineColor(kRed);
-    problemRingInner.SetLineWidth(2);
-    problemRingInner.SetFillStyle(0);
+    TArc problemRing1(0,0,1,0,90);
+    problemRing1.SetLineColor(kRed);
+    problemRing1.SetLineWidth(2);
+    problemRing1.SetFillStyle(0);
+
+    TArc problemRing2(0,0,2,0,90);
+    problemRing2.SetLineColor(kRed);
+    problemRing2.SetLineWidth(2);
+    problemRing2.SetFillStyle(0);
 
     histTroubleEtaVsPhi1->Draw("COLZ");
-    problemRingInner.Draw();
+    problemRing1.Draw("only");
     c.SaveAs((name+"cleanTk/TroubleEtaVsPhi1_clean"+app+".pdf").c_str());
     histTroubleEtaVsPhi2->Draw("COLZ");
-    problemRingInner.Draw();
+    problemRing1.Draw("only");
+    problemRing2.Draw("only");
     c.SaveAs((name+"cleanTk/TroubleEtaVsPhi2_clean"+app+".pdf").c_str());
 
     histRand->Draw("HISTE");
