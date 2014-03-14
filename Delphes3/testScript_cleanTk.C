@@ -1,4 +1,30 @@
 #include <vector>
+// #include <iostream>
+// #include <utility>
+
+// #include "TROOT.h"
+// #include "TSystem.h"
+// #include "TApplication.h"
+
+// #include "TString.h"
+
+// #include "TH2.h"
+// #include "TH1.h"
+// #include "THStack.h"
+// #include "TLegend.h"
+// #include "TPaveText.h"
+// #include "TClonesArray.h"
+// #include "TLorentzVector.h"
+// #include "TCanvas.h"
+// #include "TArc.h"
+
+// #include "classes/DelphesClasses.h"
+
+// #include "external/ExRootAnalysis/ExRootTreeReader.h"
+// #include "external/ExRootAnalysis/ExRootTreeWriter.h"
+// #include "external/ExRootAnalysis/ExRootTreeBranch.h"
+// #include "external/ExRootAnalysis/ExRootResult.h"
+// #include "external/ExRootAnalysis/ExRootUtilities.h"
 /*
 root -l examples/myScript.C\(\"QCDoutput5.root\"\)
 
@@ -42,7 +68,7 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { // fr
 	std::vector<GenParticle*> current = getTauDaughters(branchAll, tau);
 	std::vector<GenParticle*> next; // holds decay products, not nec. all unique
 	GenParticle *prong(0); // holds final charged product
-    int nCharged = 0; // count charged particles - shouldn't have more than 1!
+	int nCharged = 0; // count charged particles - shouldn't have more than 1!
 	bool foundOne = false;
 
 	while (current.size()>0){ // if current > 0 we haven't exhausted all the particles
@@ -82,7 +108,7 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { // fr
 						// cout << "FINAL PRONG " << current[a]->PID << endl;
 						prong = current[a];
 						foundOne = true;
-                        nCharged++;
+						nCharged++;
 					}
 
 					history.push_back(current[a]);
@@ -109,21 +135,21 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { // fr
 		next.clear();
 	} // end of while(!done)
 
-    // Just in case
-    history.clear();
-    current.clear();
-    next.clear();
+	// Just in case
+	history.clear();
+	current.clear();
+	next.clear();
 
 	if (!foundOne) 
-        cout << "No prongs!!!" << endl;
+		cout << "No prongs!!!" << endl;
 
-    if (nCharged == 1){
-        // cout << "PRONG: " << prong->PID << endl;
-    	return prong;
-    } else {
-        // cout << "Damn, more than 1 prong!!!! Got " << nCharged << endl;
-        return NULL;
-    }
+	if (nCharged == 1){
+		// cout << "PRONG: " << prong->PID << endl;
+		return prong;
+	} else {
+		// cout << "Damn, more than 1 prong!!!! Got " << nCharged << endl;
+		return NULL;
+	}
 
 }
 
@@ -133,11 +159,11 @@ void testScript_cleanTk()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = false;
+	bool doSignal = true;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-    bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly. Otherwise, does 1 = leading, 2 = subleading
+	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly. Otherwise, does 1 = leading, 2 = subleading
 	
-    // Create chain of root trees
+	// Create chain of root trees
 	TChain chain("Delphes");
 	if (doSignal){
 		// chain.Add("GG_H_aa.root");
@@ -205,10 +231,12 @@ void testScript_cleanTk()
 	TH1D *histNTracksCum2      = new TH1D("hNTracksCum2" ,"Cumu Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 10,0,1.0);
 
 	TH1D *histMu1Pt            = new TH1D("hMu1Pt", "#mu_{1} p_{T}, no selection ;#mu_{1} p_{T}; N_{events}", 50,0,50.);
-	TH1D *histMu2Pt            = new TH1D("hMu2Pt", "#mu_{2} p_{T}, no selection;#mu_{1} p_{T}; N_{events}", 50,0,50.);
+	TH1D *histMu2Pt            = new TH1D("hMu2Pt", "#mu_{2} p_{T}, no selection;#mu_{2} p_{T}; N_{events}", 50,0,50.);
 
+	TH1D *histNuPt            = new TH1D("hNuPt", "#nu p_{T}, no selection ;#nu p_{T}; N_{events}", 50,0,50.);
+	
 	TH1D *histMu1PtSel         = new TH1D("hMu1PtSel", "#mu_{1} p_{T}, selection ;#mu_{1} p_{T}; N_{events}", 50,0,50.);
-	TH1D *histMu2PtSel         = new TH1D("hMu2PtSel", "#mu_{2} p_{T}, selection;#mu_{1} p_{T}; N_{events}", 50,0,50.);
+	TH1D *histMu2PtSel         = new TH1D("hMu2PtSel", "#mu_{2} p_{T}, selection;#mu_{2} p_{T}; N_{events}", 50,0,50.);
 
 	TH1D *histNMu              = new TH1D("hNMu", "No. muons;N mu; N_{events}", 5,0,5);
 
@@ -216,37 +244,38 @@ void testScript_cleanTk()
 	TH1D *histNTk1             = new TH1D("hNTk1", "No. tracks, p_{T} > 1 GeV;N_{tk}; N_{events}", 25,0,100);
 	TH1D *histNTk              = new TH1D("hNTk", "No. tracks, p_{T} > 0 GeV;N_{tk}; N_{events}", 25,50,250);
 
-	TH1D *histDRMuMu           = new TH1D("hDRMuMu", "#Delta R(#mu-#mu), muon selection;#Delta R(#mu_{1}-#mu_{2}); N_{events}", 20,0,TMath::Pi());
+	TH1D *histDRMuMu           = new TH1D("hDRMuMu", "#Delta R(#mu-#mu), muon selection;#Delta R(#mu_{1}-#mu_{2}); N_{events}", 30,0,5);
+	TH2D *histDEtaVsDPhiMuMu   = new TH2D("hDEtaVsDPhiMuMu","dPhi vs dEta of selection muons ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
 
-    // Signal-specific ones
-	TH1D *histDRa1             = new TH1D("hDRa1","#Delta R(#tau-#tau) 1st a_{0}, no muon selection;#Delta R(#tau-#tau); N_{events}", 10,0,1.);
-	TH1D *histDRa2             = new TH1D("hDRa2","#Delta R(#tau-#tau) 2nd a_{0}, no muon selection;#Delta R(#tau-#tau); N_{events}", 10,0,1.);
+	// Signal-specific ones
+	TH1D *histDRa1             = new TH1D("hDRa1","#Delta R(#tau-#tau) 1st a_{1}, no muon selection;#Delta R(#tau-#tau); N_{events}", 10,0,1.);
+	TH1D *histDRa2             = new TH1D("hDRa2","#Delta R(#tau-#tau) 2nd a_{1}, no muon selection;#Delta R(#tau-#tau); N_{events}", 10,0,1.);
 
-    // TH1D *histHPt           = new TH1D("hHPt","h_{1,2} p_{T}, what selections?;h_{1,2} p_{T} [GeV]; N_{events}",25,0,50); // Isn't included in MC file from Calchep :(
+	// TH1D *histHPt           = new TH1D("hHPt","h_{1,2} p_{T}, what selections?;h_{1,2} p_{T} [GeV]; N_{events}",25,0,50); // Isn't included in MC file from Calchep :(
 
-    TH1D *histPID              = new TH1D("hPID","PID of tau 1-prong; PID; N_{events}", 350,0,350);
+	TH1D *histPID              = new TH1D("hPID","PID of tau 1-prong; PID; N_{events}", 350,0,350);
 
-    TH1D *histRand             = new TH1D("hRand","Testing rand(); Value; N_{events}", 100,0,1);
-    
-    TH1D *histTroublePt        = new TH1D("hTroublePt","Testing ; Value; N_{events}", 25,0,25.);
-    TH1D *histTroublePID       = new TH1D("hTroublePID","Testing ; Value; N_{events}", 2200,0,2200);
-    TH1D *histTroubleEta       = new TH1D("hTroubleEta","Testing ; Value; N_{events}", 25,0,5.);
-    TH1D *histTroublePhi       = new TH1D("hTroublePhi","Testing ; Value; N_{events}", 25,-TMath::Pi(),TMath::Pi());
-    TH1D *histTroubleMatch     = new TH1D("hTroubleMatch","Testing ; Value; N_{events}", 2,0,2.);
-    TH1D *histTroubleDRMuMu    = new TH1D("hTroubleDRMuMu","Testing ; Value; N_{events}", 20,0,TMath::Pi());
-    TH1D *histTroubleDPhiMuMu  = new TH1D("hTroubleDPhiMuMu","Testing ; Value; N_{events}", 20,0,TMath::Pi());
-    TH1D *histTroubleDEtaMuMu  = new TH1D("hTroubleDEtaMuMu","Testing ; Value; N_{events}", 20,-5,5);
-    TH1D *histTroubleMu1Pt     = new TH1D("hTroubleMu1Pt","Testing ; Value; N_{events}", 25,0,35);
-    TH1D *histTroubleMu2Pt     = new TH1D("hTroubleMu2Pt","Testing ; Value; N_{events}", 20,0,25);
-    TH2D *histTroubleEtaVsPhi1 = new TH2D("hTroubleEtaVsPhi1","dPhi vs dEta of tracks (>2.5 GeV) vs muon 1 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
-    TH2D *histTroubleEtaVsPhi2 = new TH2D("hTroubleEtaVsPhi2","dPhi vs dEta of tracks (>2.5 GeV) vs muon 2 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
+	TH1D *histRand             = new TH1D("hRand","Testing rand(); Value; N_{events}", 100,0,1);
+	
+	TH1D *histTroublePt        = new TH1D("hTroublePt","p_{T} for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 25,0,25.);
+	TH1D *histTroublePID       = new TH1D("hTroublePID","PDGID for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 2200,0,2200);
+	TH1D *histTroubleEta       = new TH1D("hTroubleEta","#eta for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 25,0,5.);
+	TH1D *histTroublePhi       = new TH1D("hTroublePhi","#phi for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 25,-TMath::Pi(),TMath::Pi());
+	TH1D *histTroubleMatch     = new TH1D("hTroubleMatch","Whether trks with #Delta R(#mu1-trk) = 0.7 - 1.2 match to any of tau decay products ; Value; N_{events}", 2,0,2.);
+	TH1D *histTroubleDRMuMu    = new TH1D("hTroubleDRMuMu","#Delta #R (#mu-#mu) for trks #Delta R(#mu1-trk) = 0.7 - 1.2  ; Value; N_{events}", 20,0,TMath::Pi());
+	TH1D *histTroubleDPhiMuMu  = new TH1D("hTroubleDPhiMuMu","#Delta #phi (#mu-#mu) for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 20,0,TMath::Pi());
+	TH1D *histTroubleDEtaMuMu  = new TH1D("hTroubleDEtaMuMu","#Delta #eta (#mu-#mu) for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 20,-5,5);
+	TH1D *histTroubleMu1Pt     = new TH1D("hTroubleMu1Pt","Mu1 p_{T} for trks #Delta R(#mu1-trk) = 0.7 - 1.2 ; Value; N_{events}", 25,0,35);
+	TH1D *histTroubleMu2Pt     = new TH1D("hTroubleMu2Pt","Mu2 p_{T} for trks #Delta R(#mu2-trk) = 0.7 - 1.2 ; Value; N_{events}", 20,0,25);
+	TH2D *histTroubleEtaVsPhi1 = new TH2D("hTroubleEtaVsPhi1","dPhi vs dEta of tracks (>2.5 GeV) vs muon 1 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
+	TH2D *histTroubleEtaVsPhi2 = new TH2D("hTroubleEtaVsPhi2","dPhi vs dEta of tracks (>2.5 GeV) vs muon 2 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
 
 	int nMu(0);
 	int n1(0), n2(0), nMuPass(0);
 
 	// Loop over all events
 	cout << "Nevts : " << numberOfEntries <<endl;
-    bool stop = false;
+	bool stop = false;
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
 
 		// Load selected branches with data from specified event
@@ -259,13 +288,13 @@ void testScript_cleanTk()
 
 		if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons!
 
-        //////////////////////////////////////////////////////////////////////
-        // First, get the two highest pT muons in the event, store their pT //
-        // and pointers to the GenParticles                                 //
-        //////////////////////////////////////////////////////////////////////
-        
-        GenParticle *cand(0),*mu1(0), *mu2(0);
-        Track *candTk(0);
+		//////////////////////////////////////////////////////////////////////
+		// First, get the two highest pT muons in the event, store their pT //
+		// and pointers to the GenParticles                                 //
+		//////////////////////////////////////////////////////////////////////
+		
+		GenParticle *cand(0),*mu1(0), *mu2(0);
+		Track *candTk(0);
 
 		double mu1PT(0.), mu2PT(0.);
 		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
@@ -284,18 +313,18 @@ void testScript_cleanTk()
 			}
 		}
 
-        // Now randomly swap mu1 - mu2
-        GenParticle *origMu1(0), *origMu2(0);
-        origMu1 = mu1;
-        origMu2 = mu2;
-        if (swapMuRandomly){
-            double randNum = (double)rand() / RAND_MAX;
-            histRand->Fill(randNum);
-            if (randNum > 0.5){
-                mu1 = origMu2;
-                mu2 = origMu1;
-            }
-        }
+		// Now randomly swap mu1 - mu2
+		GenParticle *origMu1(0), *origMu2(0);
+		origMu1 = mu1;
+		origMu2 = mu2;
+		if (swapMuRandomly){
+			double randNum = (double)rand() / RAND_MAX;
+			histRand->Fill(randNum);
+			if (randNum > 0.5){
+				mu1 = origMu2;
+				mu2 = origMu1;
+			}
+		}
 
 		histMu1Pt->Fill(mu1PT);
 		histMu2Pt->Fill(mu2PT);
@@ -306,13 +335,13 @@ void testScript_cleanTk()
 
 		//////////////////////////////////////////////////////
 		// Get the hard interaction particles for signal MC //
-        // No selection cuts applied (only >=2 muons)       //
+		// No selection cuts applied (only >=2 muons)       //
 		//////////////////////////////////////////////////////
-        
-        GenParticle *charged1a;
-        GenParticle *charged1b;
-        GenParticle *charged2a;
-        GenParticle *charged2b;
+		
+		GenParticle *charged1a(0);
+		GenParticle *charged1b(0);
+		GenParticle *charged2a(0);
+		GenParticle *charged2b(0);
 
 		if (doSignal) {
 			GenParticle *a1(0), *a2(0);
@@ -320,7 +349,11 @@ void testScript_cleanTk()
 			for(int j = 0; j < branchAll->GetEntries(); j++){
 				cand = (GenParticle*) branchAll->At(j);
 				// cout << j << " ID: " << cand->PID << " status: " << cand->Status << endl;
-                
+			
+				if (fabs(cand->PID)== 12|| fabs(cand->PID)== 14|| fabs(cand->PID)==16 ){
+					histNuPt->Fill(cand->PT);
+				} 
+
 				if ((fabs(cand->PID)==36) && (fabs(cand->Status)==62)){
 					if (a1==0){
 						a1=cand;
@@ -347,20 +380,20 @@ void testScript_cleanTk()
 
 			histDRa1->Fill(tau1aMom.DeltaR(tau1bMom));
 			histDRa2->Fill(tau2aMom.DeltaR(tau2bMom));
-            
-            charged1a = getChargedObject(branchAll, tau1a);
-            charged1b = getChargedObject(branchAll, tau1b);
-            charged2a = getChargedObject(branchAll, tau2a);
-            charged2b = getChargedObject(branchAll, tau2b);
-            
-            if (charged1a && charged1b && charged2a && charged2b){
-                histPID->Fill(fabs(charged1a->PID));
-                histPID->Fill(fabs(charged1b->PID));
-                histPID->Fill(fabs(charged2a->PID));
-                histPID->Fill(fabs(charged2b->PID));
-            } else {
-                // cout << "Got > 1 prong!" << endl;
-            }
+			
+			charged1a = getChargedObject(branchAll, tau1a);
+			charged1b = getChargedObject(branchAll, tau1b);
+			charged2a = getChargedObject(branchAll, tau2a);
+			charged2b = getChargedObject(branchAll, tau2b);
+			
+			if (charged1a && charged1b && charged2a && charged2b){
+				histPID->Fill(fabs(charged1a->PID));
+				histPID->Fill(fabs(charged1b->PID));
+				histPID->Fill(fabs(charged2a->PID));
+				histPID->Fill(fabs(charged2b->PID));
+			} else {
+				// cout << "Got > 1 prong!" << endl;
+			}
 
 			// cout << "Tau1a has "  << tau1aDaughters.size() << endl;
 			// cout << "Tau1b has "  << tau1bDaughters.size() << endl;
@@ -372,15 +405,21 @@ void testScript_cleanTk()
 		// Muon selection //
 		////////////////////
 		
-        if ( (mu1PT > 17.)
+		if ( (mu1PT > 10.)
 		&& (mu2PT > 10.)
 		&& ((mu1->Charge) == (mu2->Charge))
 		&& (fabs(origMu1->Eta) < 2.1)
+		&& (fabs(origMu2->Eta) < 2.1)
 		&& (fabs(origMu2->Eta) < 2.4)
 		&& ((mu1Mom.DeltaR(mu2Mom)) > 2.)
 		){
 
+
 			histDRMuMu->Fill(mu1Mom.DeltaR(mu2Mom));
+			histDEtaVsDPhiMuMu->Fill(fabs(origMu1->Eta-origMu2->Eta),fabs(mu1Mom.DeltaPhi(mu2Mom)));
+
+			histMu1PtSel->Fill(mu1PT);
+			histMu2PtSel->Fill(mu2PT);
 
 			/////////////////////////////////
 			// Look at tracks around muons //
@@ -393,17 +432,17 @@ void testScript_cleanTk()
 			n2++;
 
 			// cout << "Track mult: " << branchTracks->GetEntries() << endl;
-			histNTk->Fill(branchTracks->GetEntries());
+			// histNTk->Fill(branchTracks->GetEntries());
 
 			for(int a = 0; a < branchTracks->GetEntries(); a++){
 				candTk = (Track*) branchTracks->At(a);
 
 				if ( (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
-    				&& (candTk->PT != mu2->PT)
-    				&& (candTk->PT > 1.)
-    				&& (fabs(candTk->Z) < 1.) //dz < 1mm
-    				&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
-                    && (fabs(candTk->Eta)<3)
+					&& (candTk->PT != mu2->PT)
+					&& (candTk->PT > 1.)
+					&& (fabs(candTk->Z) < 1.) //dz < 1mm
+					&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
+					&& (fabs(candTk->Eta)<3)
 				){
 
 					nTk1++;
@@ -412,43 +451,44 @@ void testScript_cleanTk()
 						double dR1 = (candTk->P4()).DeltaR(mu1Mom);
 						double dR2 = (candTk->P4()).DeltaR(mu2Mom);
 
-						hNTracks1->Fill(dR1);
-						hNTracks2->Fill(dR2);
+						histNTracks1->Fill(dR1);
+						histNTracks2->Fill(dR2);
 
-                        hTroubleEtaVsPhi1->Fill(fabs(candTk->Eta - mu1Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu1Mom)));
-                        hTroubleEtaVsPhi2->Fill(fabs(candTk->Eta - mu2Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu2Mom)));
+						histTroubleEtaVsPhi1->Fill(fabs(candTk->Eta - mu1Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu1Mom)));
+						histTroubleEtaVsPhi2->Fill(fabs(candTk->Eta - mu2Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu2Mom)));
 
-                        // Investigate large dR between trk and muon
-                        if (candTk->PT > 2.5 && ((dR1 > 0.7 && dR1 < 1.1) || (dR2 > 0.7 && dR2 < 1.1))){
-                            cout << "CandTk pT: " << candTk->PT << " PID " << candTk->PID << " dR1: " << dR1 << " dR2: " << dR2 << " phi: " << candTk->Phi << " eta: " << candTk->Eta << endl;
-                            histTroublePt->Fill(candTk->PT);
-                            histTroublePID->Fill(fabs(candTk->PID));
-                            histTroubleEta->Fill(candTk->Eta);
-                            histTroublePhi->Fill(candTk->Phi);
-                            histTroubleDRMuMu->Fill(mu1Mom.DeltaR(mu2Mom));
-                            histTroubleDPhiMuMu->Fill(mu1Mom.DeltaPhi(mu2Mom));
-                            histTroubleDEtaMuMu->Fill(fabs(mu1Mom.Eta() - mu2Mom.Eta()));
-                            histTroubleMu1Pt->Fill(mu1PT);
-                            histTroubleMu2Pt->Fill(mu2PT);
-                            if (charged1a && charged1b && charged2a && charged2b){
-                                if (candTk->PT == charged1a->PT || candTk->PT == charged1b->PT || candTk->PT == charged2a->PT || candTk->PT == charged2b->PT)
-                                    histTroubleMatch->Fill(1);
-                                else
-                                    histTroubleMatch->Fill(0);
-                            }
-                            /*for(int j = 0; j < branchAll->GetEntries(); j++){
-                                candTrouble = (GenParticle*) branchAll->At(j);
-                                cout << j << " PID: " << candTrouble->PID << " Mother1: " << candTrouble->M1 << " Mother2: " << candTrouble->M2 << " Daughter 1: " << candTrouble->D1 << " Daughter 2: " << candTrouble->D2;
-                                if ((candTrouble->PT == candTk->PT) && (candTrouble->Eta == candTk->Eta)) {
-                                    cout << " TROUBLE TRACK <<<<<<<<<<<<<<<<<<<<<<<";
-                                }
-                                cout << endl;
-                            }
-                            stop = true;*/
-                        }
+						// Investigate large dR between trk and muon
+						if (candTk->PT > 2.5 && ((dR1 > 0.7 && dR1 < 1.2) || (dR2 > 0.7 && dR2 < 1.2))){
+							cout << "CandTk pT: " << candTk->PT << " PID " << candTk->PID << " dR1: " << dR1 << " dR2: " << dR2 << " phi: " << candTk->Phi << " eta: " << candTk->Eta << endl;
+							histTroublePt->Fill(candTk->PT);
+							histTroublePID->Fill(fabs(candTk->PID));
+							histTroubleEta->Fill(candTk->Eta);
+							histTroublePhi->Fill(candTk->Phi);
+							histTroubleDRMuMu->Fill(mu1Mom.DeltaR(mu2Mom));
+							histTroubleDPhiMuMu->Fill(mu1Mom.DeltaPhi(mu2Mom));
+							histTroubleDEtaMuMu->Fill(fabs(mu1Mom.Eta() - mu2Mom.Eta()));
+							histTroubleMu1Pt->Fill(mu1PT);
+							histTroubleMu2Pt->Fill(mu2PT);
+							if (charged1a && charged1b && charged2a && charged2b){
+								if (candTk->PT == charged1a->PT || candTk->PT == charged1b->PT || candTk->PT == charged2a->PT || candTk->PT == charged2b->PT)
+									histTroubleMatch->Fill(1);
+								else
+									histTroubleMatch->Fill(0);
+							}
+							/*for(int j = 0; j < branchAll->GetEntries(); j++){
+								candTrouble = (GenParticle*) branchAll->At(j);
+								cout << j << " PID: " << candTrouble->PID << " Mother1: " << candTrouble->M1 << " Mother2: " << candTrouble->M2 << " Daughter 1: " << candTrouble->D1 << " Daughter 2: " << candTrouble->D2;
+								if ((candTrouble->PT == candTk->PT) && (candTrouble->Eta == candTk->Eta)) {
+									cout << " TROUBLE TRACK <<<<<<<<<<<<<<<<<<<<<<<";
+								}
+								cout << endl;
+							}
+							stop = true;*/
+						}
+
 						if ((candTk->Charge) * (mu1->Charge) < 0){ // only need one if statement because SS muons
-							hNTracks1OS->Fill(dR1);
-							hNTracks2OS->Fill(dR2);
+							histNTracks1OS->Fill(dR1);
+							histNTracks2OS->Fill(dR2);
 						}
 
 						// Count number of tracks with pT > 1 within a cone of 0.5 about each muon
@@ -457,19 +497,26 @@ void testScript_cleanTk()
 						if (dR2 < 0.5)
 							nAroundMu2++;
 			
-            		} //end of 2.5 cut
+					} //end of 2.5 cut
 				} // End of track selection
 			} // End of track loop
 
-			histNTk1->Fill(nTk1);
-			histNTk25->Fill(nTk25);
-			histMu1PtSel->Fill(mu1PT);
-			histMu2PtSel->Fill(mu2PT);
+			// histNTk1->Fill(nTk1);
+			// histNTk25->Fill(nTk25);
+
 
 			if (nAroundMu1==1 && nAroundMu2==1){
 				nMuPass++;
 			}
 		} // end of muon selection
+		
+		// clean up memory - should prob use smart pointers here
+		// delete cand;
+		// delete mu1;
+		// delete mu2;
+		// delete candTk;
+		// delete origMu1;
+		// delete origMu2;
 
 	} // end of event loop
 
@@ -478,16 +525,16 @@ void testScript_cleanTk()
 	histNTracks2->Scale(1./n2);
 	histNTracks2OS->Scale(1./n2);
 
-	histNTracks1Cum   = (TH1F*)histNTracks1->Clone();
-	histNTracks1CumOS = (TH1F*)histNTracks1OS->Clone();
-	histNTracks2Cum   = (TH1F*)histNTracks2->Clone();
-	histNTracks2CumOS = (TH1F*)histNTracks2OS->Clone();
+	histNTracksCum1   = (TH1D*)histNTracks1->Clone();
+	histNTracksCum1OS = (TH1D*)histNTracks1OS->Clone();
+	histNTracksCum2   = (TH1D*)histNTracks2->Clone();
+	histNTracksCum2OS = (TH1D*)histNTracks2OS->Clone();
 
 	for (int i = 1; i <= histNTracks1->GetNbinsX(); i++){
-		histNTracks1Cum->SetBinContent(i,histNTracks1Cum->GetBinContent(i-1) + histNTracks1->GetBinContent(i));
-		histNTracks1CumOS->SetBinContent(i,histNTracks1CumOS->GetBinContent(i-1) + histNTracks1OS->GetBinContent(i));
-		histNTracks2Cum->SetBinContent(i,histNTracks2Cum->GetBinContent(i-1) + histNTracks2->GetBinContent(i));
-		histNTracks2CumOS->SetBinContent(i,histNTracks2CumOS->GetBinContent(i-1) + histNTracks2OS->GetBinContent(i));
+		histNTracksCum1->SetBinContent(i,histNTracksCum1->GetBinContent(i-1) + histNTracks1->GetBinContent(i));
+		histNTracksCum1OS->SetBinContent(i,histNTracksCum1OS->GetBinContent(i-1) + histNTracks1OS->GetBinContent(i));
+		histNTracksCum2->SetBinContent(i,histNTracksCum2->GetBinContent(i-1) + histNTracks2->GetBinContent(i));
+		histNTracksCum2OS->SetBinContent(i,histNTracksCum2OS->GetBinContent(i-1) + histNTracks2OS->GetBinContent(i));
 	}
 
 	cout << "n1: " << n1 << endl;
@@ -509,6 +556,11 @@ void testScript_cleanTk()
 		else
 			name = "QCDb_";
 	}
+	if (swapMuRandomly)
+		app += "_muRand";
+	
+	app += "_samePtEta";
+
 	histNMu->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/NMu_clean"+app+".pdf").c_str());
 
@@ -517,6 +569,9 @@ void testScript_cleanTk()
 	histMu2Pt->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/Mu2Pt_clean"+app+".pdf").c_str());
 
+	histNuPt->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/NuPt_clean"+app+".pdf").c_str());
+	
 	histMu1PtSel->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/Mu1PtSel_clean"+app+".pdf").c_str());
 	histMu2PtSel->Draw("HISTE");
@@ -532,18 +587,20 @@ void testScript_cleanTk()
 	histNTracks2OS->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/NTracks2_OS_clean"+app+".pdf").c_str());
 
-	histNTracks1Cum->Draw("HISTE");
+	histNTracksCum1->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/NTracks1Cum_NS_clean"+app+".pdf").c_str());
-	histNTracks2Cum->Draw("HISTE");
+	histNTracksCum2->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/NTracks2Cum_NS_clean"+app+".pdf").c_str());
 
-	histNTracks1CumOS->Draw("HISTE");
+	histNTracksCum1OS->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/NTracks1Cum_OS_clean"+app+".pdf").c_str());
-	histNTracks2CumOS->Draw("HISTE");
+	histNTracksCum2OS->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/NTracks2Cum_OS_clean"+app+".pdf").c_str());
 
 	histDRMuMu->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/DRMuMu_clean"+app+".pdf").c_str());
+	histDEtaVsDPhiMuMu->Draw("COLZ");
+	c.SaveAs((name+"cleanTk/DEtaVsDPhiMuMu_clean"+app+".pdf").c_str());
 
 	histNTk->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/NTk_clean"+app+".pdf").c_str());
@@ -557,54 +614,52 @@ void testScript_cleanTk()
 		c.SaveAs((name+"cleanTk/DRa1_clean"+app+".pdf").c_str());
 		histDRa2->Draw("HISTE");
 		c.SaveAs((name+"cleanTk/DRa2_clean"+app+".pdf").c_str());
-        histPID->Draw("HISTE");
-        c.SaveAs((name+"cleanTk/PID_clean"+app+".pdf").c_str());
-    }
+		histPID->Draw("HISTE");
+		c.SaveAs((name+"cleanTk/PID_clean"+app+".pdf").c_str());
+	}
 
-    histTroublePt->Draw("HISTE");
-    c.SaveAs((name+"cleanTk/TroubleTkPt_clean"+app+".pdf").c_str());
-    histTroublePID->Draw("HISTE");
-    c.SaveAs((name+"cleanTk/TroubleTkPID_clean"+app+".pdf").c_str());
-    histTroubleEta->Draw("HISTE");
-    c.SaveAs((name+"cleanTk/TroubleTkEta_clean"+app+".pdf").c_str());
-    histTroublePhi->Draw("HISTE");
-    c.SaveAs((name+"cleanTk/TroubleTkPhi_clean"+app+".pdf").c_str());
-    histTroubleMatch->Draw("HISTE");
-    c.SaveAs((name+"cleanTk/TroubleMatch_clean"+app+".pdf").c_str());
-    histTroubleDRMuMu->Draw("HISTE");
-    c.SaveAs((name+"cleanTk/TroubleDRMuMu_clean"+app+".pdf").c_str());
-    histTroubleDPhiMuMu->Draw("HISTE");
-    c.SaveAs((name+"cleanTk/TroubleDPhiMuMu_clean"+app+".pdf").c_str());
-    histTroubleDEtaMuMu->Draw("HISTE");
-    c.SaveAs((name+"cleanTk/TroubleDEtaMuMu_clean"+app+".pdf").c_str());
-    histTroubleMu1Pt->Draw("HISTE");
-    c.SaveAs((name+"cleanTk/TroubleMu1Pt_clean"+app+".pdf").c_str());
-    histTroubleMu2Pt->Draw("HISTE");
-    c.SaveAs((name+"cleanTk/TroubleMu2Pt_clean"+app+".pdf").c_str());
-    // double etaMax = histTroubleEtaVsPhi1->GetBinLowEdge(histTroubleEtaVsPhi1->GetNbinsX+1);
-    // double etaMax = 3.;
-    // double phiMax = histTroubleEtaVsPhi1->GetBinLowEdge(histTroubleEtaVsPhi1->GetNbinsY+1);
-    // double phiMax = TMath::Pi();
-    TArc problemRing1(0,0,1,0,90);
-    problemRing1.SetLineColor(kRed);
-    problemRing1.SetLineWidth(2);
-    problemRing1.SetFillStyle(0);
+	histTroublePt->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/TroubleTkPt_clean"+app+".pdf").c_str());
+	histTroublePID->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/TroubleTkPID_clean"+app+".pdf").c_str());
+	histTroubleEta->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/TroubleTkEta_clean"+app+".pdf").c_str());
+	histTroublePhi->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/TroubleTkPhi_clean"+app+".pdf").c_str());
+	histTroubleMatch->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/TroubleMatch_clean"+app+".pdf").c_str());
+	histTroubleDRMuMu->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/TroubleDRMuMu_clean"+app+".pdf").c_str());
 
-    TArc problemRing2(0,0,2,0,90);
-    problemRing2.SetLineColor(kRed);
-    problemRing2.SetLineWidth(2);
-    problemRing2.SetFillStyle(0);
+	histTroubleDPhiMuMu->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/TroubleDPhiMuMu_clean"+app+".pdf").c_str());
+	histTroubleDEtaMuMu->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/TroubleDEtaMuMu_clean"+app+".pdf").c_str());
+	histTroubleMu1Pt->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/TroubleMu1Pt_clean"+app+".pdf").c_str());
+	histTroubleMu2Pt->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/TroubleMu2Pt_clean"+app+".pdf").c_str());
 
-    histTroubleEtaVsPhi1->Draw("COLZ");
-    problemRing1.Draw("only");
-    c.SaveAs((name+"cleanTk/TroubleEtaVsPhi1_clean"+app+".pdf").c_str());
-    histTroubleEtaVsPhi2->Draw("COLZ");
-    problemRing1.Draw("only");
-    problemRing2.Draw("only");
-    c.SaveAs((name+"cleanTk/TroubleEtaVsPhi2_clean"+app+".pdf").c_str());
+	TArc problemRing1(0,0,1,0,90);
+	problemRing1.SetLineColor(kRed);
+	problemRing1.SetLineWidth(2);
+	problemRing1.SetFillStyle(0);
 
-    histRand->Draw("HISTE");
-    c.SaveAs((name+"cleanTk/RandTest"+app+".pdf").c_str());
+	TArc problemRing2(0,0,2,0,90);
+	problemRing2.SetLineColor(kRed);
+	problemRing2.SetLineWidth(2);
+	problemRing2.SetFillStyle(0);
+
+	histTroubleEtaVsPhi1->Draw("COLZ");
+	problemRing1.Draw("only");
+	c.SaveAs((name+"cleanTk/TroubleEtaVsPhi1_clean"+app+".pdf").c_str());
+	histTroubleEtaVsPhi2->Draw("COLZ");
+	problemRing1.Draw("only");
+	problemRing2.Draw("only");
+	c.SaveAs((name+"cleanTk/TroubleEtaVsPhi2_clean"+app+".pdf").c_str());
+
+	histRand->Draw("HISTE");
+	c.SaveAs((name+"cleanTk/RandTest"+app+".pdf").c_str());
 
 	TFile* outFile = TFile::Open((name+"cleanTk/output"+app+".root").c_str(),"RECREATE");
 
@@ -617,10 +672,10 @@ void testScript_cleanTk()
 	histNTracks2->Write("",TObject::kOverwrite);
 	histNTracks1OS->Write("",TObject::kOverwrite);
 	histNTracks2OS->Write("",TObject::kOverwrite);
-	histNTracks1Cum->Write("",TObject::kOverwrite);
-	histNTracks2Cum->Write("",TObject::kOverwrite);
-	histNTracks1CumOS->Write("",TObject::kOverwrite);
-	histNTracks2CumOS->Write("",TObject::kOverwrite);
+	histNTracksCum1->Write("",TObject::kOverwrite);
+	histNTracksCum2->Write("",TObject::kOverwrite);
+	histNTracksCum1OS->Write("",TObject::kOverwrite);
+	histNTracksCum2OS->Write("",TObject::kOverwrite);
 	histDRMuMu->Write("",TObject::kOverwrite);
 	histNTk->Write("",TObject::kOverwrite);
 	histNTk1->Write("",TObject::kOverwrite);
