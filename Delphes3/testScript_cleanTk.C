@@ -159,9 +159,9 @@ void testScript_cleanTk()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
+	bool doSignal = false;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -176,6 +176,14 @@ void testScript_cleanTk()
 		if (doMu){
 			cout << "Doing QCDb_mu" << endl;
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_1.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_2.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_3.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_4.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_5.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_6.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_7.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_8.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_9.root");
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_10.root");
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_11.root");
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_12.root");
@@ -186,12 +194,27 @@ void testScript_cleanTk()
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_17.root");
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_18.root");
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_19.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_2.root");
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_20.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_3.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_4.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_5.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_6.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_21.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_22.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_23.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_24.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_25.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_26.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_27.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_28.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_29.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_30.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_31.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_32.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_33.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_34.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_35.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_36.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_37.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_38.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_39.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_40.root");
 		} else {
 			cout << "Doing QCDb" << endl;
 			chain.Add("QCDb_cleanTk/QCDb_10.root");
@@ -220,10 +243,10 @@ void testScript_cleanTk()
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
 	// Book histograms
-	TH1D *histNTracks1OS       = new TH1D("hNTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 50,0,5);
-	TH1D *histNTracks1         = new TH1D("hNTracks1" ,"Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 50,0,5);
-	TH1D *histNTracks2OS       = new TH1D("hNTracks2OS" ,"Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 50,0,5);
-	TH1D *histNTracks2         = new TH1D("hNTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 50,0,5);
+	TH1D *histNTracks1OS       = new TH1D("hNTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
+	TH1D *histNTracks1         = new TH1D("hNTracks1" ,"Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
+	TH1D *histNTracks2OS       = new TH1D("hNTracks2OS" ,"Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
+	TH1D *histNTracks2         = new TH1D("hNTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
 
 	TH1D *histNTracksCum1OS    = new TH1D("hNTracksCum1OS" ,"Cumu Number of tracks about mu1, OS,p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 10,0,1.0);
 	TH1D *histNTracksCum1      = new TH1D("hNTracksCum1" ,"Cumu Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); N_{trk} about muon1 / N (muon1)", 10,0,1.0);
@@ -233,14 +256,14 @@ void testScript_cleanTk()
 	TH1D *histMu1Pt            = new TH1D("hMu1Pt", "#mu_{1} p_{T}, no selection ;#mu_{1} p_{T}; N_{events}", 50,0,50.);
 	TH1D *histMu2Pt            = new TH1D("hMu2Pt", "#mu_{2} p_{T}, no selection;#mu_{2} p_{T}; N_{events}", 50,0,50.);
 
-	TH1D *histNuPt            = new TH1D("hNuPt", "#nu p_{T}, no selection ;#nu p_{T}; N_{events}", 50,0,50.);
+	TH1D *histNuPt             = new TH1D("hNuPt", "#nu p_{T}, no selection ;#nu p_{T}; N_{events}", 50,0,50.);
 	
 	TH1D *histMu1PtSel         = new TH1D("hMu1PtSel", "#mu_{1} p_{T}, selection ;#mu_{1} p_{T}; N_{events}", 50,0,50.);
 	TH1D *histMu2PtSel         = new TH1D("hMu2PtSel", "#mu_{2} p_{T}, selection;#mu_{2} p_{T}; N_{events}", 50,0,50.);
 
 	TH1D *histNMu              = new TH1D("hNMu", "No. muons;N mu; N_{events}", 5,0,5);
-	TH1D *histNMu1              = new TH1D("hNMu1", "No. muons about 1;N mu; N_{events}", 5,0,5);
-	TH1D *histNMu2              = new TH1D("hNMu2", "No. muons about 2;N mu; N_{events}", 5,0,5);
+	TH1D *histNMu1             = new TH1D("hNMu1", "No. muons about 1;N mu; N_{events}", 5,0,5);
+	TH1D *histNMu2             = new TH1D("hNMu2", "No. muons about 2;N mu; N_{events}", 5,0,5);
 
 	TH1D *histNTk25            = new TH1D("hNTk25", "No. tracks, p_{T} > 2.5 GeV;N_{tk}; N_{events}", 25,0,50);
 	TH1D *histNTk1             = new TH1D("hNTk1", "No. tracks, p_{T} > 1 GeV;N_{tk}; N_{events}", 25,0,100);
@@ -273,18 +296,18 @@ void testScript_cleanTk()
 	TH2D *histTroubleEtaVsPhi2 = new TH2D("hTroubleEtaVsPhi2","dPhi vs dEta of tracks (>2.5 GeV) vs muon 2 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
 
 	// Plots for testing invariant mass correlation
-	double massBins[6] = {0,1,2,3,4,10};
+	double massBins[6]         = {0,1,2,3,4,10};
 	// MC truth - use actual mu-tk pairs from tau
-	TH1D *histM1_truth_0to1   = new TH1D("hM1_truth_0to1","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 0-1 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_1to2   = new TH1D("hM1_truth_1to2","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 1-2 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_2to3   = new TH1D("hM1_truth_2to3","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 2-3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_3toInf = new TH1D("hM1_truth_3toInf","m(tk-#mu_{1}) for m(tk-#mu_{2}) > 3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_0to1    = new TH1D("hM1_truth_0to1","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 0-1 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_1to2    = new TH1D("hM1_truth_1to2","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 1-2 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_2to3    = new TH1D("hM1_truth_2to3","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 2-3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_3toInf  = new TH1D("hM1_truth_3toInf","m(tk-#mu_{1}) for m(tk-#mu_{2}) > 3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
 	
 	// actual dist using selection
-	TH1D *histM1_0to1         = new TH1D("hM1_0to1","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 0-1 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_1to2         = new TH1D("hM1_1to2","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 1-2 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_2to3         = new TH1D("hM1_2to3","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 2-3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_3toInf       = new TH1D("hM1_3toInf","m(tk-#mu_{1}) for m(tk-#mu_{2}) > 3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_0to1          = new TH1D("hM1_0to1","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 0-1 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_1to2          = new TH1D("hM1_1to2","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 1-2 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_2to3          = new TH1D("hM1_2to3","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 2-3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_3toInf        = new TH1D("hM1_3toInf","m(tk-#mu_{1}) for m(tk-#mu_{2}) > 3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
 
 	int nMu(0);
 	int n1(0), n2(0), nMuPass(0);
@@ -509,7 +532,7 @@ void testScript_cleanTk()
 		// Muon selection //
 		////////////////////
 		
-		if ( (mu1PT > 17.)
+		if ((mu1PT > 17.)
 		&& (mu2PT > 10.)
 		&& ((mu1->Charge) == (mu2->Charge))
 		&& (fabs(origMu1->Eta) < 2.1)
@@ -527,7 +550,8 @@ void testScript_cleanTk()
 			// Look at tracks around muons //
 			/////////////////////////////////
 
-			int nAroundMu1 (0), nAroundMu2(0);
+			int n1AroundMu1 (0), n1AroundMu2(0); // count tracks with pT > 1
+			int n25AroundMu1 (0), n25AroundMu2(0); // count tracks with pT > 2.5
 			int nTk1(0), nTk25(0);
 
 			n1++;
@@ -557,25 +581,36 @@ void testScript_cleanTk()
 	
 					// Also count the track with pT > 1
 					if (dR1 < 0.5){
-						nAroundMu1++;
+						n1AroundMu1++;
 					}
 					if (dR2 < 0.5){
-						nAroundMu2++;
+						n1AroundMu2++;
 					}
 
 					if (candTk->PT > 2.5){
 
 						nTk25++;
-						// if (((candTk->Charge) * (mu1->Charge) < 0) && (dR1 < 0.5) && (candTk->PT >= track1->PT))
-						// 		track1 = candTk;
-						// if (((candTk->Charge) * (mu2->Charge) < 0) && (dR2 < 0.5) && (candTk->PT >= track2->PT))
-						// 		track2 = candTk;
 
 						histNTracks1->Fill(dR1);
 						histNTracks2->Fill(dR2);
 
 						histTroubleEtaVsPhi1->Fill(fabs(candTk->Eta - mu1Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu1Mom)));
 						histTroubleEtaVsPhi2->Fill(fabs(candTk->Eta - mu2Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu2Mom)));
+
+						if ((candTk->Charge) * (mu1->Charge) < 0){ // only need one if statement because SS muons
+							histNTracks1OS->Fill(dR1);
+							histNTracks2OS->Fill(dR2);
+							if ((dR1 < 0.5) && (candTk->PT > track1->PT))
+								track1 = candTk;
+							if ((dR2 < 0.5) && (candTk->PT > track2->PT))
+								track2 = candTk;
+						}
+
+						// Count number of tracks with pT > 2.5 within a cone of 0.5 about each muon
+						if (dR1 < 0.5)
+							n25AroundMu1++;
+						if (dR2 < 0.5)
+							n25AroundMu2++;
 
 						// Investigate large dR between trk and muon
 						// if (candTk->PT > 2.5 && ((dR1 > 0.7 && dR1 < 1.2) || (dR2 > 0.7 && dR2 < 1.2))){
@@ -605,22 +640,6 @@ void testScript_cleanTk()
 						// 	}
 						// 	stop = true;*/
 						// }
-
-						if ((candTk->Charge) * (mu1->Charge) < 0){ // only need one if statement because SS muons
-							histNTracks1OS->Fill(dR1);
-							histNTracks2OS->Fill(dR2);
-							if ((dR1 < 0.5) && (candTk->PT > track1->PT))
-								track1 = candTk;
-							if ((dR2 < 0.5) && (candTk->PT > track2->PT))
-								track2 = candTk;
-						}
-
-						// Count number of tracks with pT > 1 within a cone of 0.5 about each muon
-						if (dR1 < 0.5)
-							nAroundMu1++;
-						if (dR2 < 0.5)
-							nAroundMu2++;
-			
 					} //end of 2.5 cut
 				} // End of track selection
 			} // End of track loop
@@ -628,8 +647,8 @@ void testScript_cleanTk()
 			// histNTk1->Fill(nTk1);
 			// histNTk25->Fill(nTk25);
 
-
-			if (nAroundMu1==1 && nAroundMu2==1){
+			// signal selection - only 1 track with pT > 1, and that track must have pT > 2.5
+			if (n1AroundMu1==1 && n1AroundMu2==1 && n25AroundMu1==1 && n25AroundMu1==1){
 				nMuPass++;
 
 				TLorentzVector track1Mom=track1->P4();
@@ -646,8 +665,13 @@ void testScript_cleanTk()
 					histM1_2to3->Fill(m1);
 				else
 					histM1_3toInf->Fill(m1);
+			}
+
+			// sideband region where you have 2+ tracks about mu2
+			if (n1AroundMu1==1 && n1AroundMu2==1 && n25AroundMu1==1 && n25AroundMu2 >= 2){
 
 			}
+
 		} // end of muon selection
 		
 		// clean up memory - should prob use smart pointers here
@@ -660,22 +684,22 @@ void testScript_cleanTk()
 
 	} // end of event loop
 
-	histNTracks1->Scale(1./n1);
-	histNTracks1OS->Scale(1./n1);
-	histNTracks2->Scale(1./n2);
-	histNTracks2OS->Scale(1./n2);
+	histNTracks1->Scale(1./histNTracks1->Integral());
+	histNTracks1OS->Scale(1./histNTracks1OS->Integral());
+	histNTracks2->Scale(1./histNTracks2->Integral());
+	histNTracks2OS->Scale(1./histNTracks2OS->Integral());
 
-	histNTracksCum1   = (TH1D*)histNTracks1->Clone();
-	histNTracksCum1OS = (TH1D*)histNTracks1OS->Clone();
-	histNTracksCum2   = (TH1D*)histNTracks2->Clone();
-	histNTracksCum2OS = (TH1D*)histNTracks2OS->Clone();
+	// histNTracksCum1   = (TH1D*)histNTracks1->Clone();
+	// histNTracksCum1OS = (TH1D*)histNTracks1OS->Clone();
+	// histNTracksCum2   = (TH1D*)histNTracks2->Clone();
+	// histNTracksCum2OS = (TH1D*)histNTracks2OS->Clone();
 
-	for (int i = 1; i <= histNTracks1->GetNbinsX(); i++){
-		histNTracksCum1->SetBinContent(i,histNTracksCum1->GetBinContent(i-1) + histNTracks1->GetBinContent(i));
-		histNTracksCum1OS->SetBinContent(i,histNTracksCum1OS->GetBinContent(i-1) + histNTracks1OS->GetBinContent(i));
-		histNTracksCum2->SetBinContent(i,histNTracksCum2->GetBinContent(i-1) + histNTracks2->GetBinContent(i));
-		histNTracksCum2OS->SetBinContent(i,histNTracksCum2OS->GetBinContent(i-1) + histNTracks2OS->GetBinContent(i));
-	}
+	// for (int i = 1; i <= histNTracks1->GetNbinsX(); i++){
+	// 	histNTracksCum1->SetBinContent(i,histNTracksCum1->GetBinContent(i-1) + histNTracks1->GetBinContent(i));
+	// 	histNTracksCum1OS->SetBinContent(i,histNTracksCum1OS->GetBinContent(i-1) + histNTracks1OS->GetBinContent(i));
+	// 	histNTracksCum2->SetBinContent(i,histNTracksCum2->GetBinContent(i-1) + histNTracks2->GetBinContent(i));
+	// 	histNTracksCum2OS->SetBinContent(i,histNTracksCum2OS->GetBinContent(i-1) + histNTracks2OS->GetBinContent(i));
+	// }
 
 	cout << "n1: " << n1 << endl;
 	cout << "n2: " << n2 << endl;
@@ -731,15 +755,15 @@ void testScript_cleanTk()
 	histNTracks2OS->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/NTracks2_OS_clean"+app+".pdf").c_str());
 
-	histNTracksCum1->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NTracks1Cum_NS_clean"+app+".pdf").c_str());
-	histNTracksCum2->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NTracks2Cum_NS_clean"+app+".pdf").c_str());
+	// histNTracksCum1->Draw("HISTE");
+	// c.SaveAs((name+"cleanTk/NTracks1Cum_NS_clean"+app+".pdf").c_str());
+	// histNTracksCum2->Draw("HISTE");
+	// c.SaveAs((name+"cleanTk/NTracks2Cum_NS_clean"+app+".pdf").c_str());
 
-	histNTracksCum1OS->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NTracks1Cum_OS_clean"+app+".pdf").c_str());
-	histNTracksCum2OS->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NTracks2Cum_OS_clean"+app+".pdf").c_str());
+	// histNTracksCum1OS->Draw("HISTE");
+	// c.SaveAs((name+"cleanTk/NTracks1Cum_OS_clean"+app+".pdf").c_str());
+	// histNTracksCum2OS->Draw("HISTE");
+	// c.SaveAs((name+"cleanTk/NTracks2Cum_OS_clean"+app+".pdf").c_str());
 
 	histDRMuMu->Draw("HISTE");
 	c.SaveAs((name+"cleanTk/DRMuMu_clean"+app+".pdf").c_str());
@@ -859,10 +883,10 @@ void testScript_cleanTk()
 	histNTracks2->Write("",TObject::kOverwrite);
 	histNTracks1OS->Write("",TObject::kOverwrite);
 	histNTracks2OS->Write("",TObject::kOverwrite);
-	histNTracksCum1->Write("",TObject::kOverwrite);
-	histNTracksCum2->Write("",TObject::kOverwrite);
-	histNTracksCum1OS->Write("",TObject::kOverwrite);
-	histNTracksCum2OS->Write("",TObject::kOverwrite);
+	// histNTracksCum1->Write("",TObject::kOverwrite);
+	// histNTracksCum2->Write("",TObject::kOverwrite);
+	// histNTracksCum1OS->Write("",TObject::kOverwrite);
+	// histNTracksCum2OS->Write("",TObject::kOverwrite);
 	histDRMuMu->Write("",TObject::kOverwrite);
 	histNTk->Write("",TObject::kOverwrite);
 	histNTk1->Write("",TObject::kOverwrite);
