@@ -31,14 +31,15 @@ root -l examples/myScript.C\(\"QCDoutput5.root\"\)
 
 for clean tracks ie efficiency = 1, no smearing
  */
-// using std::cout;
-// using std::endl;
-using namespace std;
+using std::cout;
+using std::endl;
+// using namespace std;
+
 // For sorting track vectors by pT
 // Ideally we'd use the templated methods in classes/SortableObject.h ...
-// bool sortTracksByPT(Track* a, Track* b){ 
-// 	return (a->PT) > (b->PT); 
-// }
+bool sortTracksByPT(Track* a, Track* b){ 
+	return (a->PT) > (b->PT); 
+}
 
 std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *tau) { // get the 3 correct daughters of the tau
 
@@ -167,7 +168,7 @@ void basicScript()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
+	bool doSignal = false;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	
@@ -184,45 +185,45 @@ void basicScript()
 		if (doMu){
 			cout << "Doing QCDb_mu" << endl;
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_1.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_2.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_3.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_4.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_5.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_6.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_7.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_8.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_9.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_10.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_11.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_12.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_13.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_14.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_15.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_16.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_17.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_18.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_19.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_20.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_21.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_22.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_23.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_24.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_25.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_26.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_27.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_28.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_29.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_30.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_31.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_32.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_33.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_34.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_35.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_36.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_37.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_38.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_39.root");
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_40.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_2.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_3.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_4.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_5.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_6.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_7.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_8.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_9.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_10.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_11.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_12.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_13.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_14.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_15.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_16.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_17.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_18.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_19.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_20.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_21.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_22.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_23.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_24.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_25.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_26.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_27.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_28.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_29.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_30.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_31.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_32.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_33.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_34.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_35.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_36.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_37.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_38.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_39.root");
+			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_40.root");
 		} else {
 			cout << "Doing QCDb" << endl;
 			chain.Add("QCDb_cleanTk/QCDb_10.root");
@@ -265,7 +266,7 @@ void basicScript()
 		// Load selected branches with data from specified event
 		treeReader->ReadEntry(entry);
 
-		// cout << "*** Event" << endl;
+		cout << "*** Event" << endl;
 
 		if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons!
 
@@ -359,13 +360,11 @@ void basicScript()
 		} // End of track loop
 
 		// Now pT order the track collections
-		// std::sort(tk1.begin(), tk1.end(), sortTracksByPT);
-		// std::sort(tk2.begin(), tk2.end(), sortTracksByPT);
+		std::sort(tk1.begin(), tk1.end(), sortTracksByPT);
+		std::sort(tk2.begin(), tk2.end(), sortTracksByPT);
 
-		// for (unsigned a = 0; a<tk1.size(); a++) {
-		// 	cout << tk1.at(a)->PT << endl;
-		// }
-
+		tk1.clear();
+		tk2.clear();
 	} // end of event loop
 
 
