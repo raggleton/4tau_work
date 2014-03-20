@@ -21,6 +21,8 @@ set ExecutionPath {
 
   UniqueObjectFinder
 
+  ScalarHT
+
   TreeWriter
 }
 
@@ -49,18 +51,18 @@ module ParticlePropagator ParticlePropagator {
 # Keep gen particles of certain PID
 ####################################
 
-module StatusPidFilter ElectronGenFilter {
-  set InputArray Delphes/stableParticles
+# module StatusPidFilter ElectronGenFilter {
+#   set InputArray Delphes/stableParticles
 
-  set OutputArray genElectrons
+#   set OutputArray genElectrons
 
-  set KeepPID 11
-}
+#   set KeepPID 11
+# }
 
 module StatusPidFilter MuonGenFilter {
   set InputArray Delphes/stableParticles
 
-  set OutputArray genMuons
+  set OutputArray onlyGenMuons
 
   set KeepPID 13
 }
@@ -320,9 +322,9 @@ module TreeWriter TreeWriter {
   add Branch ScalarHT/energy ScalarHT ScalarHT
   # add Branch ElectronGenFilter/genElectrons GenElectrons GenParticle
   # add Branch MuonGenFilter/genMuons GenMuons GenParticle
-  add Branch ParticlePropagator/chargedHadrons GenChargedHadron GenParticle
-  add Branch ParticlePropagator/muons GenMuon GenParticle
-  add Branch ParticlePropagator/electron GenElectron GenParticle
+  add Branch ParticlePropagator/chargedHadrons GenChargedHadron Track
+  add Branch ParticlePropagator/muons GenMuon Track
+  add Branch ParticlePropagator/electrons GenElectron Track
   add Branch MuonGenFilter/onlyGenMuons OnlyGenMuons GenParticle
 
 }
