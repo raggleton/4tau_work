@@ -1,9 +1,11 @@
-##########################################
+#######################################
 # Order of execution of various modules
 #######################################
 
 set ExecutionPath {
   ParticlePropagator
+
+  MuonGenFilter
 
   TrackMerger
   Calorimeter
@@ -72,6 +74,7 @@ module Merger TrackMerger {
   add InputArray ParticlePropagator/chargedHadrons
   # add InputArray ChargedHadronMomentumSmearing/chargedHadrons
   add InputArray ParticlePropagator/electrons
+  add InputArray ParticlePropagator/muons
   # add InputArray ElectronEnergySmearing/electrons
   set OutputArray tracks
 }
@@ -161,7 +164,7 @@ module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray Calorimeter/eflowTracks
   add InputArray Calorimeter/eflowTowers
-  add InputArray ParticlePropagator/muons
+  # add InputArray ParticlePropagator/muons
   set OutputArray eflow
 }
 
@@ -317,8 +320,10 @@ module TreeWriter TreeWriter {
   add Branch ScalarHT/energy ScalarHT ScalarHT
   # add Branch ElectronGenFilter/genElectrons GenElectrons GenParticle
   # add Branch MuonGenFilter/genMuons GenMuons GenParticle
-  add Branch ParticlePropagator/chargedHadrons ChargedHadron GenParticle
+  add Branch ParticlePropagator/chargedHadrons GenChargedHadron GenParticle
   add Branch ParticlePropagator/muons GenMuon GenParticle
   add Branch ParticlePropagator/electron GenElectron GenParticle
+  add Branch MuonGenFilter/onlyGenMuons OnlyGenMuons GenParticle
+
 }
 
