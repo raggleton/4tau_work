@@ -1,4 +1,5 @@
 #include <vector>
+#include <algorithm>
 // #include <iostream>
 // #include <utility>
 
@@ -31,6 +32,49 @@ root -l examples/myScript.C\(\"QCDoutput5.root\"\)
 for clean tracks ie efficiency = 1, no smearing
  */
 using namespace std;
+
+// For sorting track vectors by pT
+// Ideally we'd use the templated methods in classes/SortableObject.h ...
+bool sortTracksByPT(Track* a, Track* b){ 
+	return (a->PT) > (b->PT); 
+}
+
+// From the daughters of 2 taus, decide which is track and which is mu
+bool assignMuonAndTrack(GenParticle* &mu, GenParticle* &tk, GenParticle &a, GenParticle &b){
+	tk = 0;
+	mu = 0;
+
+	bool aIsMu = fabs(a.PID) == 13;
+	bool bIsMu = fabs(b.PID) == 13;
+
+	// Now look at both a and b
+	if (aIsMu && !bIsMu) {
+		mu = &a;
+		tk = &b;
+		return true;
+	}
+
+	if (!aIsMu && bIsMu) {
+		mu = &b;
+		tk = &a;
+		return true;
+	}
+
+	// the muon is the mu with the higest pT, the other mu becomes a track
+	if (aIsMu && bIsMu){
+		if (a.PT > b.PT) {
+			mu = &a;
+			tk = &b;
+			return true;
+		} else {
+			mu = &b;
+			tk = &a;
+			return true;
+		}
+	}
+	// If it gets to here, then neither a nor b is a muon - trouble!
+	return false;
+}
 
 std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *tau) { // get the 3 correct daughters of the tau
 
@@ -161,7 +205,7 @@ void testScript_cleanTk()
 
 	bool doSignal = true;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -266,14 +310,20 @@ void testScript_cleanTk()
 	TH1D *histDRSys            = new TH1D("hDRSys", "#Delta R(Sys_{1}-Sys_{2}), signal selection;#Delta R(Sys_{1}-Sys_{2}); N_{events}", 30,0,5);
 	TH2D *histDEtaVsDPhiSys    = new TH2D("hDEtaVsDPhiSys","dPhi vs dEta for system 2 wrt system 1 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
 
+	// for mu+tk systems - MC Truth
+	TH1D *histSys1PtTruth           = new TH1D("hSys1PtTruth", "System 1 p_{T}, signal selection, MC truth;System 1 p_{T}; N_{events}", 50,0,50.);
+	TH1D *histSys2PtTruth           = new TH1D("hSys2PtTruth", "System 2 p_{T}, signal selection, MC truth;System 2 p_{T}; N_{events}", 50,0,50.);
+	TH1D *histDRSysTruth            = new TH1D("hDRSysTruth", "#Delta R(Sys_{1}-Sys_{2}), signal selection, MC truth;#Delta R(Sys_{1}-Sys_{2}); N_{events}", 30,0,5);
+	TH2D *histDEtaVsDPhiSysTruth    = new TH2D("hDEtaVsDPhiSysTruth","dPhi vs dEta for system 2 wrt system 1, MC Truth ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
+
 	TH1D *histNuPt             = new TH1D("hNuPt", "#nu p_{T}, no selection ;#nu p_{T}; N_{events}", 50,0,50.);
 	
 	TH1D *histMu1PtSel         = new TH1D("hMu1PtSel", "#mu_{1} p_{T}, muon selection, no tk selection;#mu_{1} p_{T}; N_{events}", 50,0,50.);
 	TH1D *histMu2PtSel         = new TH1D("hMu2PtSel", "#mu_{2} p_{T}, muon selection, no tk selection;#mu_{2} p_{T}; N_{events}", 50,0,50.);
 
-	TH1D *histNMu              = new TH1D("hNMu", "No. muons;N mu; N_{events}", 5,0,5);
-	TH1D *histNMu1             = new TH1D("hNMu1", "No. muons about 1;N mu; N_{events}", 5,0,5);
-	TH1D *histNMu2             = new TH1D("hNMu2", "No. muons about 2;N mu; N_{events}", 5,0,5);
+	// TH1D *histNMu              = new TH1D("hNMu", "No. muons;N mu; N_{events}", 5,0,5);
+	// TH1D *histNMu1             = new TH1D("hNMu1", "No. muons about 1;N mu; N_{events}", 5,0,5);
+	// TH1D *histNMu2             = new TH1D("hNMu2", "No. muons about 2;N mu; N_{events}", 5,0,5);
 
 	TH1D *histNTk25            = new TH1D("hNTk25", "No. tracks, p_{T} > 2.5 GeV;N_{tk}; N_{events}", 25,0,50);
 	TH1D *histNTk1             = new TH1D("hNTk1", "No. tracks, p_{T} > 1 GeV;N_{tk}; N_{events}", 25,0,100);
@@ -435,88 +485,51 @@ void testScript_cleanTk()
 			charged2a = getChargedObject(branchAll, tau2a);
 			charged2b = getChargedObject(branchAll, tau2b);
 			
-			// This selects events where each tau only has 1 charged product...dunno what to do about evts where the tau decays into charged things including muon
 			if (charged1a && charged1b && charged2a && charged2b){
+				
 				histPID->Fill(fabs(charged1a->PID));
 				histPID->Fill(fabs(charged1b->PID));
 				histPID->Fill(fabs(charged2a->PID));
 				histPID->Fill(fabs(charged2b->PID));
-				
-				TLorentzVector muTruth1;
-				TLorentzVector trackTruth1;
-				TLorentzVector muTruth2;
-				TLorentzVector trackTruth2;
-				int nMu1Truth(0);
-				int nMu2Truth(0);
+
+				// To hold mu and tracks from each tau
+				GenParticle* muTruth1(0);
+				GenParticle* trackTruth1(0);
+				GenParticle* muTruth2(0);
+				GenParticle* trackTruth2(0);
 
 				// Assign charged products to be mu or track
-				// Not sure this works perfectly...
-				if (fabs(charged1a->PID)==13) {
-					nMu1Truth++;
-					muTruth1 = charged1a->P4();
-				} else {
-					trackTruth1 = charged1a->P4();
-				}
-				if (fabs(charged1b->PID)==13) {
-					nMu1Truth++;
-					if (fabs(charged1a->PID)==13){
-						if (charged1b->PT > charged1a->PT){
-							muTruth1 = charged1b->P4();
-						} else {
-							trackTruth1 = charged1b->P4();
-						}
-					} else {
-						muTruth1 = charged1b->P4();
-					}
-				} else {
-					trackTruth1 = charged1b->P4();
-				}
-				
-				if (fabs(charged2a->PID)==13) {
-					nMu2Truth++;
-					muTruth2 = charged2a->P4();
-				} else {
-					trackTruth2 = charged2a->P4();
-				}
-				if (fabs(charged2b->PID)==13) {
-					nMu2Truth++;
-					if (fabs(charged2a->PID)==13){
-						if (charged2b->PT > charged2a->PT){
-							muTruth2 = charged2b->P4();
-						} else {
-							trackTruth2 = charged2b->P4();
-						}
-					} else {
-						muTruth2 = charged2b->P4();
-					}
-				} else {
-					trackTruth2 = charged2b->P4();
-				}
-				
-				// cout << nMu1Truth << endl;
-				// cout << nMu2Truth << endl;
+				bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, *charged1a, *charged1b);				
+				bool truth2HasMu = assignMuonAndTrack(muTruth2, trackTruth2, *charged2a, *charged2b);
 
-				histNMu->Fill(nMu1Truth+nMu2Truth);
-				histNMu1->Fill(nMu1Truth);
-				histNMu2->Fill(nMu2Truth);
+				// NOTE: muons are NOT pT ordered
 
-				if (nMu1Truth<1 && nMu2Truth<1) {
-					cout << "problem, <2 truth muons!" << endl;
+				if (!truth1HasMu || !truth2HasMu) {
+					// cout << "Problem, no truth mu for 1 and/or 2!" << endl;
 				} else { 
-					
 					// Do m1 distribution in bins of m2 - for MC truth (is it actually correlated?)
-					// Randomly swap trk-mu pairs if desired
+					double m1(0.);
+					double m2(0.);
+					
+					// Assign m1 to higher pT muon
+					if (muTruth1->PT > muTruth2->PT) {
+						m1 = (muTruth1->P4()+trackTruth1->P4()).M();
+						m2 = (muTruth2->P4()+trackTruth2->P4()).M();
+					} else {
+						m2 = (muTruth1->P4()+trackTruth1->P4()).M();
+						m1 = (muTruth2->P4()+trackTruth2->P4()).M();
+					}
+
+					// Randomly swap trk-mu pairs 1<->2 if desired
 					if(swapMuRandomly){
 						double randNum = (double)rand() / RAND_MAX;
 						if (randNum > 0.5){
-							TLorentzVector cpmuTruth1 = muTruth1;
-							muTruth1=muTruth2;
-							muTruth2=cpmuTruth1;		
+							double tmp = m2;
+							m2 = m1;
+							m1 = tmp;
 						}
 					}
 
-					double m1 = (muTruth1+trackTruth1).M();
-					double m2 = (muTruth2+trackTruth2).M();
 					// cout << m1 << "     " << m2 << endl;
 					if(m2 < 1.)
 						histM1_truth_0to1->Fill(m1);
@@ -526,16 +539,21 @@ void testScript_cleanTk()
 						histM1_truth_2to3->Fill(m1);
 					else
 						histM1_truth_3toInf->Fill(m1);
-				}
-			} 
-			// else {
-				// cout << "Got > 1 prong!" << endl;
-			// }
 
-			// cout << "Tau1a has "  << tau1aDaughters.size() << endl;
-			// cout << "Tau1b has "  << tau1bDaughters.size() << endl;
-			// cout << "Tau2a has "  << tau2aDaughters.size() << endl;
-			// cout << "Tau2b has "  << tau2bDaughters.size() << endl;
+					// plot mu-tk system properties (MC truth)
+
+					// combined mu+tk system
+					TLorentzVector sys1 = muTruth1->P4()+trackTruth1->P4();
+					TLorentzVector sys2 = muTruth2->P4()+trackTruth2->P4();
+
+					// plot the pT, dR, dEta, DPhi of two systems
+					histSys1PtTruth->Fill(sys1.Pt());
+					histSys2PtTruth->Fill(sys2.Pt());
+					histDRSysTruth->Fill(sys1.DeltaR(sys2));
+					histDEtaVsDPhiSysTruth->Fill(fabs(sys1.Eta() - sys2.Eta()),fabs(sys1.DeltaPhi(sys2)));
+
+				}
+			} // end if(charged1a...) 
 
 		} // end if(doSignal)
 		////////////////////
@@ -752,12 +770,12 @@ void testScript_cleanTk()
 	std::string delph="bare"; // which Delphes config was used
 	// app += "_samePtEta";
 
-	histNMu->Draw("HISTE");
-	c.SaveAs((name+delph+"/NMu_"+delph+app+".pdf").c_str());
-	histNMu1->Draw("HISTE");
-	c.SaveAs((name+delph+"/NMu1_"+delph+app+".pdf").c_str());
-	histNMu2->Draw("HISTE");
-	c.SaveAs((name+delph+"/NMu2_"+delph+app+".pdf").c_str());
+	// histNMu->Draw("HISTE");
+	// c.SaveAs((name+delph+"/NMu_"+delph+app+".pdf").c_str());
+	// histNMu1->Draw("HISTE");
+	// c.SaveAs((name+delph+"/NMu1_"+delph+app+".pdf").c_str());
+	// histNMu2->Draw("HISTE");
+	// c.SaveAs((name+delph+"/NMu2_"+delph+app+".pdf").c_str());
 
 	histMu1Pt->Draw("HISTE");
 	c.SaveAs((name+delph+"/Mu1Pt_"+delph+app+".pdf").c_str());
@@ -777,6 +795,15 @@ void testScript_cleanTk()
 	c.SaveAs((name+delph+"/DRSys_"+delph+app+".pdf").c_str());
 	histDEtaVsDPhiSys->Draw("COLZ");
 	c.SaveAs((name+delph+"/DEtaVsDPhiSys_"+delph+app+".pdf").c_str());
+
+	histSys1PtTruth->Draw("HISTE");
+	c.SaveAs((name+delph+"/Sys1PtTruth_"+delph+app+".pdf").c_str());
+	histSys2PtTruth->Draw("HISTE");
+	c.SaveAs((name+delph+"/Sys2PtTruth_"+delph+app+".pdf").c_str());
+	histDRSysTruth->Draw("HISTE");
+	c.SaveAs((name+delph+"/DRSysTruth_"+delph+app+".pdf").c_str());
+	histDEtaVsDPhiSysTruth->Draw("COLZ");
+	c.SaveAs((name+delph+"/DEtaVsDPhiSysTruth_"+delph+app+".pdf").c_str());
 
 	histNuPt->Draw("HISTE");
 	c.SaveAs((name+delph+"/NuPt_"+delph+app+".pdf").c_str());
@@ -913,31 +940,31 @@ void testScript_cleanTk()
 	leg.Draw();
 	c.SaveAs((name+delph+"/M1_"+delph+app+".pdf").c_str());
 	
-	TFile* outFile = TFile::Open((name+delph+"/output"+app+".root").c_str(),"RECREATE");
+	// TFile* outFile = TFile::Open((name+delph+"/output"+app+".root").c_str(),"RECREATE");
 
-	histNMu->Write("",TObject::kOverwrite);
-	histMu1Pt->Write("",TObject::kOverwrite);
-	histMu2Pt->Write("",TObject::kOverwrite);
-	histMu1PtSel->Write("",TObject::kOverwrite);
-	histMu2PtSel->Write("",TObject::kOverwrite);
-	histNTracks1->Write("",TObject::kOverwrite);
-	histNTracks2->Write("",TObject::kOverwrite);
-	histNTracks1OS->Write("",TObject::kOverwrite);
-	histNTracks2OS->Write("",TObject::kOverwrite);
-	// histNTracksCum1->Write("",TObject::kOverwrite);
-	// histNTracksCum2->Write("",TObject::kOverwrite);
-	// histNTracksCum1OS->Write("",TObject::kOverwrite);
-	// histNTracksCum2OS->Write("",TObject::kOverwrite);
-	histDRMuMu->Write("",TObject::kOverwrite);
-	histNTk->Write("",TObject::kOverwrite);
-	histNTk1->Write("",TObject::kOverwrite);
-	histNTk25->Write("",TObject::kOverwrite);
-	if (doSignal){
-		histDRa1->Write("",TObject::kOverwrite);
-		histDRa2->Write("",TObject::kOverwrite);
-		histPID->Write("",TObject::kOverwrite);
-	}
+	// histNMu->Write("",TObject::kOverwrite);
+	// histMu1Pt->Write("",TObject::kOverwrite);
+	// histMu2Pt->Write("",TObject::kOverwrite);
+	// histMu1PtSel->Write("",TObject::kOverwrite);
+	// histMu2PtSel->Write("",TObject::kOverwrite);
+	// histNTracks1->Write("",TObject::kOverwrite);
+	// histNTracks2->Write("",TObject::kOverwrite);
+	// histNTracks1OS->Write("",TObject::kOverwrite);
+	// histNTracks2OS->Write("",TObject::kOverwrite);
+	// // histNTracksCum1->Write("",TObject::kOverwrite);
+	// // histNTracksCum2->Write("",TObject::kOverwrite);
+	// // histNTracksCum1OS->Write("",TObject::kOverwrite);
+	// // histNTracksCum2OS->Write("",TObject::kOverwrite);
+	// histDRMuMu->Write("",TObject::kOverwrite);
+	// histNTk->Write("",TObject::kOverwrite);
+	// histNTk1->Write("",TObject::kOverwrite);
+	// histNTk25->Write("",TObject::kOverwrite);
+	// if (doSignal){
+	// 	histDRa1->Write("",TObject::kOverwrite);
+	// 	histDRa2->Write("",TObject::kOverwrite);
+	// 	histPID->Write("",TObject::kOverwrite);
+	// }
 
-	outFile->Close();
+	// outFile->Close();
 
 }
