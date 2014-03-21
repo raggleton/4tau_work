@@ -159,9 +159,9 @@ void testScript_cleanTk()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = false;
+	bool doSignal = true;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -169,7 +169,8 @@ void testScript_cleanTk()
 		// chain.Add("GG_H_aa.root");
 		// chain.Add("sig_test.root");
 		// chain.Add("Signal_cleanTk/signal_clean.root");
-		chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
+		// chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
+		chain.Add("Signal_1prong_bare/signal_1prong_bare.root");
 		// chain.Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
 		cout << "Doing signal" << endl;
 	} else {
@@ -256,10 +257,19 @@ void testScript_cleanTk()
 	TH1D *histMu1Pt            = new TH1D("hMu1Pt", "#mu_{1} p_{T}, no selection ;#mu_{1} p_{T}; N_{events}", 50,0,50.);
 	TH1D *histMu2Pt            = new TH1D("hMu2Pt", "#mu_{2} p_{T}, no selection;#mu_{2} p_{T}; N_{events}", 50,0,50.);
 
+	TH1D *histTrack1Pt         = new TH1D("hTrack1Pt","Track 1 p_{T}, signal selection; track 1 p_{T} [GeV]; N_{events}", 25,0,25.);
+	TH1D *histTrack2Pt         = new TH1D("hTrack2Pt","Track 2 p_{T}, signal selection; track 2 p_{T} [GeV]; N_{events}", 25,0,25.);
+	
+	// for mu+tk systems
+	TH1D *histSys1Pt           = new TH1D("hSys1Pt", "System 1 p_{T}, signal selection ;System 1 p_{T}; N_{events}", 50,0,50.);
+	TH1D *histSys2Pt           = new TH1D("hSys2Pt", "System 2 p_{T}, signal selection;System 2 p_{T}; N_{events}", 50,0,50.);
+	TH1D *histDRSys            = new TH1D("hDRSys", "#Delta R(Sys_{1}-Sys_{2}), signal selection;#Delta R(Sys_{1}-Sys_{2}); N_{events}", 30,0,5);
+	TH2D *histDEtaVsDPhiSys    = new TH2D("hDEtaVsDPhiSys","dPhi vs dEta for system 2 wrt system 1 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
+
 	TH1D *histNuPt             = new TH1D("hNuPt", "#nu p_{T}, no selection ;#nu p_{T}; N_{events}", 50,0,50.);
 	
-	TH1D *histMu1PtSel         = new TH1D("hMu1PtSel", "#mu_{1} p_{T}, selection ;#mu_{1} p_{T}; N_{events}", 50,0,50.);
-	TH1D *histMu2PtSel         = new TH1D("hMu2PtSel", "#mu_{2} p_{T}, selection;#mu_{2} p_{T}; N_{events}", 50,0,50.);
+	TH1D *histMu1PtSel         = new TH1D("hMu1PtSel", "#mu_{1} p_{T}, muon selection, no tk selection;#mu_{1} p_{T}; N_{events}", 50,0,50.);
+	TH1D *histMu2PtSel         = new TH1D("hMu2PtSel", "#mu_{2} p_{T}, muon selection, no tk selection;#mu_{2} p_{T}; N_{events}", 50,0,50.);
 
 	TH1D *histNMu              = new TH1D("hNMu", "No. muons;N mu; N_{events}", 5,0,5);
 	TH1D *histNMu1             = new TH1D("hNMu1", "No. muons about 1;N mu; N_{events}", 5,0,5);
@@ -612,34 +622,36 @@ void testScript_cleanTk()
 						if (dR2 < 0.5)
 							n25AroundMu2++;
 
-						// Investigate large dR between trk and muon
-						// if (candTk->PT > 2.5 && ((dR1 > 0.7 && dR1 < 1.2) || (dR2 > 0.7 && dR2 < 1.2))){
-						// 	cout << "CandTk pT: " << candTk->PT << " PID " << candTk->PID << " dR1: " << dR1 << " dR2: " << dR2 << " phi: " << candTk->Phi << " eta: " << candTk->Eta << endl;
-						// 	histTroublePt->Fill(candTk->PT);
-						// 	histTroublePID->Fill(fabs(candTk->PID));
-						// 	histTroubleEta->Fill(candTk->Eta);
-						// 	histTroublePhi->Fill(candTk->Phi);
-						// 	histTroubleDRMuMu->Fill(mu1Mom.DeltaR(mu2Mom));
-						// 	histTroubleDPhiMuMu->Fill(mu1Mom.DeltaPhi(mu2Mom));
-						// 	histTroubleDEtaMuMu->Fill(fabs(mu1Mom.Eta() - mu2Mom.Eta()));
-						// 	histTroubleMu1Pt->Fill(mu1PT);
-						// 	histTroubleMu2Pt->Fill(mu2PT);
-						// 	if (charged1a && charged1b && charged2a && charged2b){
-						// 		if (candTk->PT == charged1a->PT || candTk->PT == charged1b->PT || candTk->PT == charged2a->PT || candTk->PT == charged2b->PT)
-						// 			histTroubleMatch->Fill(1);
-						// 		else
-						// 			histTroubleMatch->Fill(0);
-						// 	}
-						// 	/*for(int j = 0; j < branchAll->GetEntries(); j++){
-						// 		candTrouble = (GenParticle*) branchAll->At(j);
-						// 		cout << j << " PID: " << candTrouble->PID << " Mother1: " << candTrouble->M1 << " Mother2: " << candTrouble->M2 << " Daughter 1: " << candTrouble->D1 << " Daughter 2: " << candTrouble->D2;
-						// 		if ((candTrouble->PT == candTk->PT) && (candTrouble->Eta == candTk->Eta)) {
-						// 			cout << " TROUBLE TRACK <<<<<<<<<<<<<<<<<<<<<<<";
-						// 		}
-						// 		cout << endl;
-						// 	}
-						// 	stop = true;*/
-						// }
+						// Investigate peaked dR between trk and muon, ~ 1
+						// If muons are pT ordered (swapMuRandonly = false) then only want the tk about mu 2
+						// If randomly ordered, then want tk about both
+						if ((swapMuRandomly && ((dR1 > 0.7 && dR1 < 1.4) || (dR2 > 0.7 && dR2 < 1.4))) || (!swapMuRandomly && (dR2 > 0.7 && dR2 < 1.4)) ){
+							// cout << "CandTk pT: " << candTk->PT << " PID " << candTk->PID << " dR1: " << dR1 << " dR2: " << dR2 << " phi: " << candTk->Phi << " eta: " << candTk->Eta << endl;
+							histTroublePt->Fill(candTk->PT);
+							histTroublePID->Fill(fabs(candTk->PID));
+							histTroubleEta->Fill(candTk->Eta);
+							histTroublePhi->Fill(candTk->Phi);
+							histTroubleDRMuMu->Fill(mu1Mom.DeltaR(mu2Mom));
+							histTroubleDPhiMuMu->Fill(mu1Mom.DeltaPhi(mu2Mom));
+							histTroubleDEtaMuMu->Fill(fabs(mu1Mom.Eta() - mu2Mom.Eta()));
+							histTroubleMu1Pt->Fill(mu1PT);
+							histTroubleMu2Pt->Fill(mu2PT);
+							if (charged1a && charged1b && charged2a && charged2b){
+								if (candTk->PT == charged1a->PT || candTk->PT == charged1b->PT || candTk->PT == charged2a->PT || candTk->PT == charged2b->PT)
+									histTroubleMatch->Fill(1);
+								else
+									histTroubleMatch->Fill(0);
+							}
+							/*for(int j = 0; j < branchAll->GetEntries(); j++){
+								candTrouble = (GenParticle*) branchAll->At(j);
+								cout << j << " PID: " << candTrouble->PID << " Mother1: " << candTrouble->M1 << " Mother2: " << candTrouble->M2 << " Daughter 1: " << candTrouble->D1 << " Daughter 2: " << candTrouble->D2;
+								if ((candTrouble->PT == candTk->PT) && (candTrouble->Eta == candTk->Eta)) {
+									cout << " TROUBLE TRACK <<<<<<<<<<<<<<<<<<<<<<<";
+								}
+								cout << endl;
+							}
+							stop = true;*/
+						}
 					} //end of 2.5 cut
 				} // End of track selection
 			} // End of track loop
@@ -651,8 +663,22 @@ void testScript_cleanTk()
 			if (n1AroundMu1==1 && n1AroundMu2==1 && n25AroundMu1==1 && n25AroundMu1==1){
 				nMuPass++;
 
+				histTrack1Pt->Fill(track1->PT);
+				histTrack2Pt->Fill(track2->PT);
+
 				TLorentzVector track1Mom=track1->P4();
 				TLorentzVector track2Mom=track2->P4();
+
+				// combined mu+tk system
+				TLorentzVector sys1 = mu1Mom+track1Mom;
+				TLorentzVector sys2 = mu2Mom+track2Mom;
+
+				// plot the pT, dR, dEta, DPhi of two systems
+				histSys1Pt->Fill(sys1.Pt());
+				histSys2Pt->Fill(sys2.Pt());
+				histDRSys->Fill(sys1.DeltaR(sys2));
+				histDEtaVsDPhiSys->Fill(fabs(sys1.Eta() - sys2.Eta()),fabs(sys1.DeltaPhi(sys2)));
+
 				// Do m1 in bins of m2
 				double m1 = (mu1Mom+track1Mom).M();
 				double m2 = (mu2Mom+track2Mom).M();
@@ -723,90 +749,105 @@ void testScript_cleanTk()
 	if (swapMuRandomly)
 		app += "_muRand";
 	
+	std::string delph="bare"; // which Delphes config was used
 	// app += "_samePtEta";
 
 	histNMu->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NMu_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/NMu_"+delph+app+".pdf").c_str());
 	histNMu1->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NMu1_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/NMu1_"+delph+app+".pdf").c_str());
 	histNMu2->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NMu2_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/NMu2_"+delph+app+".pdf").c_str());
 
 	histMu1Pt->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/Mu1Pt_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/Mu1Pt_"+delph+app+".pdf").c_str());
 	histMu2Pt->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/Mu2Pt_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/Mu2Pt_"+delph+app+".pdf").c_str());
+
+	histTrack1Pt->Draw("HISTE");
+	c.SaveAs((name+delph+"/Track1Pt_"+delph+app+".pdf").c_str());
+	histTrack2Pt->Draw("HISTE");
+	c.SaveAs((name+delph+"/Track2Pt_"+delph+app+".pdf").c_str());
+
+	histSys1Pt->Draw("HISTE");
+	c.SaveAs((name+delph+"/Sys1Pt_"+delph+app+".pdf").c_str());
+	histSys2Pt->Draw("HISTE");
+	c.SaveAs((name+delph+"/Sys2Pt_"+delph+app+".pdf").c_str());
+	histDRSys->Draw("HISTE");
+	c.SaveAs((name+delph+"/DRSys_"+delph+app+".pdf").c_str());
+	histDEtaVsDPhiSys->Draw("COLZ");
+	c.SaveAs((name+delph+"/DEtaVsDPhiSys_"+delph+app+".pdf").c_str());
 
 	histNuPt->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NuPt_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/NuPt_"+delph+app+".pdf").c_str());
 	
 	histMu1PtSel->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/Mu1PtSel_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/Mu1PtSel_"+delph+app+".pdf").c_str());
 	histMu2PtSel->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/Mu2PtSel_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/Mu2PtSel_"+delph+app+".pdf").c_str());
 
 	histNTracks1->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NTracks1_NS_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/NTracks1_NS_"+delph+app+".pdf").c_str());
 	histNTracks2->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NTracks2_NS_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/NTracks2_NS_"+delph+app+".pdf").c_str());
 
 	histNTracks1OS->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NTracks1_OS_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/NTracks1_OS_"+delph+app+".pdf").c_str());
 	histNTracks2OS->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NTracks2_OS_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/NTracks2_OS_"+delph+app+".pdf").c_str());
 
 	// histNTracksCum1->Draw("HISTE");
-	// c.SaveAs((name+"cleanTk/NTracks1Cum_NS_clean"+app+".pdf").c_str());
+	// c.SaveAs((name+delph+"/NTracks1Cum_NS_"+delph+app+".pdf").c_str());
 	// histNTracksCum2->Draw("HISTE");
-	// c.SaveAs((name+"cleanTk/NTracks2Cum_NS_clean"+app+".pdf").c_str());
+	// c.SaveAs((name+delph+"/NTracks2Cum_NS_"+delph+app+".pdf").c_str());
 
 	// histNTracksCum1OS->Draw("HISTE");
-	// c.SaveAs((name+"cleanTk/NTracks1Cum_OS_clean"+app+".pdf").c_str());
+	// c.SaveAs((name+delph+"/NTracks1Cum_OS_"+delph+app+".pdf").c_str());
 	// histNTracksCum2OS->Draw("HISTE");
-	// c.SaveAs((name+"cleanTk/NTracks2Cum_OS_clean"+app+".pdf").c_str());
+	// c.SaveAs((name+delph+"/NTracks2Cum_OS_"+delph+app+".pdf").c_str());
 
 	histDRMuMu->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/DRMuMu_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/DRMuMu_"+delph+app+".pdf").c_str());
 	histDEtaVsDPhiMuMu->Draw("COLZ");
-	c.SaveAs((name+"cleanTk/DEtaVsDPhiMuMu_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/DEtaVsDPhiMuMu_"+delph+app+".pdf").c_str());
 
 	histNTk->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NTk_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/NTk_"+delph+app+".pdf").c_str());
 	histNTk1->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NTk1_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/NTk1_"+delph+app+".pdf").c_str());
 	histNTk25->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/NTk25_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/NTk25_"+delph+app+".pdf").c_str());
 
 	if (doSignal){
 		histDRa1->Draw("HISTE");
-		c.SaveAs((name+"cleanTk/DRa1_clean"+app+".pdf").c_str());
+		c.SaveAs((name+delph+"/DRa1_"+delph+app+".pdf").c_str());
 		histDRa2->Draw("HISTE");
-		c.SaveAs((name+"cleanTk/DRa2_clean"+app+".pdf").c_str());
+		c.SaveAs((name+delph+"/DRa2_"+delph+app+".pdf").c_str());
 		histPID->Draw("HISTE");
-		c.SaveAs((name+"cleanTk/PID_clean"+app+".pdf").c_str());
+		c.SaveAs((name+delph+"/PID_"+delph+app+".pdf").c_str());
 	}
 
 	histTroublePt->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/TroubleTkPt_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleTkPt_"+delph+app+".pdf").c_str());
 	histTroublePID->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/TroubleTkPID_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleTkPID_"+delph+app+".pdf").c_str());
 	histTroubleEta->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/TroubleTkEta_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleTkEta_"+delph+app+".pdf").c_str());
 	histTroublePhi->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/TroubleTkPhi_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleTkPhi_"+delph+app+".pdf").c_str());
 	histTroubleMatch->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/TroubleMatch_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleMatch_"+delph+app+".pdf").c_str());
 	histTroubleDRMuMu->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/TroubleDRMuMu_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleDRMuMu_"+delph+app+".pdf").c_str());
 
 	histTroubleDPhiMuMu->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/TroubleDPhiMuMu_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleDPhiMuMu_"+delph+app+".pdf").c_str());
 	histTroubleDEtaMuMu->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/TroubleDEtaMuMu_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleDEtaMuMu_"+delph+app+".pdf").c_str());
 	histTroubleMu1Pt->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/TroubleMu1Pt_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleMu1Pt_"+delph+app+".pdf").c_str());
 	histTroubleMu2Pt->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/TroubleMu2Pt_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleMu2Pt_"+delph+app+".pdf").c_str());
 
 	TArc problemRing1(0,0,1,0,90);
 	problemRing1.SetLineColor(kRed);
@@ -820,14 +861,14 @@ void testScript_cleanTk()
 
 	histTroubleEtaVsPhi1->Draw("COLZ");
 	problemRing1.Draw("only");
-	c.SaveAs((name+"cleanTk/TroubleEtaVsPhi1_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleEtaVsPhi1_"+delph+app+".pdf").c_str());
 	histTroubleEtaVsPhi2->Draw("COLZ");
 	problemRing1.Draw("only");
 	problemRing2.Draw("only");
-	c.SaveAs((name+"cleanTk/TroubleEtaVsPhi2_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/TroubleEtaVsPhi2_"+delph+app+".pdf").c_str());
 
 	histRand->Draw("HISTE");
-	c.SaveAs((name+"cleanTk/RandTest"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/RandTest"+app+".pdf").c_str());
 
 	histM1_truth_0to1->Scale(1./histM1_truth_0to1->Integral());
 	histM1_truth_0to1->SetLineColor(kBlack);
@@ -851,7 +892,7 @@ void testScript_cleanTk()
 	leg.AddEntry(histM1_truth_2to3,"m_{2} = 2-3 GeV","l");
 	leg.AddEntry(histM1_truth_3toInf,"m_{2} > 3 GeV","l");
 	leg.Draw();
-	c.SaveAs((name+"cleanTk/M1_truth_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/M1_truth_"+delph+app+".pdf").c_str());
 
 	histM1_0to1->Scale(1./histM1_0to1->Integral());
 	histM1_0to1->SetLineColor(kBlack);
@@ -870,9 +911,9 @@ void testScript_cleanTk()
 	histM1_3toInf->Draw("HISTESAME");
 
 	leg.Draw();
-	c.SaveAs((name+"cleanTk/M1_clean"+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/M1_"+delph+app+".pdf").c_str());
 	
-	TFile* outFile = TFile::Open((name+"cleanTk/output"+app+".root").c_str(),"RECREATE");
+	TFile* outFile = TFile::Open((name+delph+"/output"+app+".root").c_str(),"RECREATE");
 
 	histNMu->Write("",TObject::kOverwrite);
 	histMu1Pt->Write("",TObject::kOverwrite);
