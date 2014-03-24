@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
 
   bool outputEvent  = false; // output entire event listing to STDOUT (long!), for debugging only
   bool writeToHEPMC = true; // output to HEPMC
-  bool muOnly       = false; // Only allow b hadrons to decay to muons or taus
+  bool muOnly       = true; // Only allow b hadrons to decay to muons or taus
   bool tauToMuOnly  = true; // Only allow those taus from b hadrons to decay to muons 
 
   // Check that correct number of command-line arguments
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
   // Number of events. 
   // Warning, 5K events ~900MB hepmc file and takes ~5 min.
   // Warning, 50K events ~9GB hepmc file and takes ~40 min.
-  pythia.readString("Main:numberOfEvents = 5000");
+  pythia.readString("Main:numberOfEvents = 50000");
   int nEvent = pythia.mode("Main:numberOfEvents");
   pythia.readString("Next:numberShowEvent = 00");
   // pythia.readString("Next:numberShowProcess = 100");
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
   // Make sure t->Wb only
   pythia.readString("6: onMode = off");
   pythia.readString("6: onIfAny = 5");
-  pythia.readString("PhaseSpace:pTHatMin = 10.");  
+  pythia.readString("PhaseSpace:pTHatMin = 100.");  
   // pythia.readString("HadronLevel:all = on");
     // pythia.readString("ProcessLevel:all = off");   
   // pythia.readString("PartonLevel:all = off");   
@@ -128,8 +128,16 @@ int main(int argc, char* argv[]) {
 
 
   // Begin event loop.
-  for (int iEvent = 0; iEvent < nEvent; ++iEvent) {
+  // for (int iEvent = 0; iEvent < nEvent; ++iEvent) {
+  int iEvent = 0;
+  int lastiEvent = 0;
+  while(iEvent < nEvent) {
     bool wanted = true;
+
+    if ((iEvent % 1000 == 0) && (iEvent!= lastiEvent)){
+      lastiEvent = iEvent;
+      cout << "iEvent: " << iEvent << endl;
+    }
 
     if (tauToMuOnly){
       // have to turn off tau decays for each event
@@ -189,34 +197,42 @@ int main(int argc, char* argv[]) {
         event[tausNotFromB[a]].statusPos(); // Mark the taus not from B as needing decaying
       }
       if (!pythia.moreDecays()) continue;
-    }
+    } // end of if(tauToMuOnly)
     
-    // Do basic analysis 
+   // Now do all your selection requirements to determine if we keep the event:
+    
     // Look for muons among decay products (also from charm/tau/...).
-    vector<int> iMuNeg, iMuPos;
+    int nMuNeg(0), nMuPos(0);
+    std::vector<double> muPtVec;
+
     for (int i = 0; i < event.size(); ++i) {
       int id = event[i].id();  
-      
       if (id ==  13){ 
-        iMuNeg.push_back(i);
-        muPt.fill(event[i].pT());
+        nMuNeg++;
+        muPtVec.push_back(event[i].pT());
       }
       if (id == -13) {
-        iMuPos.push_back(i);
-        muPt.fill(event[i].pT());
+        nMuPos++;
+        muPtVec.push_back(event[i].pT());
       }
     }
     
     // Check whether SS pair(s) present.
-    int nMuNeg = iMuNeg.size();
-    int nMuPos = iMuPos.size();
     if ((nMuNeg  > 1) || (nMuPos > 1)) {
       ++nWithPair;
     }
 
-    if (muOnly && (nMuPos+nMuNeg < 2) && writeToHEPMC)
-      wanted = false; // Don't output to hepmc is there's only 1 muon
+    if (nMuPos+nMuNeg < 2) continue; // Skip if there's only 1 muon
 
+    // order mu pt vector
+    // std::sort(muPtVec.begin(),muPtVec.end());
+    // if (muPtVec[0] < 10 || muPtVec[1] < 10 ) continue; // Skip if top 2 pt muons have pt < 10
+
+    // if it gets to here, then we're happy with the event
+    iEvent++;
+    for (unsigned a = 0; a < muPtVec.size(); a++){
+      muPt.fill(muPtVec.at(a));
+    }
     nMuInEvent.fill(nMuPos + nMuNeg);
 
     // Output the event to screen
