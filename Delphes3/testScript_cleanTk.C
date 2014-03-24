@@ -203,7 +203,7 @@ void testScript_cleanTk()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
+	bool doSignal = false;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	
@@ -260,6 +260,26 @@ void testScript_cleanTk()
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_38.root");
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_39.root");
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_40.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_1.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_2.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_3.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_4.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_5.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_6.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_7.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_8.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_9.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_10.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_11.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_12.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_13.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_14.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_15.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_16.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_17.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_18.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_19.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_20.root");
 		} else {
 			cout << "Doing QCDb" << endl;
 			chain.Add("QCDb_cleanTk/QCDb_10.root");
@@ -354,6 +374,9 @@ void testScript_cleanTk()
 	TH1D *histTroubleMu2Pt     = new TH1D("hTroubleMu2Pt","Mu2 p_{T} for trks #Delta R(#mu2-trk) = 0.7 - 1.2 ; Value; N_{events}", 20,0,25);
 	TH2D *histTroubleEtaVsPhi1 = new TH2D("hTroubleEtaVsPhi1","dPhi vs dEta of tracks (>2.5 GeV) vs muon 1 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
 	TH2D *histTroubleEtaVsPhi2 = new TH2D("hTroubleEtaVsPhi2","dPhi vs dEta of tracks (>2.5 GeV) vs muon 2 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
+
+	TH1D *histM1 = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}", 10,0,10);
+	TH1D *histM2 = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}", 10,0,10);
 
 	// Plots for testing invariant mass correlation
 	double massBins[6]         = {0,1,2,3,4,10};
@@ -589,8 +612,8 @@ void testScript_cleanTk()
 			// histNTk->Fill(branchTracks->GetEntries());
 
 			// The two tracks
-			Track *track1 = new Track();
-			Track *track2 = new Track();
+			Track *track1(0);
+			Track *track2(0);
 
 			for(int a = 0; a < branchTracks->GetEntries(); a++){
 				candTk = (Track*) branchTracks->At(a);
@@ -628,17 +651,18 @@ void testScript_cleanTk()
 						if ((candTk->Charge) * (mu1->Charge) < 0){ // only need one if statement because SS muons
 							histNTracks1OS->Fill(dR1);
 							histNTracks2OS->Fill(dR2);
-							if ((dR1 < 0.5) && (candTk->PT > track1->PT))
+							if ((dR1 < 0.5) && (!track1 || (candTk->PT > track1->PT))) { // so first time roudn doesn't seg fault
 								track1 = candTk;
-							if ((dR2 < 0.5) && (candTk->PT > track2->PT))
+								n25AroundMu1++;
+							}
+							if ((dR2 < 0.5) && (!track2 || (candTk->PT > track2->PT))) {
 								track2 = candTk;
+								n25AroundMu2++;
+							}
 						}
-
 						// Count number of tracks with pT > 2.5 within a cone of 0.5 about each muon
-						if (dR1 < 0.5)
-							n25AroundMu1++;
-						if (dR2 < 0.5)
-							n25AroundMu2++;
+						// if (dR1 < 0.5)
+						// if (dR2 < 0.5)
 
 						// Investigate peaked dR between trk and muon, ~ 1
 						// If muons are pT ordered (swapMuRandonly = false) then only want the tk about mu 2
@@ -676,11 +700,9 @@ void testScript_cleanTk()
 
 			// histNTk1->Fill(nTk1);
 			// histNTk25->Fill(nTk25);
-
-			// signal selection - only 1 track with pT > 1, and that track must have pT > 2.5
-			if (n1AroundMu1==1 && n1AroundMu2==1 && n25AroundMu1==1 && n25AroundMu1==1){
+			// signal selection - only 1 track with pT > 1, and that track must have pT > 2.5 and be OS
+			if (n1AroundMu1==1 && n1AroundMu2==1 && n25AroundMu1==1 && n25AroundMu2==1 ) {
 				nMuPass++;
-
 				histTrack1Pt->Fill(track1->PT);
 				histTrack2Pt->Fill(track2->PT);
 
@@ -700,7 +722,11 @@ void testScript_cleanTk()
 				// Do m1 in bins of m2
 				double m1 = (mu1Mom+track1Mom).M();
 				double m2 = (mu2Mom+track2Mom).M();
-				cout << m1 << "     " << m2 << endl;
+
+				histM1->Fill(m1);
+				histM2->Fill(m2);
+
+				// cout << m1 << "     " << m2 << endl;
 				if(m2 < 1.)
 					histM1_0to1->Fill(m1);
 				else if (m2 < 2.)
@@ -759,15 +785,17 @@ void testScript_cleanTk()
 		app = "_sig";
 	} else {
 		app = "_bg";
-		if (doMu)
+		if (doMu){
 			name = "QCDb_mu_";
-		else
+			// name = "QCDb_mu_pthatmin100_";
+		} else {
 			name = "QCDb_";
+		}
 	}
 	if (swapMuRandomly)
 		app += "_muRand";
 	
-	std::string delph="bare"; // which Delphes config was used
+	std::string delph="cleanTk"; // which Delphes config was used: bare, CMS, cleanTk
 	// app += "_samePtEta";
 
 	// histNMu->Draw("HISTE");
@@ -919,7 +947,7 @@ void testScript_cleanTk()
 	leg.AddEntry(histM1_truth_2to3,"m_{2} = 2-3 GeV","l");
 	leg.AddEntry(histM1_truth_3toInf,"m_{2} > 3 GeV","l");
 	leg.Draw();
-	c.SaveAs((name+delph+"/M1_truth_"+delph+app+".pdf").c_str());
+	c.SaveAs((name+delph+"/M1_M2_truth_"+delph+app+".pdf").c_str());
 
 	histM1_0to1->Scale(1./histM1_0to1->Integral());
 	histM1_0to1->SetLineColor(kBlack);
@@ -938,8 +966,13 @@ void testScript_cleanTk()
 	histM1_3toInf->Draw("HISTESAME");
 
 	leg.Draw();
+	c.SaveAs((name+delph+"/M1_M2_"+delph+app+".pdf").c_str());
+
+	histM1->Draw("HISTE");
 	c.SaveAs((name+delph+"/M1_"+delph+app+".pdf").c_str());
-	
+	histM2->Draw("HISTE");
+	c.SaveAs((name+delph+"/M2_"+delph+app+".pdf").c_str());
+
 	// TFile* outFile = TFile::Open((name+delph+"/output"+app+".root").c_str(),"RECREATE");
 
 	// histNMu->Write("",TObject::kOverwrite);
