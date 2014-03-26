@@ -13,6 +13,13 @@
 
 using namespace Pythia8; 
 
+/**
+ * This method analyses the decay products from a tau. Has to go through the complete decay chain
+ * until it finds all the final state particles. Then it figure sout which are charged, and which are muons.
+ * nProngs: returns the number of charged particles from the tau (includes muons!)
+ * nMu: returns the number of stable muons from the tau
+ * current: the immediate decays products of the tau, passed to event from method that calls this fn.
+ */
 void lookAtTauProducts(Event& event, int &nProngs, int &nMu, std::vector<int> current) {
   std::vector<int> history; // hold all unique particles in the decay chain (stores event posiiton number)
   // std::vector<int> current; // holds position no.s for current step
@@ -54,6 +61,7 @@ void lookAtTauProducts(Event& event, int &nProngs, int &nMu, std::vector<int> cu
           if (event[current[a]].idAbs() == 13){
             // cout << "--Muon" <<endl;
             nMu++;
+            nProngs++;
           } else {
             // Check if charged
             if (event[current[a]].isCharged()){
@@ -121,11 +129,16 @@ int main(int argc, char* argv[]) {
   int nPrintLHA  = 1;             
   int nPrintRest = 0;             
   int nAbort     = 10;
-  int nMaxEvent  = 50;
+  int nMaxEvent  = 50000;
   
   // Generator           
   Pythia pythia;                            
   Event& event = pythia.event;
+
+  // Do random seed
+  //  a value 0 gives a random seed based on the time
+  pythia.readString("Random:setSeed = on");
+  pythia.readString("Random:seed = 0");
 
   // No automatic event listings - do it manually below.
   pythia.readString("Next:numberShowLHA = 0"); 
@@ -138,10 +151,6 @@ int main(int argc, char* argv[]) {
   pythia.readString("Beams:LHEF = GG_H_aa_4taus_decay-single-single.lhe");   
   // pythia.readString("Beams:LHEF = reduced_GG_H_aa_4taus_2.lhe");   
   
-  
-  // pythia.readString("Higgs:useBSM = on");  
-  // pythia.readString("HiggsBSM:gg2H1 = on");  
-
   // pythia.readString("ProcessLevel:all = off");   
   // pythia.readString("PartonLevel:all = off");   
   // pythia.readString("HadronLevel:all = off");   
@@ -206,22 +215,20 @@ int main(int argc, char* argv[]) {
     } // end loop over particles in event
     
     // After looking at all taus, have we got 2 muons and 2 1-prong decays?
-    if ((n1Prong == 2) && (nMus>=2)){
+    if ((n1Prong == 4) && (nMus>=2)){
       wanted = true;
-      cout << "+++++++++++++++++ YAYYYY +++++++++++++" <<endl;
+      nWanted++;
+      // cout << "+++++++++++++++++ YAYYYY +++++++++++++" <<endl;
     } else
       wanted = false;
 
-    cout << "This event had " << n1Prong << " 1-prong taus, " << n3Prong << " 3-prong taus and " << nMus << " tau to mu decays." << endl;
-    if (n3Prong+n1Prong+nMus > 4) {
+    // cout << "This event had " << n1Prong << " 1-prong taus, " << n3Prong << " 3-prong taus and " << nMus << " tau to mu decays." << endl;
+    if (n3Prong+n1Prong > 4) {
       cout << "*********** SHIT > 4 --------------------------------------" <<endl;
-            pythia.event.list();  
-
-
+            // pythia.event.list();  
     }
 
     if (wanted && writeToHEPMC){
-      nWanted++;
       // Construct new empty HepMC event and fill it.
       // Units will be as chosen for HepMC build, but can be changed
       // by arguments, e.g. GenEvt( HepMC::Units::GEV, HepMC::Units::MM)  
@@ -234,7 +241,7 @@ int main(int argc, char* argv[]) {
     }
 
   } // End of event loop.        
-  cout << " Number of useful events: " << nWanted <<endl;
+  cout << " Number of useful events: " << nWanted << "/" << nMaxEvent << endl;
   // Give statistics. Print histogram.
   pythia.stat();
 
