@@ -26,63 +26,46 @@ void lookAtTauProducts(Event& event, int &nProngs, int &nMu, std::vector<int> cu
   std::vector<int> next; // holds decay products, not nec. all unique
 
   while (current.size()>0){ // if current > 0 we haven't exhausted all the particles
-    // cout << "STEP! size " << current.size() << endl;
     for (unsigned a = 0; a < current.size(); a++){
-      // cout << "Particle " << current[a] << " id: " << event[current[a]].id() << endl;
       // Check 1 - is this already in current?
       // Could probably do more efficiently using the unique function on std::vector
       bool alreadyDone = false;
 
       for (unsigned b = 0; b < a; b++){
         if ((current[a] == current[b]) && (a != 0)) {
-          // cout << "--Found a duplicate" << endl;
           alreadyDone = true;
         }
       }
 
       // Check 2 - is this already in history?
       if (!alreadyDone){
-        // cout << "-not in current" << endl;
         for (unsigned c = 0; c < history.size(); c++){
           if ((current[a] == history[c]) && (c!=0)){
-            // cout << "--Found a dupicate in history" << endl;
             alreadyDone = true;
           }
         }
       }
 
       // Check 3 - is this final state?
-      // cout << alreadyDone << endl;
       if (!alreadyDone){
-        // cout << "-not in history" << endl;
         if (event[current[a]].status() > 0) {
-          // cout << "status > 0" <<endl;
           // Check if muon
           if (event[current[a]].idAbs() == 13){
-            // cout << "--Muon" <<endl;
             nMu++;
             nProngs++;
           } else {
             // Check if charged
             if (event[current[a]].isCharged()){
-              // cout << "--Charged" << endl;
               nProngs++;
             }
-            // cout << "checked charged" << endl;
           }
           // Load it into history
           history.push_back(current[a]);
-          // cout << "pushed into history" << endl;
         } else {
           // Load its daughters no. into next
-          // cout << "-Loading daughters" << endl;
-          // int d = event[current[a]].daughter1();
-
-          // cout << "daughters: " << event[current[a]].daughter1() << " - " << event[current[a]].daughter2() << endl;
           if (event[current[a]].daughter2() == 0) // if only 1 daughter, the second daughter will return 0
             next.push_back(event[current[a]].daughter1());
           for (int d = event[current[a]].daughter1(); d <= event[current[a]].daughter2(); d++) {
-            // cout << "pushing" << endl;
             next.push_back(d);
           } 
           
@@ -192,13 +175,8 @@ int main(int argc, char* argv[]) {
 
     int n1Prong(0), n3Prong(0), nMus(0);
     for (int i = 0; i < event.size(); ++i) {
-      // if ((event[i].idAbs() == 13) && (event[i].status() > 0))
-        // nMus++;
       if ((event[i].idAbs() == 15 ) && (event[i].status() == -22)){ // loop over all taus from a_0
 
-        // cout << "Tau" << endl;
-        // cout << i << " : " << endl;
-        // cout << "- daughters: " << event[i].daughter2() << " -> " << event[i].daughter1() << endl;
         int nProngs(0), nMu(0);
         std::vector<int> daughters;
         for (int d = event[i].daughter1(); d <= event[i].daughter2() && d>0; d++){
