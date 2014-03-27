@@ -42,39 +42,38 @@ bool sortTracksByPT(Track* a, Track* b){
 }
 
 // From the daughters of 2 taus, decide which is track and which is mu
-bool assignMuonAndTrack(GenParticle *mu, GenParticle *tk, GenParticle *a, GenParticle *b){
+bool assignMuonAndTrack(GenParticle* &mu, GenParticle* &tk, GenParticle &a, GenParticle &b){
 	tk = 0;
 	mu = 0;
 
-	bool aIsMu = fabs(a->PID) == 13;
-	bool bIsMu = fabs(b->PID) == 13;
+	bool aIsMu = fabs(a.PID) == 13;
+	bool bIsMu = fabs(b.PID) == 13;
 
 	// Now look at both a and b
 	if (aIsMu && !bIsMu) {
-		mu = a;
-		tk = b;
+		mu = &a;
+		tk = &b;
 		return true;
 	}
 
 	if (!aIsMu && bIsMu) {
-		mu = b;
-		tk = a;
+		mu = &b;
+		tk = &a;
 		return true;
 	}
 
 	// the muon is the mu with the higest pT, the other mu becomes a track
 	if (aIsMu && bIsMu){
-		if (a->PT > b->PT) {
-			mu = a;
-			tk = b;
+		if (a.PT > b.PT) {
+			mu = &a;
+			tk = &b;
 			return true;
 		} else {
-			mu = b;
-			tk = a;
+			mu = &b;
+			tk = &a;
 			return true;
 		}
 	}
-
 	// If it gets to here, then neither a nor b is a muon - trouble!
 	return false;
 }
@@ -366,8 +365,8 @@ void basicScript()
 				GenParticle* trackTruth2;
 
 				// Assign charged products to be mu or track
-				bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, charged1a, charged1b);				
-				bool truth2HasMu = assignMuonAndTrack(muTruth2, trackTruth2, charged2a, charged2b);
+				bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, *charged1a, *charged1b);				
+				bool truth2HasMu = assignMuonAndTrack(muTruth2, trackTruth2, *charged2a, *charged2b);
 
 				// NOTE: muons are NOT pT ordered
 
