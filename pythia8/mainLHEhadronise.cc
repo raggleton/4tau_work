@@ -89,12 +89,12 @@ void lookAtTauProducts(Event& event, int &nProngs, int &nMu, std::vector<int> cu
 int main(int argc, char* argv[]) {
 
   // bool outputEvent  = true; // output entire event listing to STDOUT (long!), for debugging only
-  bool writeToHEPMC = false; // output to HEPMC
+  bool writeToHEPMC = true; // output to HEPMC
 
   // Check that correct number of command-line arguments
   if (argc != 2) {
     cerr << " Unexpected number of command-line arguments. \n "
-         <<  "You are expected to provide one output file name. \n"
+         << " You are expected to provide one output file name. \n"
          << " Program stopped! " << endl;
     return 1;
   }
@@ -106,7 +106,6 @@ int main(int argc, char* argv[]) {
 
   // Specify file where HepMC events will be stored.
   HepMC::IO_GenEvent ascii_io(argv[1], std::ios::out);
-
 
   //  Number of listed events. Allow for possibility of a few faulty events.
   int nPrintLHA  = 1;             
@@ -173,8 +172,8 @@ int main(int argc, char* argv[]) {
       ++iPrintRest;         
     }                 
 
-    int n1Prong(0), n3Prong(0), nMus(0);
-    for (int i = 0; i < event.size(); ++i) {
+    int n1Prong(0), n3Prong(0), nMus(0); //xProng includes muons
+    for (int i = 0; (i < event.size()) && (n3Prong==0); ++i) {
       if ((event[i].idAbs() == 15 ) && (event[i].status() == -22)){ // loop over all taus from a_0
 
         int nProngs(0), nMu(0);
@@ -188,8 +187,6 @@ int main(int argc, char* argv[]) {
         else if (nProngs > 1) n3Prong++;
         nMus += nMu;
       }
-      
-    
     } // end loop over particles in event
     
     // After looking at all taus, have we got 2 muons and 2 1-prong decays?
