@@ -203,7 +203,7 @@ void testScript_cleanTk()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = false;
+	bool doSignal = true;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	
@@ -214,7 +214,8 @@ void testScript_cleanTk()
 		// chain.Add("sig_test.root");
 		// chain.Add("Signal_cleanTk/signal_clean.root");
 		// chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
-		chain.Add("Signal_1prong_bare/signal_1prong_bare.root");
+		// chain.Add("Signal_1prong_bare/signal_1prong_bare.root");
+		chain.Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
 		// chain.Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
 		cout << "Doing signal" << endl;
 	} else {
@@ -624,6 +625,7 @@ void testScript_cleanTk()
 					&& (fabs(candTk->Z) < 1.) //dz < 1mm
 					&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
 					&& (fabs(candTk->Eta)<3)
+					&& (fabs(candTk->PID)!=13)
 				){
 
 					nTk1++;
@@ -780,7 +782,9 @@ void testScript_cleanTk()
 	std::string app("");
 	if (doSignal) {
 		// name = "Signal_";
+		// name = "Signal_1prong_";
 		name = "Signal_1prong_";
+		// name = "Signal_1prong_new_";
 		// name = "Signal_3prong_";
 		app = "_sig";
 	} else {
@@ -795,7 +799,8 @@ void testScript_cleanTk()
 	if (swapMuRandomly)
 		app += "_muRand";
 	
-	std::string delph="cleanTk"; // which Delphes config was used: bare, CMS, cleanTk
+	// std::string delph="cleanTk"; // which Delphes config was used: bare, CMS, cleanTk
+	std::string delph="bare"; // which Delphes config was used: bare, CMS, cleanTk
 	// app += "_samePtEta";
 
 	// histNMu->Draw("HISTE");
