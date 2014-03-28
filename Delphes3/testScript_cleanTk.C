@@ -213,9 +213,9 @@ void testScript_cleanTk()
 		// chain.Add("GG_H_aa.root");
 		// chain.Add("sig_test.root");
 		// chain.Add("Signal_cleanTk/signal_clean.root");
-		// chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
+		chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
 		// chain.Add("Signal_1prong_bare/signal_1prong_bare.root");
-		chain.Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
+		// chain.Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
 		// chain.Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
 		cout << "Doing signal" << endl;
 	} else {
@@ -602,47 +602,42 @@ void testScript_cleanTk()
 			// Look at tracks around muons //
 			/////////////////////////////////
 
-			int n1AroundMu1 (0), n1AroundMu2(0); // count tracks with pT > 1
-			int n25AroundMu1 (0), n25AroundMu2(0); // count tracks with pT > 2.5
-			int nTk1(0), nTk25(0);
+			// Vectors of tracks with pT > 1, within dR < 0.5 of respective muons + other cuts
+			// so tk1 is the track nearest to muon1, (may or may not be highest pT, depends if random swapping is on)
+			std::vector<Track*> tk1_1;
+			std::vector<Track*> tk2_1;
 
-			n1++;
-			n2++;
+			// same but with pT >2.5
+			std::vector<Track*> tk1_2p5;
+			std::vector<Track*> tk2_2p5;
 
-			// cout << "Track mult: " << branchTracks->GetEntries() << endl;
-			// histNTk->Fill(branchTracks->GetEntries());
+			// same but with pT > 2.5, OS to muon
+			std::vector<Track*> tk1_2p5_OS;
+			std::vector<Track*> tk2_2p5_OS;
 
-			// The two tracks
-			Track *track1(0);
-			Track *track2(0);
-
+			Track *candTk(0);
 			for(int a = 0; a < branchTracks->GetEntries(); a++){
 				candTk = (Track*) branchTracks->At(a);
 
-				if ( (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
+				if (   (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
 					&& (candTk->PT != mu2->PT)
 					&& (candTk->PT > 1.)
 					&& (fabs(candTk->Z) < 1.) //dz < 1mm
 					&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
 					&& (fabs(candTk->Eta)<3)
-					&& (fabs(candTk->PID)!=13)
 				){
-
-					nTk1++;
+					// Store track in suitable vector
 					double dR1 = (candTk->P4()).DeltaR(mu1Mom);
 					double dR2 = (candTk->P4()).DeltaR(mu2Mom);
-	
-					// Also count the track with pT > 1
+
 					if (dR1 < 0.5){
-						n1AroundMu1++;
+						tk1_1.push_back(candTk);
 					}
 					if (dR2 < 0.5){
-						n1AroundMu2++;
+						tk2_1.push_back(candTk);
 					}
 
 					if (candTk->PT > 2.5){
-
-						nTk25++;
 
 						histNTracks1->Fill(dR1);
 						histNTracks2->Fill(dR2);
@@ -650,18 +645,66 @@ void testScript_cleanTk()
 						histTroubleEtaVsPhi1->Fill(fabs(candTk->Eta - mu1Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu1Mom)));
 						histTroubleEtaVsPhi2->Fill(fabs(candTk->Eta - mu2Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu2Mom)));
 
-						if ((candTk->Charge) * (mu1->Charge) < 0){ // only need one if statement because SS muons
+						if (dR1 < 0.5){
+							tk1_2p5.push_back(candTk);
+						}
+						if (dR2 < 0.5){
+							tk2_2p5.push_back(candTk);
+						}
+						if ((candTk->Charge) * (mu1->Charge) < 0) {
 							histNTracks1OS->Fill(dR1);
 							histNTracks2OS->Fill(dR2);
-							if ((dR1 < 0.5) && (!track1 || (candTk->PT > track1->PT))) { // so first time roudn doesn't seg fault
-								track1 = candTk;
-								n25AroundMu1++;
+
+							if (dR1 < 0.5){
+								tk1_2p5_OS.push_back(candTk);
 							}
-							if ((dR2 < 0.5) && (!track2 || (candTk->PT > track2->PT))) {
-								track2 = candTk;
-								n25AroundMu2++;
+							if (dR2 < 0.5){
+								tk2_2p5_OS.push_back(candTk);
 							}
-						}
+						}					
+					}
+				} // End of track selection
+			} // End of track loop
+
+
+			// for(int a = 0; a < branchTracks->GetEntries(); a++){
+			// 	candTk = (Track*) branchTracks->At(a);
+
+			// 	if ( (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
+			// 		&& (candTk->PT != mu2->PT)
+			// 		&& (candTk->PT > 1.)
+			// 		&& (fabs(candTk->Z) < 1.) //dz < 1mm
+			// 		&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
+			// 		&& (fabs(candTk->Eta)<3)
+			// 		&& (fabs(candTk->PID)!=13)
+			// 	){
+
+			// 		nTk1++;
+			// 		double dR1 = (candTk->P4()).DeltaR(mu1Mom);
+			// 		double dR2 = (candTk->P4()).DeltaR(mu2Mom);
+	
+			// 		// Also count the track with pT > 1
+			// 		if (dR1 < 0.5){
+			// 			n1AroundMu1++;
+			// 		}
+			// 		if (dR2 < 0.5){
+			// 			n1AroundMu2++;
+			// 		}
+
+			// 		if (candTk->PT > 2.5){
+
+						// if ((candTk->Charge) * (mu1->Charge) < 0){ // only need one if statement because SS muons
+						// 	histNTracks1OS->Fill(dR1);
+						// 	histNTracks2OS->Fill(dR2);
+						// 	if ((dR1 < 0.5) && (!track1 || (candTk->PT > track1->PT))) { // so first time roudn doesn't seg fault
+						// 		track1 = candTk;
+						// 		n25AroundMu1++;
+						// 	}
+						// 	if ((dR2 < 0.5) && (!track2 || (candTk->PT > track2->PT))) {
+						// 		track2 = candTk;
+						// 		n25AroundMu2++;
+						// 	}
+						// }
 						// Count number of tracks with pT > 2.5 within a cone of 0.5 about each muon
 						// if (dR1 < 0.5)
 						// if (dR2 < 0.5)
@@ -669,23 +712,23 @@ void testScript_cleanTk()
 						// Investigate peaked dR between trk and muon, ~ 1
 						// If muons are pT ordered (swapMuRandonly = false) then only want the tk about mu 2
 						// If randomly ordered, then want tk about both
-						if ((swapMuRandomly && ((dR1 > 0.7 && dR1 < 1.4) || (dR2 > 0.7 && dR2 < 1.4))) || (!swapMuRandomly && (dR2 > 0.7 && dR2 < 1.4)) ){
+						// if ((swapMuRandomly && ((dR1 > 0.7 && dR1 < 1.4) || (dR2 > 0.7 && dR2 < 1.4))) || (!swapMuRandomly && (dR2 > 0.7 && dR2 < 1.4)) ){
 							// cout << "CandTk pT: " << candTk->PT << " PID " << candTk->PID << " dR1: " << dR1 << " dR2: " << dR2 << " phi: " << candTk->Phi << " eta: " << candTk->Eta << endl;
-							histTroublePt->Fill(candTk->PT);
-							histTroublePID->Fill(fabs(candTk->PID));
-							histTroubleEta->Fill(candTk->Eta);
-							histTroublePhi->Fill(candTk->Phi);
-							histTroubleDRMuMu->Fill(mu1Mom.DeltaR(mu2Mom));
-							histTroubleDPhiMuMu->Fill(mu1Mom.DeltaPhi(mu2Mom));
-							histTroubleDEtaMuMu->Fill(fabs(mu1Mom.Eta() - mu2Mom.Eta()));
-							histTroubleMu1Pt->Fill(mu1PT);
-							histTroubleMu2Pt->Fill(mu2PT);
-							if (charged1a && charged1b && charged2a && charged2b){
-								if (candTk->PT == charged1a->PT || candTk->PT == charged1b->PT || candTk->PT == charged2a->PT || candTk->PT == charged2b->PT)
-									histTroubleMatch->Fill(1);
-								else
-									histTroubleMatch->Fill(0);
-							}
+							// histTroublePt->Fill(candTk->PT);
+							// histTroublePID->Fill(fabs(candTk->PID));
+							// histTroubleEta->Fill(candTk->Eta);
+							// histTroublePhi->Fill(candTk->Phi);
+							// histTroubleDRMuMu->Fill(mu1Mom.DeltaR(mu2Mom));
+							// histTroubleDPhiMuMu->Fill(mu1Mom.DeltaPhi(mu2Mom));
+							// histTroubleDEtaMuMu->Fill(fabs(mu1Mom.Eta() - mu2Mom.Eta()));
+							// histTroubleMu1Pt->Fill(mu1PT);
+							// histTroubleMu2Pt->Fill(mu2PT);
+							// if (charged1a && charged1b && charged2a && charged2b){
+							// 	if (candTk->PT == charged1a->PT || candTk->PT == charged1b->PT || candTk->PT == charged2a->PT || candTk->PT == charged2b->PT)
+							// 		histTroubleMatch->Fill(1);
+							// 	else
+							// 		histTroubleMatch->Fill(0);
+							// }
 							/*for(int j = 0; j < branchAll->GetEntries(); j++){
 								candTrouble = (GenParticle*) branchAll->At(j);
 								cout << j << " PID: " << candTrouble->PID << " Mother1: " << candTrouble->M1 << " Mother2: " << candTrouble->M2 << " Daughter 1: " << candTrouble->D1 << " Daughter 2: " << candTrouble->D2;
@@ -695,21 +738,60 @@ void testScript_cleanTk()
 								cout << endl;
 							}
 							stop = true;*/
-						}
-					} //end of 2.5 cut
-				} // End of track selection
-			} // End of track loop
+			// 			}
+			// 		} //end of 2.5 cut
+			// 	} // End of track selection
+			// } // End of track loop
 
 			// histNTk1->Fill(nTk1);
 			// histNTk25->Fill(nTk25);
 			// signal selection - only 1 track with pT > 1, and that track must have pT > 2.5 and be OS
-			if (n1AroundMu1==1 && n1AroundMu2==1 && n25AroundMu1==1 && n25AroundMu2==1 ) {
-				nMuPass++;
-				histTrack1Pt->Fill(track1->PT);
-				histTrack2Pt->Fill(track2->PT);
+			// if (n1AroundMu1==1 && n1AroundMu2==1 && n25AroundMu1==1 && n25AroundMu2==1 ) {
+			// 	nMuPass++;
+			// 	histTrack1Pt->Fill(track1->PT);
+			// 	histTrack2Pt->Fill(track2->PT);
 
-				TLorentzVector track1Mom=track1->P4();
-				TLorentzVector track2Mom=track2->P4();
+			// 	TLorentzVector track1Mom=track1->P4();
+			// 	TLorentzVector track2Mom=track2->P4();
+
+			// 	// combined mu+tk system
+			// 	TLorentzVector sys1 = mu1Mom+track1Mom;
+			// 	TLorentzVector sys2 = mu2Mom+track2Mom;
+
+			// 	// plot the pT, dR, dEta, DPhi of two systems
+			// 	histSys1Pt->Fill(sys1.Pt());
+			// 	histSys2Pt->Fill(sys2.Pt());
+			// 	histDRSys->Fill(sys1.DeltaR(sys2));
+			// 	histDEtaVsDPhiSys->Fill(fabs(sys1.Eta() - sys2.Eta()),fabs(sys1.DeltaPhi(sys2)));
+
+			// 	// Do m1 in bins of m2
+			// 	double m1 = (mu1Mom+track1Mom).M();
+			// 	double m2 = (mu2Mom+track2Mom).M();
+
+			// 	histM1->Fill(m1);
+			// 	histM2->Fill(m2);
+
+			// 	// cout << m1 << "     " << m2 << endl;
+			// 	if(m2 < 1.)
+			// 		histM1_0to1->Fill(m1);
+			// 	else if (m2 < 2.)
+			// 		histM1_1to2->Fill(m1);
+			// 	else if (m2 < 3.)
+			// 		histM1_2to3->Fill(m1);
+			// 	else
+			// 		histM1_3toInf->Fill(m1);
+			// }
+
+			// SIGNAL SELECTION
+			if (tk1_1.size() == 1 && tk2_1.size() == 1 
+			&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) {
+				
+				nMuPass++;
+				histTrack1Pt->Fill(tk1_2p5_OS[0]->PT);
+				histTrack2Pt->Fill(tk2_2p5_OS[0]->PT);
+
+				TLorentzVector track1Mom=tk1_2p5_OS[0]->P4();
+				TLorentzVector track2Mom=tk2_2p5_OS[0]->P4();
 
 				// combined mu+tk system
 				TLorentzVector sys1 = mu1Mom+track1Mom;
@@ -719,16 +801,13 @@ void testScript_cleanTk()
 				histSys1Pt->Fill(sys1.Pt());
 				histSys2Pt->Fill(sys2.Pt());
 				histDRSys->Fill(sys1.DeltaR(sys2));
-				histDEtaVsDPhiSys->Fill(fabs(sys1.Eta() - sys2.Eta()),fabs(sys1.DeltaPhi(sys2)));
 
-				// Do m1 in bins of m2
-				double m1 = (mu1Mom+track1Mom).M();
-				double m2 = (mu2Mom+track2Mom).M();
+				double m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+				double m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
 				histM1->Fill(m1);
 				histM2->Fill(m2);
 
-				// cout << m1 << "     " << m2 << endl;
 				if(m2 < 1.)
 					histM1_0to1->Fill(m1);
 				else if (m2 < 2.)
@@ -737,11 +816,6 @@ void testScript_cleanTk()
 					histM1_2to3->Fill(m1);
 				else
 					histM1_3toInf->Fill(m1);
-			}
-
-			// sideband region where you have 2+ tracks about mu2
-			if (n1AroundMu1==1 && n1AroundMu2==1 && n25AroundMu1==1 && n25AroundMu2 >= 2){
-
 			}
 
 		} // end of muon selection
@@ -782,7 +856,6 @@ void testScript_cleanTk()
 	std::string app("");
 	if (doSignal) {
 		// name = "Signal_";
-		// name = "Signal_1prong_";
 		name = "Signal_1prong_";
 		// name = "Signal_1prong_new_";
 		// name = "Signal_3prong_";
@@ -799,8 +872,8 @@ void testScript_cleanTk()
 	if (swapMuRandomly)
 		app += "_muRand";
 	
-	// std::string delph="cleanTk"; // which Delphes config was used: bare, CMS, cleanTk
-	std::string delph="bare"; // which Delphes config was used: bare, CMS, cleanTk
+	std::string delph="cleanTk"; // which Delphes config was used: bare, CMS, cleanTk
+	// std::string delph="bare"; // which Delphes config was used: bare, CMS, cleanTk
 	// app += "_samePtEta";
 
 	// histNMu->Draw("HISTE");
