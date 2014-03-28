@@ -326,28 +326,28 @@ void testScript_cleanTk()
 	TH1D *histNTracksCum2OS      = new TH1D("hNTracksCum2OS" ,"Cumu Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 10,0,1.0);
 	TH1D *histNTracksCum2        = new TH1D("hNTracksCum2" ,"Cumu Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); N_{trk} about muon2 / N (muon2)", 10,0,1.0);
 
-	TH1D *histMu1Pt              = new TH1D("hMu1Pt", "#mu_{1} p_{T}, no selection ;#mu_{1} p_{T}; N_{events}", 50,0,50.);
-	TH1D *histMu2Pt              = new TH1D("hMu2Pt", "#mu_{2} p_{T}, no selection;#mu_{2} p_{T}; N_{events}", 50,0,50.);
+	TH1D *histMu1Pt              = new TH1D("hMu1Pt", "#mu_{1} p_{T}, no selection ;#mu_{1} p_{T} [GeV]; N_{events}", 50,0,50.);
+	TH1D *histMu2Pt              = new TH1D("hMu2Pt", "#mu_{2} p_{T}, no selection;#mu_{2} p_{T} [GeV]; N_{events}", 50,0,50.);
 
 	TH1D *histTrack1Pt           = new TH1D("hTrack1Pt","Track 1 p_{T}, signal selection; track 1 p_{T} [GeV]; N_{events}", 25,0,25.);
 	TH1D *histTrack2Pt           = new TH1D("hTrack2Pt","Track 2 p_{T}, signal selection; track 2 p_{T} [GeV]; N_{events}", 25,0,25.);
 	
 	// for mu+tk systems
-	TH1D *histSys1Pt             = new TH1D("hSys1Pt", "System 1 p_{T}, signal selection ;System 1 p_{T}; N_{events}", 50,0,50.);
-	TH1D *histSys2Pt             = new TH1D("hSys2Pt", "System 2 p_{T}, signal selection;System 2 p_{T}; N_{events}", 50,0,50.);
+	TH1D *histSys1Pt             = new TH1D("hSys1Pt", "System 1 p_{T}, signal selection ;System 1 p_{T} [GeV]; N_{events}", 50,0,50.);
+	TH1D *histSys2Pt             = new TH1D("hSys2Pt", "System 2 p_{T}, signal selection;System 2 p_{T} [GeV]; N_{events}", 50,0,50.);
 	TH1D *histDRSys              = new TH1D("hDRSys", "#Delta R(Sys_{1}-Sys_{2}), signal selection;#Delta R(Sys_{1}-Sys_{2}); N_{events}", 30,0,5);
 	TH2D *histDEtaVsDPhiSys      = new TH2D("hDEtaVsDPhiSys","dPhi vs dEta for system 2 wrt system 1 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
 
 	// for mu+tk systems - MC Truth
-	TH1D *histSys1PtTruth        = new TH1D("hSys1PtTruth", "System 1 p_{T}, signal selection, MC truth;System 1 p_{T}; N_{events}", 50,0,50.);
-	TH1D *histSys2PtTruth        = new TH1D("hSys2PtTruth", "System 2 p_{T}, signal selection, MC truth;System 2 p_{T}; N_{events}", 50,0,50.);
+	TH1D *histSys1PtTruth        = new TH1D("hSys1PtTruth", "System 1 p_{T}, signal selection, MC truth;System 1 p_{T} [GeV]; N_{events}", 50,0,50.);
+	TH1D *histSys2PtTruth        = new TH1D("hSys2PtTruth", "System 2 p_{T}, signal selection, MC truth;System 2 p_{T} [GeV]; N_{events}", 50,0,50.);
 	TH1D *histDRSysTruth         = new TH1D("hDRSysTruth", "#Delta R(Sys_{1}-Sys_{2}), signal selection, MC truth;#Delta R(Sys_{1}-Sys_{2}); N_{events}", 30,0,5);
 	TH2D *histDEtaVsDPhiSysTruth = new TH2D("hDEtaVsDPhiSysTruth","dPhi vs dEta for system 2 wrt system 1, MC Truth ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
 
-	TH1D *histNuPt               = new TH1D("hNuPt", "#nu p_{T}, no selection ;#nu p_{T}; N_{events}", 50,0,50.);
+	TH1D *histNuPt               = new TH1D("hNuPt", "#nu p_{T}, no selection ;#nu p_{T} [GeV]; N_{events}", 50,0,50.);
 	
-	TH1D *histMu1PtSel           = new TH1D("hMu1PtSel", "#mu_{1} p_{T}, muon selection, no tk selection;#mu_{1} p_{T}; N_{events}", 50,0,50.);
-	TH1D *histMu2PtSel           = new TH1D("hMu2PtSel", "#mu_{2} p_{T}, muon selection, no tk selection;#mu_{2} p_{T}; N_{events}", 50,0,50.);
+	TH1D *histMu1PtSel           = new TH1D("hMu1PtSel", "#mu_{1} p_{T}, muon selection, no tk selection;#mu_{1} p_{T} [GeV]; N_{events}", 50,0,50.);
+	TH1D *histMu2PtSel           = new TH1D("hMu2PtSel", "#mu_{2} p_{T}, muon selection, no tk selection;#mu_{2} p_{T} [GeV]; N_{events}", 50,0,50.);
 
 	// TH1D *histNMu             = new TH1D("hNMu", "No. muons;N mu; N_{events}", 5,0,5);
 	// TH1D *histNMu1            = new TH1D("hNMu1", "No. muons about 1;N mu; N_{events}", 5,0,5);
