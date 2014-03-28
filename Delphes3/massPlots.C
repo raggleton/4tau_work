@@ -1,39 +1,21 @@
 #include <vector>
 #include <algorithm>
-// #include <iostream>
-// #include <utility>
+#include <string>
+#include <sstream>
 
-// #include "TROOT.h"
-// #include "TSystem.h"
-// #include "TApplication.h"
-
-// #include "TString.h"
-
-// #include "TH2.h"
-// #include "TH1.h"
-// #include "THStack.h"
-// #include "TLegend.h"
-// #include "TPaveText.h"
-// #include "TClonesArray.h"
-// #include "TLorentzVector.h"
-// #include "TCanvas.h"
-// #include "TArc.h"
-
-// #include "classes/DelphesClasses.h"
-
-// #include "external/ExRootAnalysis/ExRootTreeReader.h"
-// #include "external/ExRootAnalysis/ExRootTreeWriter.h"
-// #include "external/ExRootAnalysis/ExRootTreeBranch.h"
-// #include "external/ExRootAnalysis/ExRootResult.h"
-// #include "external/ExRootAnalysis/ExRootUtilities.h"
-/*
-root -l examples/myScript.C\(\"QCDoutput5.root\"\)
-
-for clean tracks ie efficiency = 1, no smearing
- */
+// using namespace std;
 using std::cout;
 using std::endl;
-// using namespace std;
+
+// For string splitting
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
 
 // For sorting track vectors by pT
 // Ideally we'd use the templated methods in classes/SortableObject.h ...
@@ -78,7 +60,8 @@ bool assignMuonAndTrack(GenParticle* &mu, GenParticle* &tk, GenParticle &a, GenP
 	return false;
 }
 
-std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *tau) { // get the 3 correct daughters of the tau
+// Get the 3 correct daughters of the tau
+std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *tau) { 
 
 	// cout << "get tau daughters" << endl;
 
@@ -108,7 +91,8 @@ std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *
 	}
 }
 
-GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { // from tau decay products, get the final stable products
+// From tau decay products, get the final stable products
+GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { 
 
 	std::vector<GenParticle*> history; // hold all unique particles in the decay chain (stores event posiiton number)
 	std::vector<GenParticle*> current = getTauDaughters(branchAll, tau);
@@ -199,13 +183,78 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { // fr
 
 }
 
+// Draw a histogram and save it to PDF
+// h = hist to draw (TObject* to handle THStacks, which don't inherit from TH1)
+// drawOpt = options for drawing hist
+// filename = main filename (e.g. Mu1Pt)
+// directory = directory for output PDF
+// app = appendage eg muRand, sig
+// 
+// saves file as directory/filename_<delphes setup from directory>_app.pdf
+void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std::string directory, std::string app){
+	TCanvas c;
+	h->Draw(drawOpt.c_str());
+
+	std::vector<std::string> elems2;
+    split(directory, '_', elems2);
+	std::string delph = elems2[elems2.size()-1];
+	
+	c.SaveAs((directory+"/"+filename+"_"+delph+"_"+app+".pdf").c_str());
+}
+
+// Draws mass correlation plot
+// title = title on plot (including axes labels)
+// histM1_* = 4 mass region plots to plot
+// filename = main filename (e.g. Mu1Pt)
+// directory = directory for output PDF
+// app = appendage eg muRand, sig
+// 
+// saves file as directory/filename_<delphes setup from directory>_app.pdf
+void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* histM1_2to3, TH1* histM1_3toInf, std::string directory, std::string filename, std::string app){
+	TCanvas c;
+	THStack histM1_M2("hM1_M2",title.c_str());
+	histM1_0to1->SetLineColor(kBlack);
+	if (histM1_0to1->Integral() != 0)
+		histM1_0to1->Scale(1./histM1_0to1->Integral());
+	histM1_M2.Add(histM1_0to1);
+	
+	histM1_1to2->SetLineColor(kRed);
+	if (histM1_1to2->Integral() != 0)
+		histM1_1to2->Scale(1./histM1_1to2->Integral());
+	histM1_M2.Add(histM1_1to2);
+
+	histM1_2to3->SetLineColor(kGreen);
+	if (histM1_2to3->Integral() != 0)
+		histM1_2to3->Scale(1./histM1_2to3->Integral());
+	histM1_M2.Add(histM1_2to3);
+
+	histM1_3toInf->SetLineColor(kBlue);
+	if (histM1_3toInf->Integral() != 0)
+		histM1_3toInf->Scale(1./histM1_3toInf->Integral());
+	histM1_M2.Add(histM1_3toInf);
+	histM1_M2.Draw("nostack,HISTE");
+
+	TLegend leg(0.7,0.7,0.9,0.9);
+	leg.AddEntry(histM1_0to1,"m_{2} = 0-1 GeV","l");
+	leg.AddEntry(histM1_1to2,"m_{2} = 1-2 GeV","l");
+	leg.AddEntry(histM1_2to3,"m_{2} = 2-3 GeV","l");
+	leg.AddEntry(histM1_3toInf,"m_{2} > 3 GeV","l");
+	leg.Draw();
+	
+	std::vector<std::string> elems2;
+    split(directory, '_', elems2);
+	std::string delph = elems2[elems2.size()-1];
+	
+	c.SaveAs((directory+"/"+filename+"_"+delph+"_"+app+".pdf").c_str());
+}
+
 void massPlots()
 {
 	TH1::SetDefaultSumw2();
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = false;
+	bool doSignal = true;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	
@@ -215,7 +264,9 @@ void massPlots()
 		// chain.Add("GG_H_aa.root");
 		// chain.Add("sig_test.root");
 		// chain.Add("Signal_cleanTk/signal_clean.root");
-		chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
+		// chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
+		// chain.Add("Signal_1prong_bare/signal_1prong_bare.root");
+		chain.Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
 		// chain.Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
 		cout << "Doing signal" << endl;
 	} else {
@@ -261,6 +312,26 @@ void massPlots()
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_38.root");
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_39.root");
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_40.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_1.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_2.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_3.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_4.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_5.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_6.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_7.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_8.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_9.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_10.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_11.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_12.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_13.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_14.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_15.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_16.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_17.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_18.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_19.root");
+			// chain.Add("QCDb_mu_pthatmin100_bare/QCDb_mu_pthatmin100_20.root");
 		} else {
 			cout << "Doing QCDb" << endl;
 			chain.Add("QCDb_cleanTk/QCDb_10.root");
@@ -277,6 +348,7 @@ void massPlots()
 
 	// Create object of class ExRootTreeReader
 	ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
+	Long64_t numberOfEntries = treeReader->GetEntries();
 
 	// Get pointers to branches used in this analysis
 	// Use the data_flow.png and tcl file to figure out what branches are available, and what class they are
@@ -288,28 +360,37 @@ void massPlots()
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
 	//////////////////////
-	// Book histograms //
+	// Book histograms  //
 	//////////////////////
-
 	// Plots for testing invariant mass correlation
-	double massBins[6]         = {0,1,2,3,4,10};
-	// MC truth - use actual mu-tk pairs from tau (for signal mc only)
-	TH1D *histM1_truth_0to1    = new TH1D("hM1_truth_0to1","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 0-1 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_1to2    = new TH1D("hM1_truth_1to2","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 1-2 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_2to3    = new TH1D("hM1_truth_2to3","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 2-3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_3toInf  = new TH1D("hM1_truth_3toInf","m(tk-#mu_{1}) for m(tk-#mu_{2}) > 3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	double massBins[6]           = {0,1,2,3,4,10};
+	TH1D *histM1                 = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}", 5, massBins);
+	TH1D *histM2                 = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}", 5, massBins);
+
+	// MC truth - use actual mu-tk pairs from tau
+	TH1D *histM1_truth_0to1      = new TH1D("hM1_truth_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_1to2      = new TH1D("hM1_truth_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_2to3      = new TH1D("hM1_truth_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_3toInf    = new TH1D("hM1_truth_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 	
-	// actual dist using selection (all cuts)
-	TH1D *histM1_0to1          = new TH1D("hM1_0to1","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 0-1 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_1to2          = new TH1D("hM1_1to2","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 1-2 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_2to3          = new TH1D("hM1_2to3","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 2-3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_3toInf        = new TH1D("hM1_3toInf","m(tk-#mu_{1}) for m(tk-#mu_{2}) > 3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	// actual dist using signal selection
+	TH1D *histM1_0to1            = new TH1D("hM1_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_1to2            = new TH1D("hM1_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_2to3            = new TH1D("hM1_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_3toInf          = new TH1D("hM1_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+
+	// actual dist using sideband selection
+	TH1D *histM1_side_0to1       = new TH1D("hM1_side_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_side_1to2       = new TH1D("hM1_side_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_side_2to3       = new TH1D("hM1_side_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_side_3toInf     = new TH1D("hM1_side_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+
+	int nMu(0);
+	int n1(0), n2(0), nMuPass(0);
 
 	// Loop over all events
-	Long64_t numberOfEntries = treeReader->GetEntries();
 	cout << "Nevts : " << numberOfEntries <<endl;
 	bool stop = false;
-
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
 
 		// Load selected branches with data from specified event
@@ -317,57 +398,99 @@ void massPlots()
 
 		// cout << "*** Event" << endl;
 
+		// Do at gen particle level.
+		// histNMu->Fill(branchGenMuons->GetEntries());
+
 		if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons!
+
+		//////////////////////////////////////////////////////////////////////
+		// First, get the two highest pT muons in the event, store their pT //
+		// and pointers to the GenParticles                                 //
+		//////////////////////////////////////////////////////////////////////
+		
+		GenParticle *cand(0),*mu1(0), *mu2(0);
+		Track *candTk(0);
+
+		double mu1PT(0.), mu2PT(0.);
+		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
+			cand = (GenParticle*) branchGenMuons->At(i);
+			if (cand->PT > mu1PT) {
+				mu1 = cand;
+				mu1PT = cand->PT;
+			}
+		}
+
+		for(int j = 0; j < branchGenMuons->GetEntries(); j++){
+			cand = (GenParticle*) branchGenMuons->At(j);
+			if ((cand->PT > mu2PT) && (cand->PT != mu1->PT)) {
+				mu2 = cand;
+				mu2PT = cand->PT;
+			}
+		}
+
+		// Now randomly swap mu1 - mu2
+		GenParticle *origMu1(0), *origMu2(0);
+		origMu1 = mu1;
+		origMu2 = mu2;
+		if (swapMuRandomly){
+			double randNum = (double)rand() / RAND_MAX;
+			if (randNum > 0.5){
+				mu1 = origMu2;
+				mu2 = origMu1;
+			}
+		}
+
+
+		TLorentzVector mu1Mom, mu2Mom;
+		mu1Mom = mu1->P4();
+		mu2Mom = mu2->P4();
 
 		//////////////////////////////////////////////////////
 		// Get the hard interaction particles for signal MC //
 		// No selection cuts applied (only >=2 muons)       //
 		//////////////////////////////////////////////////////
 		
+		GenParticle *charged1a(0);
+		GenParticle *charged1b(0);
+		GenParticle *charged2a(0);
+		GenParticle *charged2b(0);
+
 		if (doSignal) {
 			GenParticle *a1(0), *a2(0);
 			// Get a0s
 			for(int j = 0; j < branchAll->GetEntries(); j++){
-				GenParticle *candHa = (GenParticle*) branchAll->At(j);
-				// cout << j << " ID: " << candHa->PID << " status: " << candHa->Status << endl;
+				cand = (GenParticle*) branchAll->At(j);
+				// cout << j << " ID: " << cand->PID << " status: " << cand->Status << endl;
 			
-				// if (fabs(candHa->PID)== 12|| fabs(candHa->PID)== 14|| fabs(candHa->PID)==16 ){
-				// 	histNuPt->Fill(candHa->PT);
-				// } 
-
-				// Which is "1" and "2" is arbitrary here.
-				if ((fabs(candHa->PID)==36) && (fabs(candHa->Status)==62)){
+				if ((fabs(cand->PID)==36) && (fabs(cand->Status)==62)){
 					if (a1==0){
-						a1=candHa;
+						a1=cand;
+						// cout << "found first a1 at " << j << endl;
 					} else {
-						a2=candHa;
+						// cout << "found second a1 at " << j << endl;
+						a2=cand;
 					}
 				}
 			}
 
-			// Get the tau daughters from a1 and a2 (no pT ordering)
+			// Get the tau daughters from a1 and a2
 			GenParticle *tau1a(0), *tau1b(0), *tau2a(0), *tau2b(0);
 			tau1a = (GenParticle*) branchAll->At(a1->D1);
 			tau1b = (GenParticle*) branchAll->At(a1->D2);
 			tau2a = (GenParticle*) branchAll->At(a2->D1);
 			tau2b = (GenParticle*) branchAll->At(a2->D2);
 
-			// TLorentzVector tau1aMom,tau1bMom, tau2aMom, tau2bMom;
-			// tau1aMom = tau1a->P4();
-			// tau1bMom = tau1b->P4();
-			// tau2aMom = tau2a->P4();
-			// tau2bMom = tau2b->P4();
+			TLorentzVector tau1aMom,tau1bMom, tau2aMom, tau2bMom;
+			tau1aMom = tau1a->P4();
+			tau1bMom = tau1b->P4();
+			tau2aMom = tau2a->P4();
+			tau2bMom = tau2b->P4();
 
-			// histDRa1->Fill(tau1aMom.DeltaR(tau1bMom));
-			// histDRa2->Fill(tau2aMom.DeltaR(tau2bMom));
+			charged1a = getChargedObject(branchAll, tau1a);
+			charged1b = getChargedObject(branchAll, tau1b);
+			charged2a = getChargedObject(branchAll, tau2a);
+			charged2b = getChargedObject(branchAll, tau2b);
 			
-			GenParticle *charged1a = getChargedObject(branchAll, tau1a);
-			GenParticle *charged1b = getChargedObject(branchAll, tau1b);
-			GenParticle *charged2a = getChargedObject(branchAll, tau2a);
-			GenParticle *charged2b = getChargedObject(branchAll, tau2b);
-			
-			// This selects events where each tau only has 1 charged product...
-			// dunno what to do about evts where the tau decays into charged things *including* muon
 			if (charged1a && charged1b && charged2a && charged2b){
 				
 				// To hold mu and tracks from each tau
@@ -383,9 +506,8 @@ void massPlots()
 				// NOTE: muons are NOT pT ordered
 
 				if (!truth1HasMu || !truth2HasMu) {
-					cout << "Problem, no truth mu for 1 and/or 2!" << endl;
+					// cout << "Problem, no truth mu for 1 and/or 2!" << endl;
 				} else { 
-					
 					// Do m1 distribution in bins of m2 - for MC truth (is it actually correlated?)
 					double m1(0.);
 					double m2(0.);
@@ -409,206 +531,261 @@ void massPlots()
 						}
 					}
 
-					cout << m1 << "     " << m2 << endl;
-					// if(m2 < 1.)
-					// 	histM1_truth_0to1->Fill(m1);
-					// else if (m2 < 2.)
-					// 	histM1_truth_1to2->Fill(m1);
-					// else if (m2 < 3.)
-					// 	histM1_truth_2to3->Fill(m1);
-					// else
-					// 	histM1_truth_3toInf->Fill(m1);
+					// plot mu-tk system properties (MC truth)
+					// cout << m1 << "     " << m2 << endl;
+					if(m2 < 1.)
+						histM1_truth_0to1->Fill(m1);
+					else if (m2 < 2.)
+						histM1_truth_1to2->Fill(m1);
+					else if (m2 < 3.)
+						histM1_truth_2to3->Fill(m1);
+					else
+						histM1_truth_3toInf->Fill(m1);
 				}
-			} 
+			} // end if(charged1a...) 
 		} // end if(doSignal)
-
-
-		//////////////////////////////////////////////////////////////////////
-		// Now, do more general MC stuff:                                   //
-		// get the two highest pT muons in the event, store their pT        //
-		// and pointers to the GenParticles                                 //
-		//////////////////////////////////////////////////////////////////////
-		
-		GenParticle *cand(0),*mu1(0), *mu2(0);
-
-		double mu1PT(0.), mu2PT(0.);
-		// Get highest pT muon
-		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
-			cand = (GenParticle*) branchGenMuons->At(i);
-			if (cand->PT > mu1PT) {
-				mu1 = cand;
-				mu1PT = cand->PT;
-			}
-		}
-		// Get 2nd highest pT muon
-		for(int j = 0; j < branchGenMuons->GetEntries(); j++){
-			cand = (GenParticle*) branchGenMuons->At(j);
-			if ((cand->PT > mu2PT) && (cand->PT != mu1->PT)) {
-				mu2 = cand;
-				mu2PT = cand->PT;
-			}
-		}
-
-		// Now randomly swap mu1 - mu2 if desired
-		GenParticle *origMu1(0), *origMu2(0);
-		origMu1 = mu1;
-		origMu2 = mu2;
-		if (swapMuRandomly){
-			double randNum = (double)rand() / RAND_MAX;
-			// histRand->Fill(randNum);
-			if (randNum > 0.5){
-				mu1 = origMu2;
-				mu2 = origMu1;
-			}
-		}
-
-		TLorentzVector mu1Mom, mu2Mom;
-		mu1Mom = mu1->P4();
-		mu2Mom = mu2->P4();
 
 		////////////////////
 		// Muon selection //
 		////////////////////
 		
-		if ((mu1PT < 17.)
-		|| (mu2PT < 10.)
-		|| ((mu1->Charge) != (mu2->Charge))
-		|| (fabs(origMu1->Eta) > 2.1)
-		|| (fabs(origMu2->Eta) > 2.4)
-		|| ((mu1Mom.DeltaR(mu2Mom)) < 2.)
+		if ((mu1PT > 17.)
+		&& (mu2PT > 10.)
+		&& ((mu1->Charge) == (mu2->Charge))
+		&& (fabs(origMu1->Eta) < 2.1)
+		// && (fabs(origMu2->Eta) < 2.1)
+		&& (fabs(origMu2->Eta) < 2.4)
+		&& ((mu1Mom.DeltaR(mu2Mom)) > 2.)
 		){
-			continue;
-		}
+			/////////////////////////////////
+			// Look at tracks around muons //
+			/////////////////////////////////
 
-		/////////////////////////////////
-		// Look at tracks around muons //
-		/////////////////////////////////
+			// Vectors of tracks with pT > 1, within dR < 0.5 of respective muons + other cuts
+			// so tk1 is the track nearest to muon1, (may or may not be highest pT, depends if random swapping is on)
+			std::vector<Track*> tk1_1;
+			std::vector<Track*> tk2_1;
 
-		// Vectors of tracks with pT > 1, within dR < 0.5 of respective muons + other cuts
-		// so tk1 is the track nearest to muon1, NOT higher pT track
-		std::vector<Track*> tk1;
-		std::vector<Track*> tk2;
+			// same but with pT >2.5
+			std::vector<Track*> tk1_2p5;
+			std::vector<Track*> tk2_2p5;
 
-		Track *candTk(0);
-		for(int a = 0; a < branchTracks->GetEntries(); a++){
-			candTk = (Track*) branchTracks->At(a);
+			// same but with pT > 2.5, OS to muon
+			std::vector<Track*> tk1_2p5_OS;
+			std::vector<Track*> tk2_2p5_OS;
 
-			if (   (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
-				&& (candTk->PT != mu2->PT)
-				&& (candTk->PT > 1.)
-				&& (fabs(candTk->Z) < 1.) //dz < 1mm
-				&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
-				&& (fabs(candTk->Eta)<3)
-			){
+			Track *candTk(0);
+			for(int a = 0; a < branchTracks->GetEntries(); a++){
+				candTk = (Track*) branchTracks->At(a);
 
-				double dR1 = (candTk->P4()).DeltaR(mu1Mom);
-				double dR2 = (candTk->P4()).DeltaR(mu2Mom);
+				if (   (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
+					&& (candTk->PT != mu2->PT)
+					&& (candTk->PT > 1.)
+					&& (fabs(candTk->Z) < 1.) //dz < 1mm
+					&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
+					&& (fabs(candTk->Eta)<3)
+				){
+					// Store track in suitable vector
+					double dR1 = (candTk->P4()).DeltaR(mu1Mom);
+					double dR2 = (candTk->P4()).DeltaR(mu2Mom);
 
-				if ((candTk->Charge) * (mu1->Charge) < 0) {
 					if (dR1 < 0.5){
-						tk1.push_back(candTk);
+						tk1_1.push_back(candTk);
 					}
 					if (dR2 < 0.5){
-						tk2.push_back(candTk);
+						tk2_1.push_back(candTk);
 					}
-				}
-			} // End of track selection
-		} // End of track loop
 
-		// Now pT order the track collections for each muon
-		std::sort(tk1.begin(), tk1.end(), sortTracksByPT);
-		std::sort(tk2.begin(), tk2.end(), sortTracksByPT);
+					if (candTk->PT > 2.5){
+						if (dR1 < 0.5){
+							tk1_2p5.push_back(candTk);
+						}
+						if (dR2 < 0.5){
+							tk2_2p5.push_back(candTk);
+						}
+						if ((candTk->Charge) * (mu1->Charge) < 0) {
+							if (dR1 < 0.5){
+								tk1_2p5_OS.push_back(candTk);
+							}
+							if (dR2 < 0.5){
+								tk2_2p5_OS.push_back(candTk);
+							}
+						}					
+					}
+				} // End of track selection
+			} // End of track loop
 
-		// Can now deal with signal or sideband regions
+			// SIGNAL SELECTION
+			if (tk1_1.size() == 1 && tk2_1.size() == 1 
+			&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) {
+				
+				TLorentzVector track1Mom=tk1_2p5_OS[0]->P4();
+				TLorentzVector track2Mom=tk2_2p5_OS[0]->P4();
 
-		// SIGNAL SELECTION
-		if (tk1.size() == 1 and tk2.size() == 1) {
-			double m1 = (mu1Mom+tk1[0]->P4()).M();
-			double m2 = (mu2Mom+tk2[0]->P4()).M();
-			if(m2 < 1.)
-				histM1_0to1->Fill(m1);
-			else if (m2 < 2.)
-				histM1_1to2->Fill(m1);
-			else if (m2 < 3.)
-				histM1_2to3->Fill(m1);
-			else
-				histM1_3toInf->Fill(m1);
-		}
+				double m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+				double m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
-		// if (tk1.size() == 1 and tk2.size() == 1) {
+				histM1->Fill(m1);
+				histM2->Fill(m2);
 
-		// }
+				if(m2 < 1.)
+					histM1_0to1->Fill(m1);
+				else if (m2 < 2.)
+					histM1_1to2->Fill(m1);
+				else if (m2 < 3.)
+					histM1_2to3->Fill(m1);
+				else
+					histM1_3toInf->Fill(m1);
+			}
 
-		tk1.clear();
-		tk2.clear();
+			// SIDEBAND REGION
+			// one muon has 1 tk > 2.5 (OS), other has 2 or 3 ( 1 tk => "mu1", 2/3 tk => "mu2")
+			// so NOT pT ordered (although you could do that by eliminating the else if ... bit)
+			if (tk1_1.size() == 1 && (tk2_1.size() == 2 || tk2_1.size() == 3)
+				&& tk1_2p5_OS.size() == 1 && (tk2_2p5.size() == 2 || tk2_2p5.size() == 3)){
+				
+				// mu1Mom has 1 tk, mu2Mom has 2/3 tks, stay as "mu1" and "mu2"
+				double m1 = (mu1Mom+tk1_2p5[0]->P4()).M();
+				double m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
+				if(m2 < 1.)
+					histM1_side_0to1->Fill(m1);
+				else if (m2 < 2.)
+					histM1_side_1to2->Fill(m1);
+				else if (m2 < 3.)
+					histM1_side_2to3->Fill(m1);
+				else
+					histM1_3toInf->Fill(m1);
+			} else if (tk2_1.size() == 1 && (tk1_1.size() == 2 || tk1_1.size() == 3)
+				&& tk2_2p5_OS.size() == 1 && (tk1_2p5.size() == 2 || tk1_2p5.size() == 3)){
+
+				// mu1Mom has 2/3 tks, mu2Mom has 1 tks, so m1 uses mu2Mom & v.v.
+				double m1 = (mu2Mom+tk2_2p5[0]->P4()).M();
+				double m2 = (mu1Mom+tk1_2p5[0]->P4()).M();
+				if(m2 < 1.)
+					histM1_side_0to1->Fill(m1);
+				else if (m2 < 2.)
+					histM1_side_1to2->Fill(m1);
+				else if (m2 < 3.)
+					histM1_side_2to3->Fill(m1);
+				else
+					histM1_side_3toInf->Fill(m1);
+			}
+
+		} // end of muon selection
+		
 	} // end of event loop
 
-
 	TCanvas c;
-	std::string name("");
 	std::string app("");
 	if (doSignal) {
-		// name = "Signal_";
-		name = "Signal_1prong_";
-		// name = "Signal_3prong_";
-		app = "_sig";
+		app = "sig";
 	} else {
-		app = "_bg";
-		if (doMu)
-			name = "QCDb_mu_";
-		else
-			name = "QCDb_";
+		app = "bg";
 	}
 	if (swapMuRandomly)
 		app += "_muRand";
 	
+	// Get directory that input file was in - put plots in there
+	std::string fullpath = chain.GetFile()->GetDirectory("")->GetName();
+	std::vector<std::string> elems;
+    split(fullpath, '/', elems);
+    std::string directory = elems[0];
+
+	// Get Delphes file config used - last part of directory name
+	std::vector<std::string> elems2;
+    split(directory, '_', elems2);
+	std::string delph = elems2[elems2.size()-1];
+
 	// app += "_samePtEta";
 
-	histM1_0to1->Scale(1./histM1_0to1->Integral());
+	// Mass plots
+	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
+	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
+
+	THStack histM1_M2("hM1_M2","m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal selection;m(#mu_{1}-tk) [GeV]; A.U.");
 	histM1_0to1->SetLineColor(kBlack);
-	histM1_0to1->Draw("HISTE");
+	if (histM1_0to1->Integral() != 0)
+		histM1_0to1->Scale(1./histM1_0to1->Integral());
+	histM1_M2.Add(histM1_0to1);
 	
-	histM1_1to2->Scale(1./histM1_1to2->Integral());
 	histM1_1to2->SetLineColor(kRed);
-	histM1_1to2->Draw("HISTESAME");
-	
-	histM1_2to3->Scale(1./histM1_2to3->Integral());
+	if (histM1_1to2->Integral() != 0)
+		histM1_1to2->Scale(1./histM1_1to2->Integral());
+	histM1_M2.Add(histM1_1to2);
+
 	histM1_2to3->SetLineColor(kGreen);
-	histM1_2to3->Draw("HISTESAME");
-	
-	histM1_3toInf->Scale(1./histM1_3toInf->Integral());
+	if (histM1_2to3->Integral() != 0)
+		histM1_2to3->Scale(1./histM1_2to3->Integral());
+	histM1_M2.Add(histM1_2to3);
+
 	histM1_3toInf->SetLineColor(kBlue);
-	histM1_3toInf->Draw("HISTESAME");
+	if (histM1_3toInf->Integral() != 0)
+		histM1_3toInf->Scale(1./histM1_3toInf->Integral());
+	histM1_M2.Add(histM1_3toInf);
+	histM1_M2.Draw("nostack,HISTE");
 
 	TLegend leg(0.7,0.7,0.9,0.9);
 	leg.AddEntry(histM1_0to1,"m_{2} = 0-1 GeV","l");
 	leg.AddEntry(histM1_1to2,"m_{2} = 1-2 GeV","l");
 	leg.AddEntry(histM1_2to3,"m_{2} = 2-3 GeV","l");
 	leg.AddEntry(histM1_3toInf,"m_{2} > 3 GeV","l");
-	leg.SetFillColor(kWhite); //wtf is this not the default? moronic
 	leg.Draw();
-	c.SaveAs((name+"bare/M1"+app+".pdf").c_str());
-	
-	// histM1_truth_0to1->Scale(1./histM1_truth_0to1->Integral());
-	// histM1_truth_0to1->SetLineColor(kBlack);
-	// histM1_truth_0to1->Draw("HISTE");
-	
-	// histM1_truth_1to2->Scale(1./histM1_truth_1to2->Integral());
-	// histM1_truth_1to2->SetLineColor(kRed);
-	// histM1_truth_1to2->Draw("HISTESAME");
-	
-	// histM1_truth_2to3->Scale(1./histM1_truth_2to3->Integral());
-	// histM1_truth_2to3->SetLineColor(kGreen);
-	// histM1_truth_2to3->Draw("HISTESAME");
-	
-	// histM1_truth_3toInf->Scale(1./histM1_truth_3toInf->Integral());
-	// histM1_truth_3toInf->SetLineColor(kBlue);
-	// histM1_truth_3toInf->Draw("HISTESAME");
+	c.SaveAs((directory+"/M1_M2_"+delph+"_"+app+".pdf").c_str());
 
-	// leg.Draw();
-	// c.SaveAs((name+"cleanTk/M1_truth_clean"+app+".pdf").c_str());
+	if(doSignal){
+		THStack histM1_truth_M2("hM1_M2_truth","m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.");
+		histM1_truth_0to1->SetLineColor(kBlack);
+		if (histM1_truth_0to1->Integral() != 0) 
+			histM1_truth_0to1->Scale(1./histM1_truth_0to1->Integral());
+		histM1_truth_M2.Add(histM1_truth_0to1);
+
+		histM1_truth_1to2->SetLineColor(kRed);
+		if (histM1_truth_1to2->Integral() != 0)	
+			histM1_truth_1to2->Scale(1./histM1_truth_1to2->Integral());
+		histM1_truth_M2.Add(histM1_truth_1to2);
+
+		histM1_truth_2to3->SetLineColor(kGreen);
+		if (histM1_truth_2to3->Integral() != 0)	
+			histM1_truth_2to3->Scale(1./histM1_truth_2to3->Integral());
+		histM1_truth_M2.Add(histM1_truth_2to3);
+
+		histM1_truth_3toInf->SetLineColor(kBlue);
+		if (histM1_truth_3toInf->Integral() != 0)
+			histM1_truth_3toInf->Scale(1./histM1_truth_3toInf->Integral());
+		histM1_truth_M2.Add(histM1_truth_3toInf);
+		histM1_truth_M2.Draw("nostack,HISTE");
+
+		leg.Draw();
+		c.SaveAs((directory+"/M1_M2_truth_"+delph+"_"+app+".pdf").c_str());
+	}
+
+	// THStack histM1_side_M2("hM1_M2_side","m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region;m(#mu_{1}-tk) [GeV]; A.U.");
+	// histM1_side_0to1->SetLineColor(kBlack);
+	// if (histM1_side_0to1->Integral() != 0)
+	// 	histM1_side_0to1->Scale(1./histM1_side_0to1->Integral());
+	// histM1_side_M2.Add(histM1_side_0to1);
 	
-	// TFile* outFile = TFile::Open((name+"bare/output"+app+".root").c_str(),"RECREATE");
+	// histM1_side_1to2->SetLineColor(kRed);
+	// if (histM1_side_1to2->Integral() != 0)
+	// 	histM1_side_1to2->Scale(1./histM1_side_1to2->Integral());
+	// histM1_side_M2.Add(histM1_side_1to2);
+
+	// histM1_side_2to3->SetLineColor(kGreen);
+	// if (histM1_side_2to3->Integral() != 0)
+	// 	histM1_side_2to3->Scale(1./histM1_side_2to3->Integral());
+	// histM1_side_M2.Add(histM1_side_2to3);
+
+	// histM1_side_3toInf->SetLineColor(kBlue);
+	// if (histM1_side_3toInf->Integral() != 0)
+	// 	histM1_side_3toInf->Scale(1./histM1_side_3toInf->Integral());
+	// histM1_side_M2.Add(histM1_side_3toInf);
+	// histM1_side_M2.Draw("nostack,HISTE");
+	// leg.Draw();
+	// c.SaveAs((directory+"/M1_M2_side_"+delph+"_"+app+".pdf").c_str());
+
+	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, directory, "M1_M2_side", app);
+
+	// TFile* outFile = TFile::Open((name+delph+"/output"+app+".root").c_str(),"RECREATE");
 
 	// histNMu->Write("",TObject::kOverwrite);
 	// histMu1Pt->Write("",TObject::kOverwrite);
