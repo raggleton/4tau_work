@@ -364,26 +364,26 @@ void massPlots()
 	//////////////////////
 	// Plots for testing invariant mass correlation
 	double massBins[6]           = {0,1,2,3,4,10};
-	TH1D *histM1                 = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}", 5, massBins);
-	TH1D *histM2                 = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}", 5, massBins);
+	TH1D *histM1              = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}", 5, massBins);
+	TH1D *histM2              = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}", 5, massBins);
 
 	// MC truth - use actual mu-tk pairs from tau
-	TH1D *histM1_truth_0to1      = new TH1D("hM1_truth_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_1to2      = new TH1D("hM1_truth_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_2to3      = new TH1D("hM1_truth_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_3toInf    = new TH1D("hM1_truth_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_0to1   = new TH1D("hM1_truth_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_1to2   = new TH1D("hM1_truth_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_2to3   = new TH1D("hM1_truth_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_3toInf = new TH1D("hM1_truth_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 	
 	// actual dist using signal selection
-	TH1D *histM1_0to1            = new TH1D("hM1_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_1to2            = new TH1D("hM1_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_2to3            = new TH1D("hM1_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_3toInf          = new TH1D("hM1_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_0to1         = new TH1D("hM1_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_1to2         = new TH1D("hM1_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_2to3         = new TH1D("hM1_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_3toInf       = new TH1D("hM1_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 
 	// actual dist using sideband selection
-	TH1D *histM1_side_0to1       = new TH1D("hM1_side_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_side_1to2       = new TH1D("hM1_side_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_side_2to3       = new TH1D("hM1_side_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_side_3toInf     = new TH1D("hM1_side_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_side_0to1    = new TH1D("hM1_side_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_side_1to2    = new TH1D("hM1_side_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_side_2to3    = new TH1D("hM1_side_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_side_3toInf  = new TH1D("hM1_side_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 
 	int nMu(0);
 	int n1(0), n2(0), nMuPass(0);
@@ -702,88 +702,13 @@ void massPlots()
 	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
 	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
 
-	THStack histM1_M2("hM1_M2","m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal selection;m(#mu_{1}-tk) [GeV]; A.U.");
-	histM1_0to1->SetLineColor(kBlack);
-	if (histM1_0to1->Integral() != 0)
-		histM1_0to1->Scale(1./histM1_0to1->Integral());
-	histM1_M2.Add(histM1_0to1);
-	
-	histM1_1to2->SetLineColor(kRed);
-	if (histM1_1to2->Integral() != 0)
-		histM1_1to2->Scale(1./histM1_1to2->Integral());
-	histM1_M2.Add(histM1_1to2);
-
-	histM1_2to3->SetLineColor(kGreen);
-	if (histM1_2to3->Integral() != 0)
-		histM1_2to3->Scale(1./histM1_2to3->Integral());
-	histM1_M2.Add(histM1_2to3);
-
-	histM1_3toInf->SetLineColor(kBlue);
-	if (histM1_3toInf->Integral() != 0)
-		histM1_3toInf->Scale(1./histM1_3toInf->Integral());
-	histM1_M2.Add(histM1_3toInf);
-	histM1_M2.Draw("nostack,HISTE");
-
-	TLegend leg(0.7,0.7,0.9,0.9);
-	leg.AddEntry(histM1_0to1,"m_{2} = 0-1 GeV","l");
-	leg.AddEntry(histM1_1to2,"m_{2} = 1-2 GeV","l");
-	leg.AddEntry(histM1_2to3,"m_{2} = 2-3 GeV","l");
-	leg.AddEntry(histM1_3toInf,"m_{2} > 3 GeV","l");
-	leg.Draw();
-	c.SaveAs((directory+"/M1_M2_"+delph+"_"+app+".pdf").c_str());
-
-	if(doSignal){
-		THStack histM1_truth_M2("hM1_M2_truth","m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.");
-		histM1_truth_0to1->SetLineColor(kBlack);
-		if (histM1_truth_0to1->Integral() != 0) 
-			histM1_truth_0to1->Scale(1./histM1_truth_0to1->Integral());
-		histM1_truth_M2.Add(histM1_truth_0to1);
-
-		histM1_truth_1to2->SetLineColor(kRed);
-		if (histM1_truth_1to2->Integral() != 0)	
-			histM1_truth_1to2->Scale(1./histM1_truth_1to2->Integral());
-		histM1_truth_M2.Add(histM1_truth_1to2);
-
-		histM1_truth_2to3->SetLineColor(kGreen);
-		if (histM1_truth_2to3->Integral() != 0)	
-			histM1_truth_2to3->Scale(1./histM1_truth_2to3->Integral());
-		histM1_truth_M2.Add(histM1_truth_2to3);
-
-		histM1_truth_3toInf->SetLineColor(kBlue);
-		if (histM1_truth_3toInf->Integral() != 0)
-			histM1_truth_3toInf->Scale(1./histM1_truth_3toInf->Integral());
-		histM1_truth_M2.Add(histM1_truth_3toInf);
-		histM1_truth_M2.Draw("nostack,HISTE");
-
-		leg.Draw();
-		c.SaveAs((directory+"/M1_M2_truth_"+delph+"_"+app+".pdf").c_str());
-	}
-
-	// THStack histM1_side_M2("hM1_M2_side","m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region;m(#mu_{1}-tk) [GeV]; A.U.");
-	// histM1_side_0to1->SetLineColor(kBlack);
-	// if (histM1_side_0to1->Integral() != 0)
-	// 	histM1_side_0to1->Scale(1./histM1_side_0to1->Integral());
-	// histM1_side_M2.Add(histM1_side_0to1);
-	
-	// histM1_side_1to2->SetLineColor(kRed);
-	// if (histM1_side_1to2->Integral() != 0)
-	// 	histM1_side_1to2->Scale(1./histM1_side_1to2->Integral());
-	// histM1_side_M2.Add(histM1_side_1to2);
-
-	// histM1_side_2to3->SetLineColor(kGreen);
-	// if (histM1_side_2to3->Integral() != 0)
-	// 	histM1_side_2to3->Scale(1./histM1_side_2to3->Integral());
-	// histM1_side_M2.Add(histM1_side_2to3);
-
-	// histM1_side_3toInf->SetLineColor(kBlue);
-	// if (histM1_side_3toInf->Integral() != 0)
-	// 	histM1_side_3toInf->Scale(1./histM1_side_3toInf->Integral());
-	// histM1_side_M2.Add(histM1_side_3toInf);
-	// histM1_side_M2.Draw("nostack,HISTE");
-	// leg.Draw();
-	// c.SaveAs((directory+"/M1_M2_side_"+delph+"_"+app+".pdf").c_str());
+	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, directory, "M1_M2", app);
 
 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, directory, "M1_M2_side", app);
+
+	if(doSignal){
+		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, directory, "M1_M2_truth", app);
+	}
 
 	// TFile* outFile = TFile::Open((name+delph+"/output"+app+".root").c_str(),"RECREATE");
 
