@@ -213,9 +213,9 @@ void testScript_cleanTk()
 		// chain.Add("GG_H_aa.root");
 		// chain.Add("sig_test.root");
 		// chain.Add("Signal_cleanTk/signal_clean.root");
-		chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
+		// chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
 		// chain.Add("Signal_1prong_bare/signal_1prong_bare.root");
-		// chain.Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
+		chain.Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
 		// chain.Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
 		cout << "Doing signal" << endl;
 	} else {
@@ -856,8 +856,8 @@ void testScript_cleanTk()
 	std::string app("");
 	if (doSignal) {
 		// name = "Signal_";
-		name = "Signal_1prong_";
-		// name = "Signal_1prong_new_";
+		// name = "Signal_1prong_";
+		name = "Signal_1prong_new_";
 		// name = "Signal_3prong_";
 		app = "_sig";
 	} else {
@@ -872,8 +872,8 @@ void testScript_cleanTk()
 	if (swapMuRandomly)
 		app += "_muRand";
 	
-	std::string delph="cleanTk"; // which Delphes config was used: bare, CMS, cleanTk
-	// std::string delph="bare"; // which Delphes config was used: bare, CMS, cleanTk
+	// std::string delph="cleanTk"; // which Delphes config was used: bare, CMS, cleanTk
+	std::string delph="bare"; // which Delphes config was used: bare, CMS, cleanTk
 	// app += "_samePtEta";
 
 	// histNMu->Draw("HISTE");
@@ -1003,48 +1003,64 @@ void testScript_cleanTk()
 	histRand->Draw("HISTE");
 	c.SaveAs((name+delph+"/RandTest"+app+".pdf").c_str());
 
-	histM1_truth_0to1->Scale(1./histM1_truth_0to1->Integral());
-	histM1_truth_0to1->SetLineColor(kBlack);
-	histM1_truth_0to1->Draw("HISTE");
+	// Mass plots
+	THStack histM1_M2("hM1_M2","m(tk-#mu_{1}) in bins of m(tk-#mu_{2});m(tk-#mu_{1}) [GeV]; A.U.");
+	histM1_0to1->SetLineColor(kBlack);
+	if (histM1_0to1->Integral() != 0)
+		histM1_0to1->Scale(1./histM1_0to1->Integral());
+	histM1_M2.Add(histM1_0to1);
 	
-	histM1_truth_1to2->Scale(1./histM1_truth_1to2->Integral());
-	histM1_truth_1to2->SetLineColor(kRed);
-	histM1_truth_1to2->Draw("HISTESAME");
-	
-	histM1_truth_2to3->Scale(1./histM1_truth_2to3->Integral());
-	histM1_truth_2to3->SetLineColor(kGreen);
-	histM1_truth_2to3->Draw("HISTESAME");
-	
-	histM1_truth_3toInf->Scale(1./histM1_truth_3toInf->Integral());
-	histM1_truth_3toInf->SetLineColor(kBlue);
-	histM1_truth_3toInf->Draw("HISTESAME");
+	histM1_1to2->SetLineColor(kRed);
+	if (histM1_1to2->Integral() != 0)
+		histM1_1to2->Scale(1./histM1_1to2->Integral());
+	histM1_M2.Add(histM1_1to2);
+
+	histM1_2to3->SetLineColor(kGreen);
+	if (histM1_2to3->Integral() != 0)
+		histM1_2to3->Scale(1./histM1_2to3->Integral());
+	histM1_M2.Add(histM1_2to3);
+
+	histM1_3toInf->SetLineColor(kBlue);
+	if (histM1_3toInf->Integral() != 0)
+		histM1_3toInf->Scale(1./histM1_3toInf->Integral());
+	histM1_M2.Add(histM1_3toInf);
+	histM1_M2.Draw("nostack,HISTE");
 
 	TLegend leg(0.7,0.7,0.9,0.9);
-	leg.AddEntry(histM1_truth_0to1,"m_{2} = 0-1 GeV","l");
-	leg.AddEntry(histM1_truth_1to2,"m_{2} = 1-2 GeV","l");
-	leg.AddEntry(histM1_truth_2to3,"m_{2} = 2-3 GeV","l");
-	leg.AddEntry(histM1_truth_3toInf,"m_{2} > 3 GeV","l");
-	leg.Draw();
-	c.SaveAs((name+delph+"/M1_M2_truth_"+delph+app+".pdf").c_str());
-
-	histM1_0to1->Scale(1./histM1_0to1->Integral());
-	histM1_0to1->SetLineColor(kBlack);
-	histM1_0to1->Draw("HISTE");
-	
-	histM1_1to2->Scale(1./histM1_1to2->Integral());
-	histM1_1to2->SetLineColor(kRed);
-	histM1_1to2->Draw("HISTESAME");
-	
-	histM1_2to3->Scale(1./histM1_2to3->Integral());
-	histM1_2to3->SetLineColor(kGreen);
-	histM1_2to3->Draw("HISTESAME");
-	
-	histM1_3toInf->Scale(1./histM1_3toInf->Integral());
-	histM1_3toInf->SetLineColor(kBlue);
-	histM1_3toInf->Draw("HISTESAME");
-
+	leg.AddEntry(histM1_0to1,"m_{2} = 0-1 GeV","l");
+	leg.AddEntry(histM1_1to2,"m_{2} = 1-2 GeV","l");
+	leg.AddEntry(histM1_2to3,"m_{2} = 2-3 GeV","l");
+	leg.AddEntry(histM1_3toInf,"m_{2} > 3 GeV","l");
 	leg.Draw();
 	c.SaveAs((name+delph+"/M1_M2_"+delph+app+".pdf").c_str());
+
+	if(doSignal){
+		THStack histM1_truth_M2("hM1_M2","m(tk-#mu_{1}) in bins of m(tk-#mu_{2}) - MC truth;m(tk-#mu_{1}) [GeV]; A.U.");
+		histM1_truth_0to1->SetLineColor(kBlack);
+		if (histM1_truth_0to1->Integral() != 0) 
+			histM1_truth_0to1->Scale(1./histM1_truth_0to1->Integral());
+		histM1_truth_M2.Add(histM1_truth_0to1);
+
+		histM1_truth_1to2->SetLineColor(kRed);
+		if (histM1_truth_1to2->Integral() != 0)	
+			histM1_truth_1to2->Scale(1./histM1_truth_1to2->Integral());
+		histM1_truth_M2.Add(histM1_truth_1to2);
+
+		histM1_truth_2to3->SetLineColor(kGreen);
+		if (histM1_truth_2to3->Integral() != 0)	
+			histM1_truth_2to3->Scale(1./histM1_truth_2to3->Integral());
+		histM1_truth_M2.Add(histM1_truth_2to3);
+
+		histM1_truth_3toInf->SetLineColor(kBlue);
+		if (histM1_truth_3toInf->Integral() != 0)
+			histM1_truth_3toInf->Scale(1./histM1_truth_3toInf->Integral());
+		histM1_truth_M2.Add(histM1_truth_3toInf);
+		histM1_truth_M2.Draw("nostack,HISTE");
+
+		leg.Draw();
+		c.SaveAs((name+delph+"/M1_M2_truth_"+delph+app+".pdf").c_str());
+	}
+
 
 	histM1->Draw("HISTE");
 	c.SaveAs((name+delph+"/M1_"+delph+app+".pdf").c_str());
