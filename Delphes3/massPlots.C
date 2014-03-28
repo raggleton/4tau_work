@@ -210,7 +210,7 @@ void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std:
 // app = appendage eg muRand, sig
 // 
 // saves file as directory/filename_<delphes setup from directory>_app.pdf
-void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* histM1_2to3, TH1* histM1_3toInf, std::string directory, std::string filename, std::string app){
+void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* histM1_2to3, TH1* histM1_3toInf, std::string filename, std::string directory, std::string app){
 	TCanvas c;
 	THStack histM1_M2("hM1_M2",title.c_str());
 	histM1_0to1->SetLineColor(kBlack);
@@ -702,12 +702,12 @@ void massPlots()
 	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
 	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
 
-	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, directory, "M1_M2", app);
+	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
 
-	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, directory, "M1_M2_side", app);
+	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, "M1_M2_side", directory, app);
 
 	if(doSignal){
-		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, directory, "M1_M2_truth", app);
+		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
 	}
 
 	// TFile* outFile = TFile::Open((name+delph+"/output"+app+".root").c_str(),"RECREATE");
