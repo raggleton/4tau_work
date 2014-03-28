@@ -542,6 +542,11 @@ void massPlots()
 					else
 						histM1_truth_3toInf->Fill(m1);
 				}
+
+				if (!muTruth1) delete muTruth1;
+				if (!trackTruth1) delete trackTruth1;
+				if (!muTruth2) delete muTruth2;
+				if (!trackTruth2) delete trackTruth2;
 			} // end if(charged1a...) 
 		} // end if(doSignal)
 

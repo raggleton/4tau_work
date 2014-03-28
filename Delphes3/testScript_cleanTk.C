@@ -591,7 +591,13 @@ void testScript_cleanTk()
 					histDRSysTruth->Fill(sys1.DeltaR(sys2));
 					histDEtaVsDPhiSysTruth->Fill(fabs(sys1.Eta() - sys2.Eta()),fabs(sys1.DeltaPhi(sys2)));
 
+
 				}
+
+				if (!muTruth1) delete muTruth1;
+				if (!trackTruth1) delete trackTruth1;
+				if (!muTruth2) delete muTruth2;
+				if (!trackTruth2) delete trackTruth2;
 			} // end if(charged1a...) 
 		} // end if(doSignal)
 
