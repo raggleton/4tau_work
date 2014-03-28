@@ -42,39 +42,38 @@ bool sortTracksByPT(Track* a, Track* b){
 }
 
 // From the daughters of 2 taus, decide which is track and which is mu
-bool assignMuonAndTrack(GenParticle *mu, GenParticle *tk, GenParticle *a, GenParticle *b){
+bool assignMuonAndTrack(GenParticle* &mu, GenParticle* &tk, GenParticle &a, GenParticle &b){
 	tk = 0;
 	mu = 0;
 
-	bool aIsMu = fabs(a->PID) == 13;
-	bool bIsMu = fabs(b->PID) == 13;
+	bool aIsMu = fabs(a.PID) == 13;
+	bool bIsMu = fabs(b.PID) == 13;
 
 	// Now look at both a and b
 	if (aIsMu && !bIsMu) {
-		mu = a;
-		tk = b;
+		mu = &a;
+		tk = &b;
 		return true;
 	}
 
 	if (!aIsMu && bIsMu) {
-		mu = b;
-		tk = a;
+		mu = &b;
+		tk = &a;
 		return true;
 	}
 
 	// the muon is the mu with the higest pT, the other mu becomes a track
 	if (aIsMu && bIsMu){
-		if (a->PT > b->PT) {
-			mu = a;
-			tk = b;
+		if (a.PT > b.PT) {
+			mu = &a;
+			tk = &b;
 			return true;
 		} else {
-			mu = b;
-			tk = a;
+			mu = &b;
+			tk = &a;
 			return true;
 		}
 	}
-
 	// If it gets to here, then neither a nor b is a muon - trouble!
 	return false;
 }
@@ -223,45 +222,45 @@ void massPlots()
 		if (doMu){
 			cout << "Doing QCDb_mu" << endl;
 			chain.Add("QCDb_mu_cleanTk/QCDb_mu_1.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_2.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_3.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_4.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_5.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_6.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_7.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_8.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_9.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_10.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_11.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_12.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_13.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_14.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_15.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_16.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_17.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_18.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_19.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_20.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_21.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_22.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_23.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_24.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_25.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_26.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_27.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_28.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_29.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_30.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_31.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_32.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_33.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_34.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_35.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_36.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_37.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_38.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_39.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_40.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_2.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_3.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_4.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_5.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_6.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_7.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_8.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_9.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_10.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_11.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_12.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_13.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_14.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_15.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_16.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_17.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_18.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_19.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_20.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_21.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_22.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_23.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_24.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_25.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_26.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_27.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_28.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_29.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_30.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_31.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_32.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_33.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_34.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_35.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_36.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_37.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_38.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_39.root");
+			chain.Add("QCDb_mu_cleanTk/QCDb_mu_40.root");
 		} else {
 			cout << "Doing QCDb" << endl;
 			chain.Add("QCDb_cleanTk/QCDb_10.root");
@@ -288,11 +287,23 @@ void massPlots()
 	TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
-	// Book histograms
-	// TH1D *histNTracks1OS       = new TH1D("hNTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
-	// TH1D *histNTracks1         = new TH1D("hNTracks1" ,"Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
-	// TH1D *histNTracks2OS       = new TH1D("hNTracks2OS" ,"Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
-	// TH1D *histNTracks2         = new TH1D("hNTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
+	//////////////////////
+	// Book histograms //
+	//////////////////////
+
+	// Plots for testing invariant mass correlation
+	double massBins[6]         = {0,1,2,3,4,10};
+	// MC truth - use actual mu-tk pairs from tau (for signal mc only)
+	TH1D *histM1_truth_0to1    = new TH1D("hM1_truth_0to1","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 0-1 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_1to2    = new TH1D("hM1_truth_1to2","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 1-2 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_2to3    = new TH1D("hM1_truth_2to3","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 2-3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_truth_3toInf  = new TH1D("hM1_truth_3toInf","m(tk-#mu_{1}) for m(tk-#mu_{2}) > 3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	
+	// actual dist using selection (all cuts)
+	TH1D *histM1_0to1          = new TH1D("hM1_0to1","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 0-1 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_1to2          = new TH1D("hM1_1to2","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 1-2 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_2to3          = new TH1D("hM1_2to3","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 2-3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_3toInf        = new TH1D("hM1_3toInf","m(tk-#mu_{1}) for m(tk-#mu_{2}) > 3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
 
 	// Loop over all events
 	Long64_t numberOfEntries = treeReader->GetEntries();
@@ -360,14 +371,14 @@ void massPlots()
 			if (charged1a && charged1b && charged2a && charged2b){
 				
 				// To hold mu and tracks from each tau
-				GenParticle* muTruth1;
-				GenParticle* trackTruth1;
-				GenParticle* muTruth2;
-				GenParticle* trackTruth2;
+				GenParticle* muTruth1(0);
+				GenParticle* trackTruth1(0);
+				GenParticle* muTruth2(0);
+				GenParticle* trackTruth2(0);
 
 				// Assign charged products to be mu or track
-				bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, charged1a, charged1b);				
-				bool truth2HasMu = assignMuonAndTrack(muTruth2, trackTruth2, charged2a, charged2b);
+				bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, *charged1a, *charged1b);				
+				bool truth2HasMu = assignMuonAndTrack(muTruth2, trackTruth2, *charged2a, *charged2b);
 
 				// NOTE: muons are NOT pT ordered
 
@@ -493,21 +504,40 @@ void massPlots()
 				double dR1 = (candTk->P4()).DeltaR(mu1Mom);
 				double dR2 = (candTk->P4()).DeltaR(mu2Mom);
 
-				if (dR1 < 0.5){
-					tk1.push_back(candTk);
+				if ((candTk->Charge) * (mu1->Charge) < 0) {
+					if (dR1 < 0.5){
+						tk1.push_back(candTk);
+					}
+					if (dR2 < 0.5){
+						tk2.push_back(candTk);
+					}
 				}
-				if (dR2 < 0.5){
-					tk2.push_back(candTk);
-				}
-
 			} // End of track selection
 		} // End of track loop
 
-		// Now pT order the track collections
+		// Now pT order the track collections for each muon
 		std::sort(tk1.begin(), tk1.end(), sortTracksByPT);
 		std::sort(tk2.begin(), tk2.end(), sortTracksByPT);
 
-		// Can now deal with signal or sidebang regions
+		// Can now deal with signal or sideband regions
+
+		// SIGNAL SELECTION
+		if (tk1.size() == 1 and tk2.size() == 1) {
+			double m1 = (mu1Mom+tk1[0]->P4()).M();
+			double m2 = (mu2Mom+tk2[0]->P4()).M();
+			if(m2 < 1.)
+				histM1_0to1->Fill(m1);
+			else if (m2 < 2.)
+				histM1_1to2->Fill(m1);
+			else if (m2 < 3.)
+				histM1_2to3->Fill(m1);
+			else
+				histM1_3toInf->Fill(m1);
+		}
+
+		// if (tk1.size() == 1 and tk2.size() == 1) {
+
+		// }
 
 		tk1.clear();
 		tk2.clear();
@@ -534,6 +564,31 @@ void massPlots()
 	
 	// app += "_samePtEta";
 
+	histM1_0to1->Scale(1./histM1_0to1->Integral());
+	histM1_0to1->SetLineColor(kBlack);
+	histM1_0to1->Draw("HISTE");
+	
+	histM1_1to2->Scale(1./histM1_1to2->Integral());
+	histM1_1to2->SetLineColor(kRed);
+	histM1_1to2->Draw("HISTESAME");
+	
+	histM1_2to3->Scale(1./histM1_2to3->Integral());
+	histM1_2to3->SetLineColor(kGreen);
+	histM1_2to3->Draw("HISTESAME");
+	
+	histM1_3toInf->Scale(1./histM1_3toInf->Integral());
+	histM1_3toInf->SetLineColor(kBlue);
+	histM1_3toInf->Draw("HISTESAME");
+
+	TLegend leg(0.7,0.7,0.9,0.9);
+	leg.AddEntry(histM1_0to1,"m_{2} = 0-1 GeV","l");
+	leg.AddEntry(histM1_1to2,"m_{2} = 1-2 GeV","l");
+	leg.AddEntry(histM1_2to3,"m_{2} = 2-3 GeV","l");
+	leg.AddEntry(histM1_3toInf,"m_{2} > 3 GeV","l");
+	leg.SetFillColor(kWhite); //wtf is this not the default? moronic
+	leg.Draw();
+	c.SaveAs((name+"bare/M1"+app+".pdf").c_str());
+	
 	// histM1_truth_0to1->Scale(1./histM1_truth_0to1->Integral());
 	// histM1_truth_0to1->SetLineColor(kBlack);
 	// histM1_truth_0to1->Draw("HISTE");
@@ -550,34 +605,10 @@ void massPlots()
 	// histM1_truth_3toInf->SetLineColor(kBlue);
 	// histM1_truth_3toInf->Draw("HISTESAME");
 
-	// TLegend leg(0.7,0.7,0.9,0.9);
-	// leg.AddEntry(histM1_truth_0to1,"m_{2} = 0-1 GeV","l");
-	// leg.AddEntry(histM1_truth_1to2,"m_{2} = 1-2 GeV","l");
-	// leg.AddEntry(histM1_truth_2to3,"m_{2} = 2-3 GeV","l");
-	// leg.AddEntry(histM1_truth_3toInf,"m_{2} > 3 GeV","l");
 	// leg.Draw();
 	// c.SaveAs((name+"cleanTk/M1_truth_clean"+app+".pdf").c_str());
-
-	// histM1_0to1->Scale(1./histM1_0to1->Integral());
-	// histM1_0to1->SetLineColor(kBlack);
-	// histM1_0to1->Draw("HISTE");
 	
-	// histM1_1to2->Scale(1./histM1_1to2->Integral());
-	// histM1_1to2->SetLineColor(kRed);
-	// histM1_1to2->Draw("HISTESAME");
-	
-	// histM1_2to3->Scale(1./histM1_2to3->Integral());
-	// histM1_2to3->SetLineColor(kGreen);
-	// histM1_2to3->Draw("HISTESAME");
-	
-	// histM1_3toInf->Scale(1./histM1_3toInf->Integral());
-	// histM1_3toInf->SetLineColor(kBlue);
-	// histM1_3toInf->Draw("HISTESAME");
-
-	// leg.Draw();
-	// c.SaveAs((name+"cleanTk/M1_clean"+app+".pdf").c_str());
-	
-	// TFile* outFile = TFile::Open((name+"cleanTk/output"+app+".root").c_str(),"RECREATE");
+	// TFile* outFile = TFile::Open((name+"bare/output"+app+".root").c_str(),"RECREATE");
 
 	// histNMu->Write("",TObject::kOverwrite);
 	// histMu1Pt->Write("",TObject::kOverwrite);
