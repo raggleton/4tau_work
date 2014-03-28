@@ -1,39 +1,21 @@
 #include <vector>
 #include <algorithm>
-// #include <iostream>
-// #include <utility>
+#include <string>
+#include <sstream>
 
-// #include "TROOT.h"
-// #include "TSystem.h"
-// #include "TApplication.h"
-
-// #include "TString.h"
-
-// #include "TH2.h"
-// #include "TH1.h"
-// #include "THStack.h"
-// #include "TLegend.h"
-// #include "TPaveText.h"
-// #include "TClonesArray.h"
-// #include "TLorentzVector.h"
-// #include "TCanvas.h"
-// #include "TArc.h"
-
-// #include "classes/DelphesClasses.h"
-
-// #include "external/ExRootAnalysis/ExRootTreeReader.h"
-// #include "external/ExRootAnalysis/ExRootTreeWriter.h"
-// #include "external/ExRootAnalysis/ExRootTreeBranch.h"
-// #include "external/ExRootAnalysis/ExRootResult.h"
-// #include "external/ExRootAnalysis/ExRootUtilities.h"
-/*
-root -l examples/myScript.C\(\"QCDoutput5.root\"\)
-
-for clean tracks ie efficiency = 1, no smearing
- */
 using std::cout;
 using std::endl;
 // using namespace std;
+
+// For string splitting
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
 
 // For sorting track vectors by pT
 // Ideally we'd use the templated methods in classes/SortableObject.h ...
@@ -197,6 +179,26 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { // fr
 		return NULL;
 	}
 
+}
+
+// Draw a histogram and save it to PDF
+// h = hist to draw (TObject* to handle THStacks, which don't inherit from TH1)
+// drawOpt = options for drawing hist
+// filename = main filename (e.g. Mu1Pt)
+// directory = directory for output PDF
+// app = appendage eg muRand, sig
+// 
+// saves file as directory/filename_<delphes setup from directory>_app.pdf
+void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std::string directory, std::string app){
+	TCanvas c;
+	h->Draw(drawOpt.c_str());
+
+	std::vector<std::string> elems2;
+    split(directory, '_', elems2);
+	// cout << elems2[elems2.size()-1] << endl;
+	std::string delph = elems2[elems2.size()-1];
+	
+	c.SaveAs((directory+"/"+filename+"_"+delph+"_"+app+".pdf").c_str());
 }
 
 void basicScript()
