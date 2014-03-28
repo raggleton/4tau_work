@@ -394,11 +394,17 @@ void testScript_cleanTk()
 	TH1D *histM1_truth_2to3      = new TH1D("hM1_truth_2to3","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 2-3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
 	TH1D *histM1_truth_3toInf    = new TH1D("hM1_truth_3toInf","m(tk-#mu_{1}) for m(tk-#mu_{2}) > 3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
 	
-	// actual dist using selection
+	// actual dist using signal selection
 	TH1D *histM1_0to1            = new TH1D("hM1_0to1","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 0-1 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
 	TH1D *histM1_1to2            = new TH1D("hM1_1to2","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 1-2 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
 	TH1D *histM1_2to3            = new TH1D("hM1_2to3","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 2-3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
 	TH1D *histM1_3toInf          = new TH1D("hM1_3toInf","m(tk-#mu_{1}) for m(tk-#mu_{2}) > 3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+
+	// actual dist using sideband selection
+	TH1D *histM1_side_0to1       = new TH1D("hM1_side_0to1","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 0-1 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_side_1to2       = new TH1D("hM1_side_1to2","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 1-2 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_side_2to3       = new TH1D("hM1_side_2to3","m(tk-#mu_{1}) for m(tk-#mu_{2}) = 2-3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
+	TH1D *histM1_side_3toInf     = new TH1D("hM1_side_3toInf","m(tk-#mu_{1}) for m(tk-#mu_{2}) > 3 GeV; m(tk-#mu_{1}) [GeV]; A.U.",5,massBins);
 
 	int nMu(0);
 	int n1(0), n2(0), nMuPass(0);
@@ -741,6 +747,40 @@ void testScript_cleanTk()
 					histM1_3toInf->Fill(m1);
 			}
 
+		// SIDEBAND REGION
+		// one muon has 1 tk > 2.5 (OS), other has 2 or 3 ( 1 tk => "mu1", 2/3 tk => "mu2")
+		// so NOT pT ordered (although you could do that by eliminating the else if ... bit)
+		if (tk1_1.size() == 1 && (tk2_1.size() == 2 || tk2_1.size() == 3)
+			&& tk1_2p5_OS.size() == 1 && (tk2_2p5.size() == 2 || tk2_2p5.size() == 3)){
+			
+			// mu1Mom has 1 tk, mu2Mom has 2/3 tks, stay as "mu1" and "mu2"
+			double m1 = (mu1Mom+tk1_2p5[0]->P4()).M();
+			double m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
+			if(m2 < 1.)
+				histM1_side_0to1->Fill(m1);
+			else if (m2 < 2.)
+				histM1_side_1to2->Fill(m1);
+			else if (m2 < 3.)
+				histM1_side_2to3->Fill(m1);
+			else
+				histM1_3toInf->Fill(m1);
+		} else if (tk2_1.size() == 1 && (tk1_1.size() == 2 || tk1_1.size() == 3)
+			&& tk2_2p5_OS.size() == 1 && (tk1_2p5.size() == 2 || tk1_2p5.size() == 3)){
+
+			// mu1Mom has 2/3 tks, mu2Mom has 1 tks, so m1 uses mu2Mom & v.v.
+			double m1 = (mu2Mom+tk2_2p5[0]->P4()).M();
+			double m2 = (mu1Mom+tk1_2p5[0]->P4()).M();
+			if(m2 < 1.)
+				histM1_side_0to1->Fill(m1);
+			else if (m2 < 2.)
+				histM1_side_1to2->Fill(m1);
+			else if (m2 < 3.)
+				histM1_side_2to3->Fill(m1);
+			else
+				histM1_side_3toInf->Fill(m1);
+		}
+
+
 		} // end of muon selection
 		
 	} // end of event loop
@@ -878,7 +918,7 @@ void testScript_cleanTk()
 	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
 	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
 
-	THStack histM1_M2("hM1_M2","m(tk-#mu_{1}) in bins of m(tk-#mu_{2});m(tk-#mu_{1}) [GeV]; A.U.");
+	THStack histM1_M2("hM1_M2","m(tk-#mu_{1}) in bins of m(tk-#mu_{2}) - signal selection;m(tk-#mu_{1}) [GeV]; A.U.");
 	histM1_0to1->SetLineColor(kBlack);
 	if (histM1_0to1->Integral() != 0)
 		histM1_0to1->Scale(1./histM1_0to1->Integral());
@@ -909,7 +949,7 @@ void testScript_cleanTk()
 	c.SaveAs((directory+"/M1_M2_"+delph+"_"+app+".pdf").c_str());
 
 	if(doSignal){
-		THStack histM1_truth_M2("hM1_M2","m(tk-#mu_{1}) in bins of m(tk-#mu_{2}) - MC truth;m(tk-#mu_{1}) [GeV]; A.U.");
+		THStack histM1_truth_M2("hM1_M2_truth","m(tk-#mu_{1}) in bins of m(tk-#mu_{2}) - MC truth;m(tk-#mu_{1}) [GeV]; A.U.");
 		histM1_truth_0to1->SetLineColor(kBlack);
 		if (histM1_truth_0to1->Integral() != 0) 
 			histM1_truth_0to1->Scale(1./histM1_truth_0to1->Integral());
@@ -932,8 +972,33 @@ void testScript_cleanTk()
 		histM1_truth_M2.Draw("nostack,HISTE");
 
 		leg.Draw();
-		c.SaveAs((directory+"/M1_M2_truth_"+delph+app+".pdf").c_str());
+		c.SaveAs((directory+"/M1_M2_truth_"+delph+"_"+app+".pdf").c_str());
 	}
+
+	THStack histM1_side_M2("hM1_M2_side","m(tk-#mu_{1}) in bins of m(tk-#mu_{2}) - sideband region;m(tk-#mu_{1}) [GeV]; A.U.");
+	histM1_side_0to1->SetLineColor(kBlack);
+	if (histM1_side_0to1->Integral() != 0)
+		histM1_side_0to1->Scale(1./histM1_side_0to1->Integral());
+	histM1_side_M2.Add(histM1_side_0to1);
+	
+	histM1_side_1to2->SetLineColor(kRed);
+	if (histM1_side_1to2->Integral() != 0)
+		histM1_side_1to2->Scale(1./histM1_side_1to2->Integral());
+	histM1_side_M2.Add(histM1_side_1to2);
+
+	histM1_side_2to3->SetLineColor(kGreen);
+	if (histM1_side_2to3->Integral() != 0)
+		histM1_side_2to3->Scale(1./histM1_side_2to3->Integral());
+	histM1_side_M2.Add(histM1_side_2to3);
+
+	histM1_side_3toInf->SetLineColor(kBlue);
+	if (histM1_side_3toInf->Integral() != 0)
+		histM1_side_3toInf->Scale(1./histM1_side_3toInf->Integral());
+	histM1_side_M2.Add(histM1_side_3toInf);
+	histM1_side_M2.Draw("nostack,HISTE");
+	leg.Draw();
+	c.SaveAs((directory+"/M1_M2_side_"+delph+"_"+app+".pdf").c_str());
+
 
 	// TFile* outFile = TFile::Open((name+delph+"/output"+app+".root").c_str(),"RECREATE");
 
