@@ -295,10 +295,6 @@ void cutFlow()
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
 	// Book histograms
-	// TH1D *histNTracks1OS       = new TH1D("hNTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
-	// TH1D *histNTracks1         = new TH1D("hNTracks1" ,"Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
-	// TH1D *histNTracks2OS       = new TH1D("hNTracks2OS" ,"Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
-	// TH1D *histNTracks2         = new TH1D("hNTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
 
 	// Loop over all events
 	Long64_t numberOfEntries = treeReader->GetEntries();
@@ -569,23 +565,5 @@ void cutFlow()
 	for (unsigned a = 0; a < cutCount.size(); a++){
 		std::cout << a << ": " << cutCount[a] << std::endl;
 	}
-
-	// TCanvas c;
-	// std::string name("");
-	// std::string app("");
-	// if (doSignal) {
-	// 	// name = "Signal_";
-	// 	name = "Signal_1prong_";
-	// 	// name = "Signal_3prong_";
-	// 	app = "_sig";
-	// } else {
-	// 	app = "_bg";
-	// 	if (doMu)
-	// 		name = "QCDb_mu_";
-	// 	else
-	// 		name = "QCDb_";
-	// }
-	// if (swapMuRandomly)
-	// 	app += "_muRand";
 	
 }
