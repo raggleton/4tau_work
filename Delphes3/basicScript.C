@@ -9,12 +9,12 @@ using std::endl;
 
 // For string splitting
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
+	std::stringstream ss(s);
+	std::string item;
+	while (std::getline(ss, item, delim)) {
+		elems.push_back(item);
+	}
+	return elems;
 }
 
 // For sorting track vectors by pT
@@ -194,7 +194,7 @@ void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std:
 	h->Draw(drawOpt.c_str());
 
 	std::vector<std::string> elems2;
-    split(directory, '_', elems2);
+	split(directory, '_', elems2);
 	// cout << elems2[elems2.size()-1] << endl;
 	std::string delph = elems2[elems2.size()-1];
 	

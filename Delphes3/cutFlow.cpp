@@ -46,28 +46,28 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-  char *appName = "cutFlow";
+	char *appName = "cutFlow";
 
-  // if(argc != 2)
-  // {
-  //   cout << " Usage: " << appName << " input_file" << endl;
-  //   cout << " input_file - input file in ROOT format ('Delphes' tree)," << endl;
-  //   return 1;
-  // }
+	// if(argc != 2)
+	// {
+	//   cout << " Usage: " << appName << " input_file" << endl;
+	//   cout << " input_file - input file in ROOT format ('Delphes' tree)," << endl;
+	//   return 1;
+	// }
 
-  gROOT->SetBatch();
+	gROOT->SetBatch();
 
-  int appargc = 1;
-  char *appargv[] = {appName};
-  TApplication app(appName, &appargc, appargv);
+	int appargc = 1;
+	char *appargv[] = {appName};
+	TApplication app(appName, &appargc, appargv);
 
-  TString inputFile(argv[1]);
+	TString inputFile(argv[1]);
 
 //------------------------------------------------------------------------------
 
 // Here you call your macro's main function 
 
-  cutFlow();
+	cutFlow();
 
 //------------------------------------------------------------------------------
 

@@ -9,12 +9,12 @@ using std::endl;
 
 // For string splitting
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
+	std::stringstream ss(s);
+	std::string item;
+	while (std::getline(ss, item, delim)) {
+		elems.push_back(item);
+	}
+	return elems;
 }
 
 // For sorting track vectors by pT
@@ -196,7 +196,7 @@ void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std:
 	h->Draw(drawOpt.c_str());
 
 	std::vector<std::string> elems2;
-    split(directory, '_', elems2);
+	split(directory, '_', elems2);
 	std::string delph = elems2[elems2.size()-1];
 	
 	c.SaveAs((directory+"/"+filename+"_"+delph+"_"+app+".pdf").c_str());
@@ -242,7 +242,7 @@ void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* hi
 	leg.Draw();
 	
 	std::vector<std::string> elems2;
-    split(directory, '_', elems2);
+	split(directory, '_', elems2);
 	std::string delph = elems2[elems2.size()-1];
 	
 	c.SaveAs((directory+"/"+filename+"_"+delph+"_"+app+".pdf").c_str());
@@ -693,12 +693,12 @@ void massPlots()
 	// Get directory that input file was in - put plots in there
 	std::string fullpath = chain.GetFile()->GetDirectory("")->GetName();
 	std::vector<std::string> elems;
-    split(fullpath, '/', elems);
-    std::string directory = elems[0];
+	split(fullpath, '/', elems);
+	std::string directory = elems[0];
 
 	// Get Delphes file config used - last part of directory name
 	std::vector<std::string> elems2;
-    split(directory, '_', elems2);
+	split(directory, '_', elems2);
 	std::string delph = elems2[elems2.size()-1];
 
 	// app += "_samePtEta";
