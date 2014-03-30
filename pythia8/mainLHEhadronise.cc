@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
   int nPrintLHA  = 1;             
   int nPrintRest = 0;             
   int nAbort     = 10;
-  int nMaxEvent  = 50000;
+  int nMaxEvent  = 5000000;
   
   // Generator           
   Pythia pythia;                            
@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 
   // Initialize Les Houches Event File run.
   pythia.readString("Beams:frameType = 4"); // the beam and event information is stored in a Les Houches Event File
-  pythia.readString("Beams:LHEF = GG_H_aa_4taus_decay-single-single.lhe");   
+  pythia.readString("Beams:LHEF = GG_H_aa_8_4taus_decay_500K-single.lhe");   
   // pythia.readString("Beams:LHEF = reduced_GG_H_aa_4taus_2.lhe");   
   
   // pythia.readString("ProcessLevel:all = off");   
