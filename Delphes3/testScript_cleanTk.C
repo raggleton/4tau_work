@@ -210,9 +210,9 @@ void testScript_cleanTk()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
+	bool doSignal = false;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -343,6 +343,7 @@ void testScript_cleanTk()
 			chain.Add("QCDb_cleanTk/QCDb_9.root");
 		}
 	}
+	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
 
 	// Create object of class ExRootTreeReader
 	ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
@@ -682,6 +683,8 @@ void testScript_cleanTk()
 			std::vector<Track*> tk2_2p5_OS;
 
 			Track *candTk(0);
+			bool atLeastTk2p5 = false; // to monitor if theres a tk with pT > 2.5
+			bool atLeastTk2p5OS = false; // same but for OS tk-muon
 			for(int a = 0; a < branchTracks->GetEntries(); a++){
 				candTk = (Track*) branchTracks->At(a);
 
@@ -707,7 +710,7 @@ void testScript_cleanTk()
 
 						histNTracks1->Fill(dR1);
 						histNTracks2->Fill(dR2);
-						n2p5++;
+						atLeastTk2p5 = true;
 
 						histTroubleEtaVsPhi1->Fill(fabs(candTk->Eta - mu1Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu1Mom)));
 						histTroubleEtaVsPhi2->Fill(fabs(candTk->Eta - mu2Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu2Mom)));
@@ -721,7 +724,7 @@ void testScript_cleanTk()
 						if ((candTk->Charge) * (mu1->Charge) < 0) {
 							histNTracks1OS->Fill(dR1);
 							histNTracks2OS->Fill(dR2);
-							n2p5OS++;
+							atLeastTk2p5OS = true;
 
 							if (dR1 < 0.5){
 								tk1_2p5_OS.push_back(candTk);
@@ -733,6 +736,10 @@ void testScript_cleanTk()
 					}
 				} // End of track selection
 			} // End of track loop
+
+			// Count # muons that contribute to track distribution plots
+			if (atLeastTk2p5) n2p5++;
+			if (atLeastTk2p5OS) n2p5OS++;
 
 			// SIGNAL SELECTION
 			if (tk1_1.size() == 1 && tk2_1.size() == 1 
@@ -753,6 +760,7 @@ void testScript_cleanTk()
 				histSys1Pt->Fill(sys1.Pt());
 				histSys2Pt->Fill(sys2.Pt());
 				histDRSys->Fill(sys1.DeltaR(sys2));
+				histDEtaVsDPhiSys->Fill(fabs(sys1.Eta() - sys2.Eta()),fabs(sys1.DeltaPhi(sys2)));
 
 				double m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 				double m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
