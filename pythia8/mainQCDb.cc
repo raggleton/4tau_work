@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
   // Make sure t->Wb only
   pythia.readString("6: onMode = off");
   pythia.readString("6: onIfAny = 5");
-  pythia.readString("PhaseSpace:pTHatMin = 100.");  
+  pythia.readString("PhaseSpace:pTHatMin = 20.");  
   // pythia.readString("HadronLevel:all = on");
     // pythia.readString("ProcessLevel:all = off");   
   // pythia.readString("PartonLevel:all = off");   
