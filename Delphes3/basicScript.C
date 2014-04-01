@@ -81,6 +81,7 @@ void basicScript()
 			chain.Add("QCDb_cleanTk/QCDb_9.root");
 		}
 	}
+	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
 
 	// Create object of class ExRootTreeReader
 	ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
@@ -280,9 +281,17 @@ void basicScript()
 		/////////////////////////////////
 
 		// Vectors of tracks with pT > 1, within dR < 0.5 of respective muons + other cuts
-		// so tk1 is the track nearest to muon1, NOT higher pT track
-		std::vector<Track*> tk1;
-		std::vector<Track*> tk2;
+		// so tk1 is the track nearest to muon1, (may or may not be highest pT, depends if random swapping is on)
+		std::vector<Track*> tk1_1;
+		std::vector<Track*> tk2_1;
+
+		// same but with pT >2.5
+		std::vector<Track*> tk1_2p5;
+		std::vector<Track*> tk2_2p5;
+
+		// same but with pT > 2.5, OS to muon
+		std::vector<Track*> tk1_2p5_OS;
+		std::vector<Track*> tk2_2p5_OS;
 
 		Track *candTk(0);
 		for(int a = 0; a < branchTracks->GetEntries(); a++){
@@ -295,17 +304,35 @@ void basicScript()
 				&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
 				&& (fabs(candTk->Eta)<3)
 			){
-
+				// Store track in suitable vector
 				double dR1 = (candTk->P4()).DeltaR(mu1Mom);
 				double dR2 = (candTk->P4()).DeltaR(mu2Mom);
 
 				if (dR1 < 0.5){
-					tk1.push_back(candTk);
+					tk1_1.push_back(candTk);
 				}
 				if (dR2 < 0.5){
-					tk2.push_back(candTk);
+					tk2_1.push_back(candTk);
 				}
 
+				if (candTk->PT > 2.5){
+
+					if (dR1 < 0.5){
+						tk1_2p5.push_back(candTk);
+					}
+					if (dR2 < 0.5){
+						tk2_2p5.push_back(candTk);
+					}
+					if ((candTk->Charge) * (mu1->Charge) < 0) {
+
+						if (dR1 < 0.5){
+							tk1_2p5_OS.push_back(candTk);
+						}
+						if (dR2 < 0.5){
+							tk2_2p5_OS.push_back(candTk);
+						}
+					}					
+				}
 			} // End of track selection
 		} // End of track loop
 
@@ -314,7 +341,14 @@ void basicScript()
 		std::sort(tk2.begin(), tk2.end(), sortTracksByPT);
 
 		// Can now deal with signal or sideband regions
+		
+		// SIGNAL SELECTION
+		if (tk1_1.size() == 1 && tk2_1.size() == 1 
+		&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) {
+			// do something in signal region...
+		}		
 
+		// Clean up
 		tk1.clear();
 		tk2.clear();
 	} // end of event loop
@@ -331,25 +365,17 @@ void basicScript()
 	
 	// app += "_samePtEta";
 	
+	// drawHistAndSave(histMu1Pt, "HISTE", "Mu1Pt", directory, app);
+	// drawHistAndSave(histMu2Pt, "HISTE", "Mu2Pt", directory, app);
+	// drawHistAndSave(histTrack1Pt, "HISTE", "Track1Pt", directory, app);
+	// drawHistAndSave(histTrack2Pt, "HISTE", "Track2Pt", directory, app);
+
 	// TFile* outFile = TFile::Open((name+"cleanTk/output"+app+".root").c_str(),"RECREATE");
 
 	// histNMu->Write("",TObject::kOverwrite);
 	// histMu1Pt->Write("",TObject::kOverwrite);
 	// histMu2Pt->Write("",TObject::kOverwrite);
-	// histMu1PtSel->Write("",TObject::kOverwrite);
-	// histMu2PtSel->Write("",TObject::kOverwrite);
-	// histNTracks1->Write("",TObject::kOverwrite);
-	// histNTracks2->Write("",TObject::kOverwrite);
-	// histNTracks1OS->Write("",TObject::kOverwrite);
-	// histNTracks2OS->Write("",TObject::kOverwrite);
-	// // histNTracksCum1->Write("",TObject::kOverwrite);
-	// // histNTracksCum2->Write("",TObject::kOverwrite);
-	// // histNTracksCum1OS->Write("",TObject::kOverwrite);
-	// // histNTracksCum2OS->Write("",TObject::kOverwrite);
-	// histDRMuMu->Write("",TObject::kOverwrite);
-	// histNTk->Write("",TObject::kOverwrite);
-	// histNTk1->Write("",TObject::kOverwrite);
-	// histNTk25->Write("",TObject::kOverwrite);
+	// histMu1PtSel
 	// if (doSignal){
 	// 	histDRa1->Write("",TObject::kOverwrite);
 	// 	histDRa2->Write("",TObject::kOverwrite);
