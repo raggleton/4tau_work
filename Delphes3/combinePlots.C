@@ -1,52 +1,60 @@
-void combinePlots(){
-
-	gStyle->SetOptStat("");
+// Basically takes two hists of same name from two files (fSig & fBg),
+// plots on same canvas and saves to PDF
+// 
+// histName = name of histogram in ROOT file (assumed to be same for sig & bg)
+// plotOpt  = plotting options for Draw() e.g. HISTE
+// outputName  = name for output (needs .pdf, .png etc)
+// 
+void combineHists( TFile* fSig, TFile* fBg, std::string histName, std::string plotOpt, std::string outputName){
 
 	TCanvas c1;
-	TFile fSig("Signal_1prong_500K_bare/output_bare_sig.root","READ");
-	TFile fBg("QCDb_mu_pthatmin20_bare/output_bare_bg.root","READ");
-	TH1D* hSig = fSig.Get("hNTracksCum1");
-	TH1D* hBg = fBg.Get("hNTracksCum1");
-	hSig->Draw("HISTE");
+	TH1D* hSig = fSig->Get(histName.c_str());
+	TH1D* hBg  = fBg->Get(histName.c_str());
+	hSig->Draw(plotOpt.c_str());
 	hBg->SetLineColor(kRed);
-	hBg->Draw("HISTESAME");
+	hBg->Draw((plotOpt+"SAME").c_str());
 	TLegend leg(0.7,0.7,0.9,0.9);
 	leg.SetFillColor(kWhite);
 	leg.SetLineWidth(0);
 	leg.AddEntry(hSig,"Signal","l");
 	leg.AddEntry(hBg,"Bg","l");
 	leg.Draw();
-	c1.SaveAs("combined_NTrackCum1.pdf");
+	c1.SaveAs(outputName.c_str());
 
-	TH1D* hSig2 = fSig.Get("hNTracksCum2");
-	TH1D* hBg2 = fBg.Get("hNTracksCum2");
-	hSig2->Draw("HISTE");
-	hBg2->SetLineColor(kRed);
-	hBg2->Draw("HISTESAME");
-	leg.Draw();
-	c1.SaveAs("combined_NTrackCum2.pdf");
+	if (!hSig) delete hSig;
+	if (!hBg) delete hBg;
+}
 
-	fSig.Close();
-	fBg.Close();
+void combinePlots(){
+	
+	////////////////////////
+	// Setup, open files //
+	////////////////////////
+	
+	gStyle->SetOptStat("");
 
+	TFile fSig("Signal_1prong_500K_bare/output_bare_sig.root","READ");
+	TFile fBg("QCDb_mu_pthatmin20_bare/output_bare_bg.root","READ");
+	
 	TFile fSigRand("Signal_1prong_500K_bare/output_bare_sig_muRand.root","READ");
 	TFile fBgRand("QCDb_mu_pthatmin20_bare/output_bare_bg_muRand.root","READ");
-	TH1D* hSigRand = fSigRand.Get("hNTracksCum1");
-	TH1D* hBgRand = fBgRand.Get("hNTracksCum1");
-	hSigRand->Draw("HISTE");
-	hBgRand->SetLineColor(kRed);
-	hBgRand->Draw("HISTESAME");
-	leg.Draw();
-	c1.SaveAs("combined_NTrackCum1_muRand.pdf");
 
-	TH1D* hSigRand2 = fSigRand.Get("hNTracksCum2");
-	TH1D* hBgRand2 = fBgRand.Get("hNTracksCum2");
-	hSigRand2->Draw("HISTE");
-	hBgRand2->SetLineColor(kRed);
-	hBgRand2->Draw("HISTESAME");
-	leg.Draw();
-	c1.SaveAs("combined_NTrackCum2_muRand.pdf");
+	//////////////////
+	// Plot things //
+	//////////////////
 
+	// Cumulative track distr., for pT-ordered and 	random-ordered muons
+	combineHists(&fSig, &fBg, "hNTracksCum1", "HISTE", "combined_NTrackCum1.pdf");
+	combineHists(&fSig, &fBg, "hNTracksCum2", "HISTE", "combined_NTrackCum2.pdf");
+	combineHists(&fSigRand, &fBgRand, "hNTracksCum1", "HISTE", "combined_NTrackCum1_muRand.pdf");
+	combineHists(&fSigRand, &fBgRand, "hNTracksCum2", "HISTE", "combined_NTrackCum2_muRand.pdf");
+
+	//////////////////
+	// Close files //
+	//////////////////
+	
+	fSig.Close();
+	fBg.Close();
 	fSigRand.Close();
 	fBgRand.Close();
 }
