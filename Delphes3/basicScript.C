@@ -18,69 +18,8 @@ void basicScript()
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
-	if (doSignal){
-		// chain.Add("GG_H_aa.root");
-		// chain.Add("sig_test.root");
-		// chain.Add("Signal_cleanTk/signal_clean.root");
-		chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
-		// chain.Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
-		cout << "Doing signal" << endl;
-	} else {
-		if (doMu){
-			cout << "Doing QCDb_mu" << endl;
-			chain.Add("QCDb_mu_cleanTk/QCDb_mu_1.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_2.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_3.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_4.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_5.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_6.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_7.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_8.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_9.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_10.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_11.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_12.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_13.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_14.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_15.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_16.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_17.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_18.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_19.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_20.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_21.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_22.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_23.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_24.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_25.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_26.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_27.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_28.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_29.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_30.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_31.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_32.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_33.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_34.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_35.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_36.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_37.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_38.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_39.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_40.root");
-		} else {
-			cout << "Doing QCDb" << endl;
-			chain.Add("QCDb_cleanTk/QCDb_10.root");
-			chain.Add("QCDb_cleanTk/QCDb_2.root");
-			chain.Add("QCDb_cleanTk/QCDb_3.root");
-			chain.Add("QCDb_cleanTk/QCDb_4.root");
-			chain.Add("QCDb_cleanTk/QCDb_5.root");
-			chain.Add("QCDb_cleanTk/QCDb_6.root");
-			chain.Add("QCDb_cleanTk/QCDb_7.root");
-			chain.Add("QCDb_cleanTk/QCDb_8.root");
-			chain.Add("QCDb_cleanTk/QCDb_9.root");
-		}
-	}
+	addInputFiles(&chain, doSignal, doMu);
+
 	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
 
 	// Create object of class ExRootTreeReader
