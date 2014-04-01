@@ -14,6 +14,14 @@ using std::endl;
 
 
 // For string splitting
+
+/**
+ * For splitting strings based on a delimiter
+ * @param s     string to be split
+ * @param delim character to be used as delimiter, e.g. ':'
+ * @param elems blank vector to be used for split results
+ * @return      Returns the input vector elems, filled with s split based on delim
+ */
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
 	std::stringstream ss(s);
 	std::string item;
@@ -30,6 +38,14 @@ bool sortTracksByPT(Track* a, Track* b){
 }
 
 // From the daughters of 2 taus, decide which is track and which is mu
+/**
+ * From the daughters of 2 taus from a given a Higgs, decide which is track and which is mu
+ * @param  mu muon GenParticle, will be assigned to an object (a or b)
+ * @param  tk track GenParticle, will be assigned to an object (a or b)
+ * @param  a  One of the two gen particles from a pair of taus
+ * @param  b  The other of the two GenParticles from th pair of taus
+ * @return    Returns TRUE if assignemnt OK - if neither a nor b is a muon then returns FALSE
+ */
 bool assignMuonAndTrack(GenParticle* &mu, GenParticle* &tk, GenParticle &a, GenParticle &b){
 	tk = 0;
 	mu = 0;
@@ -68,7 +84,12 @@ bool assignMuonAndTrack(GenParticle* &mu, GenParticle* &tk, GenParticle &a, GenP
 
 // Get the 3 correct daughters of the tau
 
-
+/**
+ * Get the 3 immediate duaghters of the tau (tau neutrino + qqbar or lepton+neutrino)
+ * @param branchAll  the branch of ALL gen particles
+ * @param tau        tau to get decay product from
+ * @return           vector of the tau's 3 immediate daughters
+ */
 std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *tau) { 
 
 	// cout << "get tau daughters" << endl;
