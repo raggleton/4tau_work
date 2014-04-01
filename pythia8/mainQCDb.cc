@@ -12,7 +12,7 @@ using namespace Pythia8;
 int main(int argc, char* argv[]) {
 
   bool outputEvent  = false; // output entire event listing to STDOUT (long!), for debugging only
-  bool writeToHEPMC = true; // output to HEPMC
+  bool writeToHEPMC = false; // output to HEPMC
   bool muOnly       = true; // Only allow b hadrons to decay to muons or taus
   bool tauToMuOnly  = true; // Only allow those taus from b hadrons to decay to muons 
 
@@ -226,10 +226,10 @@ int main(int argc, char* argv[]) {
     if (nMuPos+nMuNeg < 2) continue; // Skip if there's only 1 muon
 
     // order mu pt vector
-    std::sort(muPtVec.begin(),muPtVec.end());
+    std::sort(muPtVec.begin(),muPtVec.end(), std::greater<int>());
 
     // Emulate HLT - HLT_Mu17_Mu8
-    if (muPtVec[0] < 17 || muPtVec[1] < 8 ) continue; 
+    if (muPtVec[muPtVec.size()] < 17 || muPtVec[1] < 8 ) continue; 
 
     // if it gets to here, then we're happy with the event
     iEvent++;
