@@ -7,6 +7,9 @@
 using std::cout;
 using std::endl;
 
+/**
+ * Main analysis script to make plots etc. Really should rename it.
+ */
 void testScript_cleanTk()
 {
 	TH1::SetDefaultSumw2();
@@ -19,138 +22,12 @@ void testScript_cleanTk()
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
-	if (doSignal){
-		// chain.Add("GG_H_aa.root");
-		// chain.Add("sig_test.root");
-		// chain.Add("Signal_cleanTk/signal_clean.root");
-		// chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
-		// chain.Add("Signal_1prong_bare/signal_1prong_bare.root");
-		// chain.Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
-		chain.Add("Signal_1prong_500K_bare/signal_1prong_500K_bare.root");
-		// chain.Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
-		cout << "Doing signal" << endl;
-	} else {
-		if (doMu){
-			cout << "Doing QCDb_mu" << endl;
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_1.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_2.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_3.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_4.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_5.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_6.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_7.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_8.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_9.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_10.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_11.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_12.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_13.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_14.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_15.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_16.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_17.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_18.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_19.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_20.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_21.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_22.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_23.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_24.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_25.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_26.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_27.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_28.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_29.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_30.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_31.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_32.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_33.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_34.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_35.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_36.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_37.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_38.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_39.root");
-			// chain.Add("QCDb_mu_cleanTk/QCDb_mu_40.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_1.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_2.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_3.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_4.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_5.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_6.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_7.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_8.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_9.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_10.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_11.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_12.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_13.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_14.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_15.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_16.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_17.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_18.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_19.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_20.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_21.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_22.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_23.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_24.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_25.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_26.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_27.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_28.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_29.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_30.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_31.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_32.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_33.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_34.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_35.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_36.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_37.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_38.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_39.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_40.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_41.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_42.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_43.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_44.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_45.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_46.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_47.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_48.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_49.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_50.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_51.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_52.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_53.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_54.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_55.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_56.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_57.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_58.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_59.root");
-			chain.Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_60.root");
+	addInputFiles(&chain, doSignal, doMu);
 
-		} else {
-			cout << "Doing QCDb" << endl;
-			chain.Add("QCDb_cleanTk/QCDb_10.root");
-			chain.Add("QCDb_cleanTk/QCDb_2.root");
-			chain.Add("QCDb_cleanTk/QCDb_3.root");
-			chain.Add("QCDb_cleanTk/QCDb_4.root");
-			chain.Add("QCDb_cleanTk/QCDb_5.root");
-			chain.Add("QCDb_cleanTk/QCDb_6.root");
-			chain.Add("QCDb_cleanTk/QCDb_7.root");
-			chain.Add("QCDb_cleanTk/QCDb_8.root");
-			chain.Add("QCDb_cleanTk/QCDb_9.root");
-		}
-	}
 	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
 
 	// Create object of class ExRootTreeReader
 	ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
-	Long64_t numberOfEntries = treeReader->GetEntries();
 
 	// Get pointers to branches used in this analysis
 	// Use the data_flow.png and tcl file to figure out what branches are available, and what class they are
@@ -259,8 +136,10 @@ void testScript_cleanTk()
 	int nMuPass(0);
 
 	// Loop over all events
+	Long64_t numberOfEntries = treeReader->GetEntries();
 	cout << "Nevts : " << numberOfEntries <<endl;
 	bool stop = false;
+
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
 
 		// Load selected branches with data from specified event
