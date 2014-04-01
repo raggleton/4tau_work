@@ -13,8 +13,6 @@ using std::endl;
  */
 
 
-// For string splitting
-
 /**
  * For splitting strings based on a delimiter
  * @param s     string to be split
@@ -37,9 +35,8 @@ bool sortTracksByPT(Track* a, Track* b){
 	return (a->PT) > (b->PT); 
 }
 
-// From the daughters of 2 taus, decide which is track and which is mu
 /**
- * From the daughters of 2 taus from a given a Higgs, decide which is track and which is mu
+ * From the daughters of 2 taus from a given "a" Higgs, decide which is track and which is mu
  * @param  mu muon GenParticle, will be assigned to an object (a or b)
  * @param  tk track GenParticle, will be assigned to an object (a or b)
  * @param  a  One of the two gen particles from a pair of taus
@@ -82,13 +79,11 @@ bool assignMuonAndTrack(GenParticle* &mu, GenParticle* &tk, GenParticle &a, GenP
 	return false;
 }
 
-// Get the 3 correct daughters of the tau
-
 /**
  * Get the 3 immediate duaghters of the tau (tau neutrino + qqbar or lepton+neutrino)
- * @param branchAll  the branch of ALL gen particles
- * @param tau        tau to get decay product from
- * @return           vector of the tau's 3 immediate daughters
+ * @param branchAll  The branch of ALL gen particles
+ * @param tau        Tau to get decay product from
+ * @return           Vector of the tau's 3 immediate daughters
  */
 std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *tau) { 
 
@@ -122,9 +117,9 @@ std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *
 
 /**
  * From tau, get the final, stable, charged decay product
- * @param  branchAll [the branch of ALL gen particles, to loop through decay chain]
- * @param  tau       [tau to get decay product form]
- * @return           [returns charged, stable, decay product of param tau]
+ * @param  branchAll The branch of ALL gen particles, to loop through decay chain
+ * @param  tau       Tau to get decay product form
+ * @return           Returns charged, stable, decay product of param tau
  */
 GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { 
 
@@ -219,11 +214,11 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 
 /**
  * Draw a histogram and save it to PDF, saves file as directory/filename_<delphes setup from directory>_app.pdf
- * @param h         [hist to draw (TObject* to handle THStacks, which don't inherit from TH1)]
- * @param drawOpt   [options for drawing hist]
- * @param filename  [main filename (e.g. Mu1Pt)]
- * @param directory [directory for output PDF]
- * @param app       [appendage eg muRand, sig]
+ * @param h         Hist to draw (TObject* to handle THStacks, which don't inherit from TH1)
+ * @param drawOpt   Options for drawing hist
+ * @param filename  Main filename (e.g. Mu1Pt)
+ * @param directory Directory for output PDF
+ * @param app       Appendage eg muRand, sig
  */
 void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std::string directory, std::string app){
 	TCanvas c;
@@ -238,14 +233,14 @@ void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std:
 
 /**
  * Draws mass correlation plot, saves file as directory/filename_<delphes setup from directory>_app.pdf
- * @param title         [description]
- * @param histM1_0to1   [description]
- * @param histM1_1to2   [description]
- * @param histM1_2to3   [description]
- * @param histM1_3toInf [description]
- * @param filename      [description]
- * @param directory     [description]
- * @param app           [description]
+ * @param title         Title at top of plot
+ * @param histM1_0to1   Pointer to TH1 for m2 bin 0 to 1
+ * @param histM1_1to2   Pointer to TH1 for m2 bin 1 to 2
+ * @param histM1_2to3   Pointer to TH1 for m2 bin 2 to 3
+ * @param histM1_3toInf Pointer to TH1 for m2 bin 3 to Inf
+ * @param filename      Output filename
+ * @param directory     Directory to put output file in
+ * @param app           Any appendage onto the filename e.g. muRand
  */
 void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* histM1_2to3, TH1* histM1_3toInf, std::string filename, std::string directory, std::string app){
 	TCanvas c;
