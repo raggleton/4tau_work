@@ -266,7 +266,8 @@ void massPlots()
 		// chain.Add("Signal_cleanTk/signal_clean.root");
 		// chain.Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
 		// chain.Add("Signal_1prong_bare/signal_1prong_bare.root");
-		chain.Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
+		// chain.Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
+		chain.Add("Signal_1prong_500K_bare/signal_1prong_500K_bare.root");
 		// chain.Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
 		cout << "Doing signal" << endl;
 	} else {
