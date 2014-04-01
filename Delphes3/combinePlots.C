@@ -10,12 +10,12 @@ void combineHists( TFile* fSig, TFile* fBg, std::string histName, std::string pl
 	TCanvas c1;
 	TH1D* hSig = fSig->Get(histName.c_str());
 	TH1D* hBg  = fBg->Get(histName.c_str());
+	hSig->SetLineColor(kRed);
 	hSig->Draw(plotOpt.c_str());
-	hBg->SetLineColor(kRed);
 	hBg->Draw((plotOpt+"SAME").c_str());
-	TLegend leg(0.7,0.7,0.9,0.9);
+	TLegend leg(0.75,0.75,0.88,0.88);
 	leg.SetFillColor(kWhite);
-	leg.SetLineWidth(0);
+	leg.SetLineColor(kWhite);
 	leg.AddEntry(hSig,"Signal","l");
 	leg.AddEntry(hBg,"Bg","l");
 	leg.Draw();
@@ -43,11 +43,17 @@ void combinePlots(){
 	// Plot things //
 	//////////////////
 
-	// Cumulative track distr., for pT-ordered and 	random-ordered muons
+	// Cumulative track distr., for pT-ordered and random-ordered muons
 	combineHists(&fSig, &fBg, "hNTracksCum1", "HISTE", "combined_NTrackCum1.pdf");
 	combineHists(&fSig, &fBg, "hNTracksCum2", "HISTE", "combined_NTrackCum2.pdf");
 	combineHists(&fSigRand, &fBgRand, "hNTracksCum1", "HISTE", "combined_NTrackCum1_muRand.pdf");
 	combineHists(&fSigRand, &fBgRand, "hNTracksCum2", "HISTE", "combined_NTrackCum2_muRand.pdf");
+
+	// Absolute track distr., for pT-ordered and random-ordered muons
+	combineHists(&fSig, &fBg, "hNTracksAbs1", "HISTE", "combined_NTrackAbs1.pdf");
+	combineHists(&fSig, &fBg, "hNTracksAbs2", "HISTE", "combined_NTrackAbs2.pdf");
+	combineHists(&fSigRand, &fBgRand, "hNTracksAbs1", "HISTE", "combined_NTrackAbs1_muRand.pdf");
+	combineHists(&fSigRand, &fBgRand, "hNTracksAbs2", "HISTE", "combined_NTrackAbs2_muRand.pdf");
 
 	//////////////////
 	// Close files //
