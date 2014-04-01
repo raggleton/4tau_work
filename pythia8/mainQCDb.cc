@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
   // Number of events. 
   // Warning, 5K events ~900MB hepmc file and takes ~5 min.
   // Warning, 50K events ~9GB hepmc file and takes ~40 min.
-  pythia.readString("Main:numberOfEvents = 50000");
+  pythia.readString("Main:numberOfEvents = 500");
   int nEvent = pythia.mode("Main:numberOfEvents");
   pythia.readString("Next:numberShowEvent = 00");
   // pythia.readString("Next:numberShowProcess = 100");
@@ -132,9 +132,8 @@ int main(int argc, char* argv[]) {
   int iEvent = 0;
   int lastiEvent = 0;
   while(iEvent < nEvent) {
-    bool wanted = true;
 
-    if ((iEvent % 1000 == 0) && (iEvent!= lastiEvent)){
+    if ((iEvent % 50 == 0) && (iEvent!= lastiEvent)){
       lastiEvent = iEvent;
       cout << "iEvent: " << iEvent << endl;
     }
@@ -199,7 +198,9 @@ int main(int argc, char* argv[]) {
       if (!pythia.moreDecays()) continue;
     } // end of if(tauToMuOnly)
     
-   // Now do all your selection requirements to determine if we keep the event:
+    ///////////////////////////////////////////////////////////////////////////////
+    // Now do all your selection requirements to determine if we keep the event: //
+    ///////////////////////////////////////////////////////////////////////////////
     
     // Look for muons among decay products (also from charm/tau/...).
     int nMuNeg(0), nMuPos(0);
@@ -225,8 +226,10 @@ int main(int argc, char* argv[]) {
     if (nMuPos+nMuNeg < 2) continue; // Skip if there's only 1 muon
 
     // order mu pt vector
-    // std::sort(muPtVec.begin(),muPtVec.end());
-    // if (muPtVec[0] < 10 || muPtVec[1] < 10 ) continue; // Skip if top 2 pt muons have pt < 10
+    std::sort(muPtVec.begin(),muPtVec.end());
+
+    // Emulate HLT - HLT_Mu17_Mu8
+    if (muPtVec[0] < 17 || muPtVec[1] < 8 ) continue; 
 
     // if it gets to here, then we're happy with the event
     iEvent++;
@@ -239,7 +242,7 @@ int main(int argc, char* argv[]) {
     if (outputEvent)
       event.list();
 
-    if (wanted && writeToHEPMC){
+    if (writeToHEPMC){
       // Construct new empty HepMC event and fill it.
       // Units will be as chosen for HepMC build, but can be changed
       // by arguments, e.g. GenEvt( HepMC::Units::GEV, HepMC::Units::MM)  
