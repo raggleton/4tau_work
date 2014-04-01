@@ -651,88 +651,11 @@ void testScript_cleanTk()
 	// Mass plots
 	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
 	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
-
-	THStack histM1_M2("hM1_M2","m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal selection;m(#mu_{1}-tk) [GeV]; A.U.");
-	histM1_0to1->SetLineColor(kBlack);
-	if (histM1_0to1->Integral() != 0)
-		histM1_0to1->Scale(1./histM1_0to1->Integral());
-	histM1_M2.Add(histM1_0to1);
-	
-	histM1_1to2->SetLineColor(kRed);
-	if (histM1_1to2->Integral() != 0)
-		histM1_1to2->Scale(1./histM1_1to2->Integral());
-	histM1_M2.Add(histM1_1to2);
-
-	histM1_2to3->SetLineColor(kGreen);
-	if (histM1_2to3->Integral() != 0)
-		histM1_2to3->Scale(1./histM1_2to3->Integral());
-	histM1_M2.Add(histM1_2to3);
-
-	histM1_3toInf->SetLineColor(kBlue);
-	if (histM1_3toInf->Integral() != 0)
-		histM1_3toInf->Scale(1./histM1_3toInf->Integral());
-	histM1_M2.Add(histM1_3toInf);
-	histM1_M2.Draw("nostack,HISTE");
-
-	TLegend leg(0.7,0.7,0.9,0.9);
-	leg.AddEntry(histM1_0to1,"m_{2} = 0-1 GeV","l");
-	leg.AddEntry(histM1_1to2,"m_{2} = 1-2 GeV","l");
-	leg.AddEntry(histM1_2to3,"m_{2} = 2-3 GeV","l");
-	leg.AddEntry(histM1_3toInf,"m_{2} > 3 GeV","l");
-	leg.Draw();
-	c.SaveAs((directory+"/M1_M2_"+delph+"_"+app+".pdf").c_str());
-
+	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
+	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, "M1_M2_side", directory, app);
 	if(doSignal){
-		THStack histM1_truth_M2("hM1_M2_truth","m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.");
-		histM1_truth_0to1->SetLineColor(kBlack);
-		if (histM1_truth_0to1->Integral() != 0) 
-			histM1_truth_0to1->Scale(1./histM1_truth_0to1->Integral());
-		histM1_truth_M2.Add(histM1_truth_0to1);
-
-		histM1_truth_1to2->SetLineColor(kRed);
-		if (histM1_truth_1to2->Integral() != 0)	
-			histM1_truth_1to2->Scale(1./histM1_truth_1to2->Integral());
-		histM1_truth_M2.Add(histM1_truth_1to2);
-
-		histM1_truth_2to3->SetLineColor(kGreen);
-		if (histM1_truth_2to3->Integral() != 0)	
-			histM1_truth_2to3->Scale(1./histM1_truth_2to3->Integral());
-		histM1_truth_M2.Add(histM1_truth_2to3);
-
-		histM1_truth_3toInf->SetLineColor(kBlue);
-		if (histM1_truth_3toInf->Integral() != 0)
-			histM1_truth_3toInf->Scale(1./histM1_truth_3toInf->Integral());
-		histM1_truth_M2.Add(histM1_truth_3toInf);
-		histM1_truth_M2.Draw("nostack,HISTE");
-
-		leg.Draw();
-		c.SaveAs((directory+"/M1_M2_truth_"+delph+"_"+app+".pdf").c_str());
+		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
 	}
-
-	THStack histM1_side_M2("hM1_M2_side","m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region;m(#mu_{1}-tk) [GeV]; A.U.");
-	histM1_side_0to1->SetLineColor(kBlack);
-	if (histM1_side_0to1->Integral() != 0)
-		histM1_side_0to1->Scale(1./histM1_side_0to1->Integral());
-	histM1_side_M2.Add(histM1_side_0to1);
-	
-	histM1_side_1to2->SetLineColor(kRed);
-	if (histM1_side_1to2->Integral() != 0)
-		histM1_side_1to2->Scale(1./histM1_side_1to2->Integral());
-	histM1_side_M2.Add(histM1_side_1to2);
-
-	histM1_side_2to3->SetLineColor(kGreen);
-	if (histM1_side_2to3->Integral() != 0)
-		histM1_side_2to3->Scale(1./histM1_side_2to3->Integral());
-	histM1_side_M2.Add(histM1_side_2to3);
-
-	histM1_side_3toInf->SetLineColor(kBlue);
-	if (histM1_side_3toInf->Integral() != 0)
-		histM1_side_3toInf->Scale(1./histM1_side_3toInf->Integral());
-	histM1_side_M2.Add(histM1_side_3toInf);
-	histM1_side_M2.Draw("nostack,HISTE");
-	leg.Draw();
-	c.SaveAs((directory+"/M1_M2_side_"+delph+"_"+app+".pdf").c_str());
-
 
 	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"RECREATE");
 
@@ -790,8 +713,8 @@ void testScript_cleanTk()
 	histM1->Write("",TObject::kOverwrite);
 	histM2->Write("",TObject::kOverwrite);
 
-	histM1_M2.Write("",TObject::kOverwrite);
-	histM1_side_M2.Write("",TObject::kOverwrite);
+	// histM1_M2.Write("",TObject::kOverwrite);
+	// histM1_side_M2.Write("",TObject::kOverwrite);
 
 	outFile->Close();
 
