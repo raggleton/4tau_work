@@ -307,6 +307,7 @@ void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* hi
 	histM1_M2.Draw("nostack,HISTE");
 
 	TLegend leg(0.75,0.67,0.93,0.88);
+	leg.SetFillColor(kWhite);
 	leg.AddEntry(histM1_0to1,"m_{2} = 0-1 GeV","l");
 	leg.AddEntry(histM1_1to2,"m_{2} = 1-2 GeV","l");
 	leg.AddEntry(histM1_2to3,"m_{2} = 2-3 GeV","l");

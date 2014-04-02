@@ -11,7 +11,7 @@ void massPlots()
 
 	bool doSignal = true;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -70,9 +70,6 @@ void massPlots()
 		treeReader->ReadEntry(entry);
 
 		// cout << "*** Event" << endl;
-
-		// Do at gen particle level.
-		// histNMu->Fill(branchGenMuons->GetEntries());
 
 		if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons!
 
@@ -251,6 +248,10 @@ void massPlots()
 			// same but with pT > 2.5, OS to muon
 			std::vector<Track*> tk1_2p5_OS;
 			std::vector<Track*> tk2_2p5_OS;
+			
+			// same but with 1 < pT < 2.5 (for sideband)
+			std::vector<Track*> tk1_1to2p5;
+			std::vector<Track*> tk2_1to2p5;
 
 			Track *candTk(0);
 			for(int a = 0; a < branchTracks->GetEntries(); a++){
@@ -289,6 +290,13 @@ void massPlots()
 								tk2_2p5_OS.push_back(candTk);
 							}
 						}					
+					} else {
+						if (dR1 < 0.5){
+							tk1_1to2p5.push_back(candTk);
+						}
+						if (dR2 < 0.5){
+							tk2_1to2p5.push_back(candTk);
+						}
 					}
 				} // End of track selection
 			} // End of track loop
@@ -319,26 +327,54 @@ void massPlots()
 			// SIDEBAND REGION
 			// one muon has 1 tk > 2.5 (OS), other has 2 or 3 ( 1 tk => "mu1", 2/3 tk => "mu2")
 			// so NOT pT ordered (although you could do that by eliminating the else if ... bit)
-			if (tk1_1.size() == 1 && (tk2_1.size() == 2 || tk2_1.size() == 3)
-				&& tk1_2p5_OS.size() == 1 && (tk2_2p5.size() == 2 || tk2_2p5.size() == 3)){
-				
-				// mu1Mom has 1 tk, mu2Mom has 2/3 tks, stay as "mu1" and "mu2"
-				double m1 = (mu1Mom+tk1_2p5[0]->P4()).M();
-				double m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
-				if(m2 < 1.)
-					histM1_side_0to1->Fill(m1);
-				else if (m2 < 2.)
-					histM1_side_1to2->Fill(m1);
-				else if (m2 < 3.)
-					histM1_side_2to3->Fill(m1);
-				else
-					histM1_3toInf->Fill(m1);
-			} else if (tk2_1.size() == 1 && (tk1_1.size() == 2 || tk1_1.size() == 3)
-				&& tk2_2p5_OS.size() == 1 && (tk1_2p5.size() == 2 || tk1_2p5.size() == 3)){
 
-				// mu1Mom has 2/3 tks, mu2Mom has 1 tks, so m1 uses mu2Mom & v.v.
-				double m1 = (mu2Mom+tk2_2p5[0]->P4()).M();
-				double m2 = (mu1Mom+tk1_2p5[0]->P4()).M();
+			// if (tk1_1.size() == 1 && (tk2_1.size() == 2 || tk2_1.size() == 3)
+			// 	&& tk1_2p5_OS.size() == 1 && (tk2_2p5.size() == 2 || tk2_2p5.size() == 3)){
+				
+			// 	// mu1Mom has 1 tk, mu2Mom has 2/3 tks, stay as "mu1" and "mu2"
+			// 	double m1 = (mu1Mom+tk1_2p5[0]->P4()).M();
+			// 	double m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
+			// 	if(m2 < 1.)
+			// 		histM1_side_0to1->Fill(m1);
+			// 	else if (m2 < 2.)
+			// 		histM1_side_1to2->Fill(m1);
+			// 	else if (m2 < 3.)
+			// 		histM1_side_2to3->Fill(m1);
+			// 	else
+			// 		histM1_3toInf->Fill(m1);
+			// } else if (tk2_1.size() == 1 && (tk1_1.size() == 2 || tk1_1.size() == 3)
+			// 	&& tk2_2p5_OS.size() == 1 && (tk1_2p5.size() == 2 || tk1_2p5.size() == 3)){
+
+			// 	// mu1Mom has 2/3 tks, mu2Mom has 1 tks, so m1 uses mu2Mom & v.v.
+			// 	double m1 = (mu2Mom+tk2_2p5[0]->P4()).M();
+			// 	double m2 = (mu1Mom+tk1_2p5[0]->P4()).M();
+			// 	if(m2 < 1.)
+			// 		histM1_side_0to1->Fill(m1);
+			// 	else if (m2 < 2.)
+			// 		histM1_side_1to2->Fill(m1);
+			// 	else if (m2 < 3.)
+			// 		histM1_side_2to3->Fill(m1);
+			// 	else
+			// 		histM1_side_3toInf->Fill(m1);
+			// }
+
+			// ANOTHER SIDEBAND REGION
+			// where at least one muon has an additional track with 1< pT < 2.5,
+			// within dR < 0.5. No sign requirement.
+			if (tk1_2p5.size() == 1 && tk2_2p5.size() == 1 
+				&& ((tk1_1to2p5.size() == 1 && tk1_1to2p5.size() == 1) || (tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 1) || (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 0))){
+				
+				double m1(0), m2(0);				
+				if (tk1_1to2p5.size() == 1)
+					m1 = (mu1Mom+tk1_2p5[0]->P4()+tk1_1to2p5[0]->P4()).M();
+				else
+					m1 = (mu1Mom+tk1_2p5[0]->P4()).M();
+				
+				if(tk2_1to2p5.size() == 1)
+					m2 = (mu2Mom+tk2_2p5[0]->P4()+tk2_1to2p5[0]->P4()).M();
+				else
+					m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
+				
 				if(m2 < 1.)
 					histM1_side_0to1->Fill(m1);
 				else if (m2 < 2.)
@@ -382,7 +418,7 @@ void massPlots()
 
 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
 
-	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, "M1_M2_side", directory, app);
+	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (at least 1 #mu has add. tk with p_{T} = (1,2.5));m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, "M1_M2_side", directory, app);
 
 	if(doSignal){
 		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
@@ -415,4 +451,5 @@ void massPlots()
 
 	// outFile->Close();
 
+	delete treeReader;
 }
