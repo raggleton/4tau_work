@@ -8,6 +8,12 @@ using std::endl;
  * Not very sophisticated, could be made better!
  */
 
+// For sorting track vectors by pT
+void sortTrackVector(std::vector<Track*>& tk){
+	std::sort(tk.begin(), tk.end(), sortTracksByPT);
+}
+
+
 void cutFlow()
 {
 	TH1::SetDefaultSumw2();
