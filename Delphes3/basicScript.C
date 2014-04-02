@@ -276,8 +276,8 @@ void basicScript()
 		} // End of track loop
 
 		// Now pT order the track collections
-		std::sort(tk1.begin(), tk1.end(), sortTracksByPT);
-		std::sort(tk2.begin(), tk2.end(), sortTracksByPT);
+		// std::sort(tk1.begin(), tk1.end(), sortTracksByPT);
+		// std::sort(tk2.begin(), tk2.end(), sortTracksByPT);
 
 		// Can now deal with signal or sideband regions
 		
@@ -288,8 +288,12 @@ void basicScript()
 		}		
 
 		// Clean up
-		tk1.clear();
-		tk2.clear();
+		tk1_1.clear();
+		tk2_1.clear();
+		tk1_2p5.clear();
+		tk2_2p5.clear();
+		tk1_2p5_OS.clear();
+		tk2_2p5_OS.clear();
 	} // end of event loop
 
 
