@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
+#include "TStyle.h"
 
 using std::cout;
 using std::endl;
@@ -12,8 +13,6 @@ using std::endl;
  * Robin Aggleton 2014
  */
 
-
-// For string splitting
 
 /**
  * For splitting strings based on a delimiter
@@ -37,9 +36,8 @@ bool sortTracksByPT(Track* a, Track* b){
 	return (a->PT) > (b->PT); 
 }
 
-// From the daughters of 2 taus, decide which is track and which is mu
 /**
- * From the daughters of 2 taus from a given a Higgs, decide which is track and which is mu
+ * From the daughters of 2 taus from a given "a" Higgs, decide which is track and which is mu
  * @param  mu muon GenParticle, will be assigned to an object (a or b)
  * @param  tk track GenParticle, will be assigned to an object (a or b)
  * @param  a  One of the two gen particles from a pair of taus
@@ -82,13 +80,11 @@ bool assignMuonAndTrack(GenParticle* &mu, GenParticle* &tk, GenParticle &a, GenP
 	return false;
 }
 
-// Get the 3 correct daughters of the tau
-
 /**
  * Get the 3 immediate duaghters of the tau (tau neutrino + qqbar or lepton+neutrino)
- * @param branchAll  the branch of ALL gen particles
- * @param tau        tau to get decay product from
- * @return           vector of the tau's 3 immediate daughters
+ * @param branchAll  The branch of ALL gen particles
+ * @param tau        Tau to get decay product from
+ * @return           Vector of the tau's 3 immediate daughters
  */
 std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *tau) { 
 
@@ -122,9 +118,9 @@ std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *
 
 /**
  * From tau, get the final, stable, charged decay product
- * @param  branchAll [the branch of ALL gen particles, to loop through decay chain]
- * @param  tau       [tau to get decay product form]
- * @return           [returns charged, stable, decay product of param tau]
+ * @param  branchAll The branch of ALL gen particles, to loop through decay chain
+ * @param  tau       Tau to get decay product form
+ * @return           Returns charged, stable, decay product of param tau
  */
 GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { 
 
@@ -219,13 +215,16 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 
 /**
  * Draw a histogram and save it to PDF, saves file as directory/filename_<delphes setup from directory>_app.pdf
- * @param h         [hist to draw (TObject* to handle THStacks, which don't inherit from TH1)]
- * @param drawOpt   [options for drawing hist]
- * @param filename  [main filename (e.g. Mu1Pt)]
- * @param directory [directory for output PDF]
- * @param app       [appendage eg muRand, sig]
+ * @param h         Hist to draw (TObject* to handle THStacks, which don't inherit from TH1)
+ * @param drawOpt   Options for drawing hist
+ * @param filename  Main filename (e.g. Mu1Pt)
+ * @param directory Directory for output PDF
+ * @param app       Appendage eg muRand, sig
  */
 void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std::string directory, std::string app){
+
+	TH1::SetDefaultSumw2();
+
 	TCanvas c;
 	h->Draw(drawOpt.c_str());
 
@@ -237,52 +236,134 @@ void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std:
 }
 
 /**
+ * Rescale histogram so integral = unity
+ * @param h Poitner to histogram to be rescaled
+ */
+void normaliseHist(TH1* h){
+	if (h->Integral() != 0){
+		h->Scale(1./h->Integral());
+	}
+}
+
+
+/**
  * Draws mass correlation plot, saves file as directory/filename_<delphes setup from directory>_app.pdf
- * @param title         [description]
- * @param histM1_0to1   [description]
- * @param histM1_1to2   [description]
- * @param histM1_2to3   [description]
- * @param histM1_3toInf [description]
- * @param filename      [description]
- * @param directory     [description]
- * @param app           [description]
+ * @param title         Title at top of plot
+ * @param histM1_0to1   Pointer to TH1 for m2 bin 0 to 1
+ * @param histM1_1to2   Pointer to TH1 for m2 bin 1 to 2
+ * @param histM1_2to3   Pointer to TH1 for m2 bin 2 to 3
+ * @param histM1_3toInf Pointer to TH1 for m2 bin 3 to Inf
+ * @param filename      Output filename
+ * @param directory     Directory to put output file in
+ * @param app           Any appendage onto the filename e.g. muRand
  */
 void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* histM1_2to3, TH1* histM1_3toInf, std::string filename, std::string directory, std::string app){
+
+	gStyle->SetOptStat("");
+	gStyle->SetLegendBorderSize(0);
+	gStyle->SetLegendFillColor(kWhite);
+
+	TH1::SetDefaultSumw2();
+
 	TCanvas c;
+	c.SetCanvasSize(500, 600);
+	TPad* pad1 = new TPad("pad1","",0,0.30,1,1);
+	pad1->SetBottomMargin(0.02);
+	pad1->SetRightMargin(0.05); // The ratio plot below inherits the right and left margins settings here!
+	pad1->SetLeftMargin(0.15);
+	pad1->Draw();
+	pad1->cd();
+	
 	THStack histM1_M2("hM1_M2",title.c_str());
 	histM1_0to1->SetLineColor(kBlack);
-	if (histM1_0to1->Integral() != 0)
-		histM1_0to1->Scale(1./histM1_0to1->Integral());
+	histM1_0to1->SetLineWidth(2);
+	normaliseHist(histM1_0to1);
 	histM1_M2.Add(histM1_0to1);
 	
 	histM1_1to2->SetLineColor(kRed);
-	if (histM1_1to2->Integral() != 0)
-		histM1_1to2->Scale(1./histM1_1to2->Integral());
+	histM1_1to2->SetLineWidth(2);
+	normaliseHist(histM1_1to2);
 	histM1_M2.Add(histM1_1to2);
 
-	histM1_2to3->SetLineColor(kGreen);
-	if (histM1_2to3->Integral() != 0)
-		histM1_2to3->Scale(1./histM1_2to3->Integral());
+	histM1_2to3->SetLineColor(kGreen+1);
+	histM1_2to3->SetLineWidth(2);
+	normaliseHist(histM1_2to3);
 	histM1_M2.Add(histM1_2to3);
 
 	histM1_3toInf->SetLineColor(kBlue);
-	if (histM1_3toInf->Integral() != 0)
-		histM1_3toInf->Scale(1./histM1_3toInf->Integral());
+	histM1_3toInf->SetLineWidth(2);
+	normaliseHist(histM1_3toInf);
 	histM1_M2.Add(histM1_3toInf);
+
 	histM1_M2.Draw("nostack,HISTE");
 
-	TLegend leg(0.7,0.7,0.9,0.9);
+	// Turn off x-axis label, set y-axis sizes
+	// This is THE ONLY WAY
+	// SetXtitle doesn't work, neither on the Stack or the individual hists
+	histM1_M2.GetXaxis()->SetTitleOffset(999); // turn off x-axis title
+	histM1_M2.GetXaxis()->SetLabelOffset(999); // turn off x-axis labels
+	// histM1_M2.GetYaxis()->SetTitleOffset(0.08);
+	histM1_M2.GetYaxis()->SetTitleSize(0.05);
+	histM1_M2.Draw("nostack,HISTE");
+
+	TLegend leg(0.75,0.67,0.93,0.88);
 	leg.AddEntry(histM1_0to1,"m_{2} = 0-1 GeV","l");
 	leg.AddEntry(histM1_1to2,"m_{2} = 1-2 GeV","l");
 	leg.AddEntry(histM1_2to3,"m_{2} = 2-3 GeV","l");
 	leg.AddEntry(histM1_3toInf,"m_{2} > 3 GeV","l");
 	leg.Draw();
-	
+
+	// Essential to ensure that pad2 isn't drawn INSIDE pad1	
+	c.cd();
+
+	TPad* pad2 = new TPad("pad2","",0,0,1,0.30);
+	pad2->SetBottomMargin(0.25);
+	pad2->SetLeftMargin(pad1->GetLeftMargin());
+	pad2->SetRightMargin(pad1->GetRightMargin());
+	pad2->SetTopMargin(0.05);
+
+	pad2->Draw();
+	pad2->cd();
+
+	TH1D* histM1_1to2_copy   = (TH1D*)histM1_1to2->Clone();
+	TH1D* histM1_2to3_copy   = (TH1D*)histM1_2to3->Clone();
+	TH1D* histM1_3toInf_copy = (TH1D*)histM1_3toInf->Clone();
+
+	histM1_1to2_copy->Divide(histM1_0to1);
+	histM1_2to3_copy->Divide(histM1_0to1);
+	histM1_3toInf_copy->Divide(histM1_0to1);
+
+	histM1_1to2_copy->SetTitle("");
+	histM1_1to2_copy->SetXTitle("m(#mu_{1}-tk) [GeV]");
+	histM1_1to2_copy->SetYTitle("#frac{i^{th} m_{2} bin}{1^{st} m_{2} bin}");
+	histM1_1to2_copy->GetXaxis()->SetTitleSize(0.1);
+	histM1_1to2_copy->GetXaxis()->SetTitleOffset(0.9);
+	histM1_1to2_copy->GetXaxis()->SetLabelSize(0.08);
+
+	histM1_1to2_copy->GetYaxis()->CenterTitle(kTRUE);
+	histM1_1to2_copy->GetYaxis()->SetTitleSize(0.1);
+	histM1_1to2_copy->GetYaxis()->SetTitleOffset(0.6);
+	// histM1_1to2_copy->GetYaxis()->SetNdivisions(3,5,0);
+	histM1_1to2_copy->GetYaxis()->SetLabelSize(0.08);
+
+	histM1_1to2_copy->Draw("ep");
+	histM1_2to3_copy->Draw("epSAME");
+	histM1_3toInf_copy->Draw("epSAME");
+
+	TLine *line = new TLine(0,1,10,1);
+	line->SetLineColor(kBlack);
+	line->SetLineWidth(2);
+	line->SetLineStyle(2);
+	line->Draw();
+
+	// To get the delphes config used, which is always the last part of the directory name
 	std::vector<std::string> elems2;
 	split(directory, '_', elems2);
 	std::string delph = elems2[elems2.size()-1];
 	
 	c.SaveAs((directory+"/"+filename+"_"+delph+"_"+app+".pdf").c_str());
+	delete pad1;
+	delete pad2;
 }
 
 /**
@@ -346,67 +427,67 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu){
 			// chain->Add("QCDb_mu_cleanTk/QCDb_mu_38.root");
 			// chain->Add("QCDb_mu_cleanTk/QCDb_mu_39.root");
 			// chain->Add("QCDb_mu_cleanTk/QCDb_mu_40.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_1.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_2.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_3.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_4.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_5.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_6.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_7.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_8.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_9.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_10.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_11.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_12.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_13.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_14.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_15.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_16.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_17.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_18.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_19.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_20.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_21.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_22.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_23.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_24.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_25.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_26.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_27.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_28.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_29.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_30.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_31.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_32.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_33.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_34.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_35.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_36.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_37.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_38.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_39.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_40.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_41.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_42.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_43.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_44.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_45.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_46.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_47.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_48.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_49.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_50.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_51.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_52.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_53.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_54.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_55.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_56.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_57.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_58.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_59.root");
-			chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_60.root");
-
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_1.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_2.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_3.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_4.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_5.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_6.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_7.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_8.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_9.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_10.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_11.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_12.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_13.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_14.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_15.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_16.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_17.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_18.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_19.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_20.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_21.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_22.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_23.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_24.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_25.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_26.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_27.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_28.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_29.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_30.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_31.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_32.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_33.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_34.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_35.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_36.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_37.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_38.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_39.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_40.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_41.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_42.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_43.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_44.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_45.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_46.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_47.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_48.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_49.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_50.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_51.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_52.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_53.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_54.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_55.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_56.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_57.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_58.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_59.root");
+			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_60.root");
+			chain->Add("QCDb_mu_pthatmin20_Mu17_Mu8_bare/qcdb_pthatmin20_Mu17_Mu8_test.root");
 		} else {
 			cout << "Doing QCDb" << endl;
 			chain->Add("QCDb_cleanTk/QCDb_10.root");
