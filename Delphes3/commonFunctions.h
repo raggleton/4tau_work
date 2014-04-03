@@ -2,7 +2,15 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
+
+// ROOT headers
 #include "TStyle.h"
+
+// BOOST headers
+// Need to add 
+// -I $(HOME)/boost_1_55_0
+// to CXXFLAGS in Delphes/Makefile
+#include <boost/lexical_cast.hpp>
 
 using std::cout;
 using std::endl;
@@ -451,10 +459,9 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu){
 			std::string stem = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/QCDb_mu_pthatmin20_Mu17_Mu8_";
 			int nFiles = 200;
 			for (int i = 1; i <= nFiles; i ++){
-				std::ostringstream s;
-				s << i;
-				chain->Add((stem+s.str()+".root").c_str());
+				chain->Add((stem+boost::lexical_cast<std::string>(i)+".root").c_str());
 			}
+			
 		} else {
 			cout << "Doing QCDb" << endl;
 			chain->Add("QCDb_cleanTk/QCDb_10.root");
