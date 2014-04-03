@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
   int nPrintLHA  = 1;             
   int nPrintRest = 0;             
   int nAbort     = 10;
-  int nMaxEvent  = 5000000;
+  int nMaxEvent  = 500000;
   
   // Generator           
   Pythia pythia;                            
@@ -130,7 +130,7 @@ int main(int argc, char* argv[]) {
 
   // Initialize Les Houches Event File run.
   pythia.readString("Beams:frameType = 4"); // the beam and event information is stored in a Les Houches Event File
-  pythia.readString("Beams:LHEF = GG_H_aa_8_4taus_decay_500K-single.lhe");   
+  pythia.readString("Beams:LHEF = ../Signal_1prong_500K_bare/GG_H_aa_8_4taus_decay_500K_2-single.lhe");   
   // pythia.readString("Beams:LHEF = reduced_GG_H_aa_4taus_2.lhe");   
   
   // pythia.readString("ProcessLevel:all = off");   
@@ -138,6 +138,10 @@ int main(int argc, char* argv[]) {
   // pythia.readString("HadronLevel:all = off");   
   pythia.init();   
 
+  // Some basic historgrams
+  Hist nMuInEvent("number of muons in an event", 10, -0.5, 9.5); 
+  Hist muPt("pT muons in an event", 40, 0.0, 20.0); 
+  
   // Set counters.
   int iPrintLHA  = 0;             
   int iPrintRest = 0;             
@@ -148,7 +152,7 @@ int main(int argc, char* argv[]) {
 
   // Begin event loop   
   for (int iEvent = 0; ; ++iEvent) {
-    bool wanted = true;
+    bool wanted = false;
 
     // Generate until none left in input file or get to nMaxEvent
     if (!pythia.next() || iEvent > nMaxEvent) {
@@ -172,7 +176,12 @@ int main(int argc, char* argv[]) {
       ++iPrintRest;         
     }                 
 
+    // Look for 1 prong taus only
     int n1Prong(0), n3Prong(0), nMus(0); //xProng includes muons
+    // Look for muons among decay products (also from charm/tau/...).
+    std::vector<double> muPtVec;
+
+    // Loop over all particles in event
     for (int i = 0; (i < event.size()) && (n3Prong==0); ++i) {
       if ((event[i].idAbs() == 15 ) && (event[i].status() == -22)){ // loop over all taus from a_0
 
@@ -187,15 +196,38 @@ int main(int argc, char* argv[]) {
         else if (nProngs > 1) n3Prong++;
         nMus += nMu;
       }
+
+
+      int id = event[i].id();  
+      if ((abs(id) == 13) && (event[i].status() > 0)){ 
+          muPtVec.push_back(event[i].pT());
+      }
+      
+
     } // end loop over particles in event
     
-    // After looking at all taus, have we got 2 muons and 2 1-prong decays?
-    if ((n1Prong == 4) && (nMus>=2)){
-      wanted = true;
-      nWanted++;
+    // After looking at all taus, have we got 2 muons and 2 1-prong decays? 
+    // (the muPtVec.size() test is kinda redundant, 
+    // as the 2 gen muons should provide 2 muons in that vec)
+    if ((n1Prong == 4) && (nMus>=2) && (muPtVec.size()>1)){
+
+      // order mu pt vector
+      std::sort(muPtVec.begin(),muPtVec.end(), std::greater<int>());
+
+      // Emulate HLT - HLT_Mu17_Mu8
+      if (muPtVec[0]>17 && muPtVec[1]>8 ) {
+        wanted = true;
+        nWanted++;
+        for (unsigned a = 0; a < muPtVec.size(); a++){
+          muPt.fill(muPtVec.at(a));
+        }
+        nMuInEvent.fill(muPtVec.size());
+
       // cout << "+++++++++++++++++ YAYYYY +++++++++++++" <<endl;
-    } else
+      }
+    } else {
       wanted = false;
+    }
 
     // cout << "This event had " << n1Prong << " 1-prong taus, " << n3Prong << " 3-prong taus and " << nMus << " tau to mu decays." << endl;
     if (n3Prong+n1Prong > 4) {
@@ -215,10 +247,13 @@ int main(int argc, char* argv[]) {
       delete hepmcevt;
     }
 
+    muPtVec.clear();
+  
   } // End of event loop.        
   cout << " Number of useful events: " << nWanted << "/" << nMaxEvent << endl;
   // Give statistics. Print histogram.
   pythia.stat();
+  cout << muPt << nMuInEvent << endl;
 
   // Done.                           
   return 0;
