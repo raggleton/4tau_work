@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
     std::sort(muPtVec.begin(),muPtVec.end(), std::greater<int>());
 
     // Emulate HLT - HLT_Mu17_Mu8
-    if (muPtVec[muPtVec.size()] < 17 || muPtVec[1] < 8 ) continue; 
+    if (muPtVec[0] < 17 || muPtVec[1] < 8 ) continue; 
 
     // if it gets to here, then we're happy with the event
     iEvent++;
