@@ -11,6 +11,7 @@
 // -I $(HOME)/boost_1_55_0
 // to CXXFLAGS in Delphes/Makefile
 #include <boost/lexical_cast.hpp>
+// #include <boost/filesystem.hpp>
 
 using std::cout;
 using std::endl;
@@ -330,7 +331,7 @@ void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* hi
 	pad2->SetLeftMargin(pad1->GetLeftMargin());
 	pad2->SetRightMargin(pad1->GetRightMargin());
 	pad2->SetTopMargin(0.05);
-
+	pad2->SetTicks(1,1); // Puts tick marks on upper x axis and right y axis (yes, fn of Pad, not the Hist...)
 	pad2->Draw();
 	pad2->cd();
 
@@ -390,8 +391,12 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu){
 		// chain->Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
 		// chain->Add("Signal_1prong_bare/signal_1prong_bare.root");
 		// chain->Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
-		chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_bare.root");
 		// chain->Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
+		chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_bare.root");
+		chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_2_bare.root");
+		chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_3_bare.root");
+		// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_4_bare.root");
+		// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_5_bare.root");
 		cout << "Doing signal" << endl;
 	} else {
 		if (doMu){
@@ -460,6 +465,7 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu){
 			int nFiles = 200;
 			for (int i = 1; i <= nFiles; i ++){
 				chain->Add((stem+boost::lexical_cast<std::string>(i)+".root").c_str());
+				// cout << file_size(stem+boost::lexical_cast<std::string>(i)+".root") << endl;
 			}
 			
 		} else {
