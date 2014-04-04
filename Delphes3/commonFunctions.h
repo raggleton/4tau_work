@@ -381,8 +381,9 @@ void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* hi
  * @param chain    Pointer to TChain to add files to
  * @param doSignal Flag TRUE to do signalMC, FALSE to do QCD
  * @param doMu     Flag TRUE to use sample that force B hadrons to decay to mu 
+ * @param doHLT    Flag TRUE to use signal sample that emulates HLT conditions (Mu17_Mu8)
  */
-void addInputFiles(TChain* chain, bool doSignal, bool doMu){
+void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 	// Create chain of root trees
 	if (doSignal){
 		// chain->Add("GG_H_aa.root");
@@ -392,11 +393,15 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu){
 		// chain->Add("Signal_1prong_bare/signal_1prong_bare.root");
 		// chain->Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
 		// chain->Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
-		chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_bare.root");
-		chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_2_bare.root");
-		chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_3_bare.root");
-		// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_4_bare.root");
-		// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_5_bare.root");
+		if (doHLT){
+			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_bare.root");
+			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_2_bare.root");
+			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_3_bare.root");
+			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_4_bare.root");
+			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_5_bare.root");
+		} else { 
+			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_bare.root"); // No HLT version
+		}
 		cout << "Doing signal" << endl;
 	} else {
 		if (doMu){

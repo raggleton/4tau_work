@@ -16,13 +16,14 @@ void testScript_cleanTk()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = false;
+	bool doSignal = true;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	
+	bool doHLT = true; // for signal MC - require HLT conditions or not
+
 	// Create chain of root trees
 	TChain chain("Delphes");
-	addInputFiles(&chain, doSignal, doMu);
+	addInputFiles(&chain, doSignal, doMu, doHLT);
 
 	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
 
@@ -110,8 +111,8 @@ void testScript_cleanTk()
 
 	// Plots for testing invariant mass correlation
 	double massBins[6]           = {0,1,2,3,4,10};
-	TH1D *histM1                 = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}", 5, massBins);
-	TH1D *histM2                 = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}", 5, massBins);
+	TH1D *histM1                 = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}", 10,0,10);
+	TH1D *histM2                 = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}", 10,0,10);
 
 	// MC truth - use actual mu-tk pairs from tau
 	TH1D *histM1_truth_0to1      = new TH1D("hM1_truth_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);

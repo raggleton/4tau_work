@@ -15,10 +15,11 @@ void basicScript()
 	bool doSignal = false;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool doHLT = false; // for signal MC - require HLT conditions or not
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
-	addInputFiles(&chain, doSignal, doMu);
+	addInputFiles(&chain, doSignal, doMu, doHLT);
 
 	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
 
