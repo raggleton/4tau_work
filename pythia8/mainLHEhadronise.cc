@@ -92,9 +92,11 @@ int main(int argc, char* argv[]) {
   bool writeToHEPMC = true; // output to HEPMC
 
   // Check that correct number of command-line arguments
-  if (argc != 2) {
+  if (argc != 3) {
     cerr << " Unexpected number of command-line arguments. \n "
-         << " You are expected to provide one output file name (no .hepmc on the end) eg myRun \n"
+         << " You are expected to provide:\n"
+         << " - one input LHE filename \n "
+         << " - one output file name (no .hepmc on the end) eg myRun \n"
          << " Program stopped! " << endl;
     return 1;
   }
@@ -105,8 +107,8 @@ int main(int argc, char* argv[]) {
 
   // Specify file where HepMC events will be stored.
   // Do one for with HLT cuts, one wihtout HLT cuts
-  std::string noHLTfile = std::string(argv[1])+"_NoHLT.hepmc";
-  std::string HLTfile = std::string(argv[1])+"_HLT.hepmc";
+  std::string noHLTfile = std::string(argv[2])+"_NoHLT.hepmc";
+  std::string HLTfile = std::string(argv[2])+"_HLT.hepmc";
   HepMC::IO_GenEvent ascii_io_NoHLT(noHLTfile, std::ios::out);
   HepMC::IO_GenEvent ascii_io_HLT(HLTfile, std::ios::out);
   
@@ -116,7 +118,7 @@ int main(int argc, char* argv[]) {
   int nPrintLHA  = 1;             
   int nPrintRest = 0;             
   int nAbort     = 10;
-  int nMaxEvent  = 500;
+  int nMaxEvent  = 500; // Number of events to process. Set large enough if you want to process everything in the LHE file
   
   // Generator           
   Pythia pythia;                            
@@ -135,7 +137,8 @@ int main(int argc, char* argv[]) {
 
   // Initialize Les Houches Event File run.
   pythia.readString("Beams:frameType = 4"); // the beam and event information is stored in a Les Houches Event File
-  pythia.readString("Beams:LHEF = ../Signal_1prong_500K_bare/GG_H_aa_8_4taus_decay_500K_4-single.lhe");   
+  pythia.readString("Beams:LHEF = "+std::string(argv[1]));   
+  // pythia.readString("Beams:LHEF = ../Signal_1prong_500K_bare/GG_H_aa_8_4taus_decay_500K_1-single.lhe");   
   // pythia.readString("Beams:LHEF = reduced_GG_H_aa_4taus_2.lhe");   
   
   // pythia.readString("ProcessLevel:all = off");   
