@@ -94,24 +94,29 @@ int main(int argc, char* argv[]) {
   // Check that correct number of command-line arguments
   if (argc != 2) {
     cerr << " Unexpected number of command-line arguments. \n "
-         << " You are expected to provide one output file name. \n"
+         << " You are expected to provide one output file name (no .hepmc on the end) eg myRun \n"
          << " Program stopped! " << endl;
     return 1;
   }
 
-  // cout << "Outputting to " << argv[1] << endl;
 
   // Interface for conversion from Pythia8::Event to HepMC event. 
   HepMC::Pythia8ToHepMC ToHepMC;
 
   // Specify file where HepMC events will be stored.
-  HepMC::IO_GenEvent ascii_io(argv[1], std::ios::out);
+  // Do one for with HLT cuts, one wihtout HLT cuts
+  std::string noHLTfile = std::string(argv[1])+"_NoHLT.hepmc";
+  std::string HLTfile = std::string(argv[1])+"_HLT.hepmc";
+  HepMC::IO_GenEvent ascii_io_NoHLT(noHLTfile, std::ios::out);
+  HepMC::IO_GenEvent ascii_io_HLT(HLTfile, std::ios::out);
+  
+  cout << "Outputting to " << noHLTfile << " and " << HLTfile << endl;
 
   //  Number of listed events. Allow for possibility of a few faulty events.
   int nPrintLHA  = 1;             
   int nPrintRest = 0;             
   int nAbort     = 10;
-  int nMaxEvent  = 500000;
+  int nMaxEvent  = 500;
   
   // Generator           
   Pythia pythia;                            
@@ -130,7 +135,7 @@ int main(int argc, char* argv[]) {
 
   // Initialize Les Houches Event File run.
   pythia.readString("Beams:frameType = 4"); // the beam and event information is stored in a Les Houches Event File
-  pythia.readString("Beams:LHEF = ../Signal_1prong_500K_bare/GG_H_aa_8_4taus_decay_500K_2-single.lhe");   
+  pythia.readString("Beams:LHEF = ../Signal_1prong_500K_bare/GG_H_aa_8_4taus_decay_500K_4-single.lhe");   
   // pythia.readString("Beams:LHEF = reduced_GG_H_aa_4taus_2.lhe");   
   
   // pythia.readString("ProcessLevel:all = off");   
@@ -138,9 +143,9 @@ int main(int argc, char* argv[]) {
   // pythia.readString("HadronLevel:all = off");   
   pythia.init();   
 
-  // Some basic historgrams
-  Hist nMuInEvent("number of muons in an event", 10, -0.5, 9.5); 
-  Hist muPt("pT muons in an event", 40, 0.0, 20.0); 
+  // Some basic histograms
+  Hist nMuInEvent("number of muons in an event (HLT)", 10, -0.5, 9.5); 
+  Hist muPt("pT muons in an event (HLT)", 40, 0.0, 40.0); 
   
   // Set counters.
   int iPrintLHA  = 0;             
@@ -148,11 +153,12 @@ int main(int argc, char* argv[]) {
   int iAbort     = 0;
   int iFile      = 1;
 
-  int nWanted(0);
+  int nWanted(0); // Count number pass HLT
 
   // Begin event loop   
   for (int iEvent = 0; ; ++iEvent) {
-    bool wanted = false;
+    bool wantedHLT = false;
+    bool wantedNoHLT = false;
 
     // Generate until none left in input file or get to nMaxEvent
     if (!pythia.next() || iEvent > nMaxEvent) {
@@ -211,12 +217,14 @@ int main(int argc, char* argv[]) {
     // as the 2 gen muons should provide 2 muons in that vec)
     if ((n1Prong == 4) && (nMus>=2) && (muPtVec.size()>1)){
 
+      wantedNoHLT = true;
+      
       // order mu pt vector
       std::sort(muPtVec.begin(),muPtVec.end(), std::greater<int>());
 
       // Emulate HLT - HLT_Mu17_Mu8
       if (muPtVec[0]>17 && muPtVec[1]>8 ) {
-        wanted = true;
+        wantedHLT = true;
         nWanted++;
         for (unsigned a = 0; a < muPtVec.size(); a++){
           muPt.fill(muPtVec.at(a));
@@ -226,16 +234,18 @@ int main(int argc, char* argv[]) {
       // cout << "+++++++++++++++++ YAYYYY +++++++++++++" <<endl;
       }
     } else {
-      wanted = false;
+      wantedHLT = false;
+      wantedNoHLT = false;
     }
 
     // cout << "This event had " << n1Prong << " 1-prong taus, " << n3Prong << " 3-prong taus and " << nMus << " tau to mu decays." << endl;
     if (n3Prong+n1Prong > 4) {
-      cout << "*********** SHIT > 4 --------------------------------------" <<endl;
+      cout << "*********** ARGH > 4 --------------------------------------" <<endl;
             // pythia.event.list();  
     }
-
-    if (wanted && writeToHEPMC){
+    
+    // Write out events that pass HLT cuts
+    if (wantedHLT && writeToHEPMC){
       // Construct new empty HepMC event and fill it.
       // Units will be as chosen for HepMC build, but can be changed
       // by arguments, e.g. GenEvt( HepMC::Units::GEV, HepMC::Units::MM)  
@@ -243,14 +253,27 @@ int main(int argc, char* argv[]) {
       ToHepMC.fill_next_event( pythia, hepmcevt );
 
       // Write the HepMC event to file. Done with it.
-      ascii_io << hepmcevt;
+      ascii_io_HLT << hepmcevt;
+      delete hepmcevt;
+    }
+    
+    // Write out events regardless of HLT status. But must have 4 1-prong taus & 2+ muons
+    if (wantedNoHLT && writeToHEPMC){
+      // Construct new empty HepMC event and fill it.
+      // Units will be as chosen for HepMC build, but can be changed
+      // by arguments, e.g. GenEvt( HepMC::Units::GEV, HepMC::Units::MM)  
+      HepMC::GenEvent* hepmcevt = new HepMC::GenEvent();
+      ToHepMC.fill_next_event( pythia, hepmcevt );
+
+      // Write the HepMC event to file. Done with it.
+      ascii_io_NoHLT << hepmcevt;
       delete hepmcevt;
     }
 
     muPtVec.clear();
   
   } // End of event loop.        
-  cout << " Number of useful events: " << nWanted << "/" << nMaxEvent << endl;
+  cout << " Number of useful events passing HLT: " << nWanted << "/" << nMaxEvent << endl;
   // Give statistics. Print histogram.
   pythia.stat();
   cout << muPt << nMuInEvent << endl;
