@@ -9,16 +9,17 @@ void massPlots()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
+	bool doSignal = false;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT = false; // for signal MC - require HLT conditions or not
+	bool doHLT = true; // for signal MC - require HLT conditions (29K/5*500K evt) or not (500K evt)
 
 	// Create chain of root trees
 	TChain chain("Delphes");
 	addInputFiles(&chain, doSignal, doMu, doHLT);
 
 	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
+	else cout << "mu1 has higher pT than mu2" << endl;
 
 	// Create object of class ExRootTreeReader
 	ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
@@ -400,6 +401,11 @@ void massPlots()
 	if (swapMuRandomly)
 		app += "_muRand";
 	
+	if (doHLT)
+		app += "_HLT";
+	else
+		app += "_NoHLT";
+
 	// Get directory that input file was in - put plots in there
 	std::string fullpath = chain.GetFile()->GetDirectory("")->GetName();
 	std::vector<std::string> elems;
