@@ -16,10 +16,10 @@ void mainAnalysis()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
+	bool doSignal = false;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT = false; // for signal MC - require HLT conditions or not. TODO: QCDb
+	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool doHLT = false; // whether to use MC that has HLT cuts already applied or not.
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -27,9 +27,6 @@ void mainAnalysis()
 
 	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
 	else cout << "mu1 has higher pT than mu2" << endl;
-
-	// if (doHLT) cout << "Using files with HLT cuts already made" << endl;
-	// else cout << "Using files without any HLT cut" << endl;
 
 	// Create object of class ExRootTreeReader
 	ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
@@ -368,7 +365,11 @@ void mainAnalysis()
 			// same but with pT > 2.5, OS to muon
 			std::vector<Track*> tk1_2p5_OS;
 			std::vector<Track*> tk2_2p5_OS;
-
+			
+			// same but with 1 < pT < 2.5 (for sideband)
+			std::vector<Track*> tk1_1to2p5;
+			std::vector<Track*> tk2_1to2p5;
+			
 			Track *candTk(0);
 			bool atLeastTk2p5 = false; // to monitor if theres a tk with pT > 2.5
 			bool atLeastTk2p5OS = false; // same but for OS tk-muon
@@ -420,6 +421,13 @@ void mainAnalysis()
 								tk2_2p5_OS.push_back(candTk);
 							}
 						}					
+					}  else {
+						if (dR1 < 0.5){
+							tk1_1to2p5.push_back(candTk);
+						}
+						if (dR2 < 0.5){
+							tk2_1to2p5.push_back(candTk);
+						}
 					}
 				} // End of track selection
 			} // End of track loop
@@ -465,38 +473,65 @@ void mainAnalysis()
 					histM1_3toInf->Fill(m1);
 			}
 
-		// SIDEBAND REGION
-		// one muon has 1 tk > 2.5 (OS), other has 2 or 3 ( 1 tk => "mu1", 2/3 tk => "mu2")
-		// so NOT pT ordered (although you could do that by eliminating the else if ... bit)
-		if (tk1_1.size() == 1 && (tk2_1.size() == 2 || tk2_1.size() == 3)
-			&& tk1_2p5_OS.size() == 1 && (tk2_2p5.size() == 2 || tk2_2p5.size() == 3)){
+		// // SIDEBAND REGION
+		// // one muon has 1 tk > 2.5 (OS), other has 2 or 3 ( 1 tk => "mu1", 2/3 tk => "mu2")
+		// // so NOT pT ordered (although you could do that by eliminating the else if ... bit)
+		// if (tk1_1.size() == 1 && (tk2_1.size() == 2 || tk2_1.size() == 3)
+		// 	&& tk1_2p5_OS.size() == 1 && (tk2_2p5.size() == 2 || tk2_2p5.size() == 3)){
 			
-			// mu1Mom has 1 tk, mu2Mom has 2/3 tks, stay as "mu1" and "mu2"
-			double m1 = (mu1Mom+tk1_2p5[0]->P4()).M();
-			double m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
-			if(m2 < 1.)
-				histM1_side_0to1->Fill(m1);
-			else if (m2 < 2.)
-				histM1_side_1to2->Fill(m1);
-			else if (m2 < 3.)
-				histM1_side_2to3->Fill(m1);
-			else
-				histM1_3toInf->Fill(m1);
-		} else if (tk2_1.size() == 1 && (tk1_1.size() == 2 || tk1_1.size() == 3)
-			&& tk2_2p5_OS.size() == 1 && (tk1_2p5.size() == 2 || tk1_2p5.size() == 3)){
+		// 	// mu1Mom has 1 tk, mu2Mom has 2/3 tks, stay as "mu1" and "mu2"
+		// 	double m1 = (mu1Mom+tk1_2p5[0]->P4()).M();
+		// 	double m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
+		// 	if(m2 < 1.)
+		// 		histM1_side_0to1->Fill(m1);
+		// 	else if (m2 < 2.)
+		// 		histM1_side_1to2->Fill(m1);
+		// 	else if (m2 < 3.)
+		// 		histM1_side_2to3->Fill(m1);
+		// 	else
+		// 		histM1_3toInf->Fill(m1);
+		// } else if (tk2_1.size() == 1 && (tk1_1.size() == 2 || tk1_1.size() == 3)
+		// 	&& tk2_2p5_OS.size() == 1 && (tk1_2p5.size() == 2 || tk1_2p5.size() == 3)){
 
-			// mu1Mom has 2/3 tks, mu2Mom has 1 tks, so m1 uses mu2Mom & v.v.
-			double m1 = (mu2Mom+tk2_2p5[0]->P4()).M();
-			double m2 = (mu1Mom+tk1_2p5[0]->P4()).M();
-			if(m2 < 1.)
-				histM1_side_0to1->Fill(m1);
-			else if (m2 < 2.)
-				histM1_side_1to2->Fill(m1);
-			else if (m2 < 3.)
-				histM1_side_2to3->Fill(m1);
-			else
-				histM1_side_3toInf->Fill(m1);
-		}
+		// 	// mu1Mom has 2/3 tks, mu2Mom has 1 tks, so m1 uses mu2Mom & v.v.
+		// 	double m1 = (mu2Mom+tk2_2p5[0]->P4()).M();
+		// 	double m2 = (mu1Mom+tk1_2p5[0]->P4()).M();
+		// 	if(m2 < 1.)
+		// 		histM1_side_0to1->Fill(m1);
+		// 	else if (m2 < 2.)
+		// 		histM1_side_1to2->Fill(m1);
+		// 	else if (m2 < 3.)
+		// 		histM1_side_2to3->Fill(m1);
+		// 	else
+		// 		histM1_side_3toInf->Fill(m1);
+		// }
+
+			// ANOTHER SIDEBAND REGION
+			// where at least one muon has an additional track with 1< pT < 2.5,
+			// within dR < 0.5. No sign requirement.
+			if (tk1_2p5.size() == 1 && tk2_2p5.size() == 1 
+				&& ((tk1_1to2p5.size() == 1 && tk1_1to2p5.size() == 1) || (tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 1) || (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 0))){
+				
+				double m1(0), m2(0);				
+				if (tk1_1to2p5.size() == 1)
+					m1 = (mu1Mom+tk1_2p5[0]->P4()+tk1_1to2p5[0]->P4()).M();
+				else
+					m1 = (mu1Mom+tk1_2p5[0]->P4()).M();
+				
+				if(tk2_1to2p5.size() == 1)
+					m2 = (mu2Mom+tk2_2p5[0]->P4()+tk2_1to2p5[0]->P4()).M();
+				else
+					m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
+				
+				if(m2 < 1.)
+					histM1_side_0to1->Fill(m1);
+				else if (m2 < 2.)
+					histM1_side_1to2->Fill(m1);
+				else if (m2 < 3.)
+					histM1_side_2to3->Fill(m1);
+				else
+					histM1_side_3toInf->Fill(m1);
+			}
 
 
 		} // end of muon selection
