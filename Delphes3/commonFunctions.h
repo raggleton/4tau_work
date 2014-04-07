@@ -385,105 +385,60 @@ void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* hi
  */
 void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 	// Create chain of root trees
+	int nFiles = 0; // number of files to be added
+	std::string stem = ""; // folder & file stem, expect files to be named like myFile_i.root, where i = 1 -> nFiles
+
 	if (doSignal){
-		// chain->Add("GG_H_aa.root");
-		// chain->Add("sig_test.root");
-		// chain->Add("Signal_cleanTk/signal_clean.root");
-		// chain->Add("Signal_1prong_cleanTk/signal_1prong_cleanTk.root");
-		// chain->Add("Signal_1prong_bare/signal_1prong_bare.root");
-		// chain->Add("Signal_1prong_new_bare/signal_1prong_new_bare.root");
-		// chain->Add("Signal_3prong_cleanTk/signal_3prong_cleanTk.root");
 		if (doHLT){
-			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_bare.root");
-			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_2_bare.root");
-			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_3_bare.root");
-			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_4_bare.root");
-			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_5_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_10_HLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_HLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_2_HLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_3_HLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_4_HLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_5_HLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_6_HLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_7_HLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_8_HLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_HLT_bare.root");
+			stem = "Signal_1prong_500K_bare/signal_1prong_500K_HLT_";
+			nFiles = 10;
 		} else { 
-			chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_bare.root"); // No HLT version
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_10_NoHLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_NoHLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_2_NoHLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_3_NoHLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_4_NoHLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_5_NoHLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_6_NoHLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_7_NoHLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_8_NoHLT_bare.root");
+			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_NoHLT_bare.root");
+			stem = "Signal_1prong_500K_bare/signal_1prong_500K_NoHLT_";
+			nFiles = 10;
 		}
 		cout << "Doing signal" << endl;
 	} else {
 		if (doMu){
 			cout << "Doing QCDb_mu" << endl;
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_1.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_2.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_3.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_4.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_5.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_6.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_7.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_8.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_9.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_10.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_11.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_12.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_13.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_14.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_15.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_16.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_17.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_18.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_19.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_20.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_21.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_22.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_23.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_24.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_25.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_26.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_27.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_28.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_29.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_30.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_31.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_32.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_33.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_34.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_35.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_36.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_37.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_38.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_39.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_40.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_41.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_42.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_43.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_44.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_45.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_46.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_47.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_48.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_49.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_50.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_51.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_52.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_53.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_54.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_55.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_56.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_57.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_58.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_59.root");
-			// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_60.root");
-			std::string stem = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/QCDb_mu_pthatmin20_Mu17_Mu8_";
-			int nFiles = 200;
-			for (int i = 1; i <= nFiles; i ++){
-				chain->Add((stem+boost::lexical_cast<std::string>(i)+".root").c_str());
-				// cout << file_size(stem+boost::lexical_cast<std::string>(i)+".root") << endl;
-			}
-			
+			// std::string stem = "QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_";
+			stem = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/QCDb_mu_pthatmin20_Mu17_Mu8_";
+			nFiles = 300;
 		} else {
 			cout << "Doing QCDb" << endl;
-			chain->Add("QCDb_cleanTk/QCDb_10.root");
-			chain->Add("QCDb_cleanTk/QCDb_2.root");
-			chain->Add("QCDb_cleanTk/QCDb_3.root");
-			chain->Add("QCDb_cleanTk/QCDb_4.root");
-			chain->Add("QCDb_cleanTk/QCDb_5.root");
-			chain->Add("QCDb_cleanTk/QCDb_6.root");
-			chain->Add("QCDb_cleanTk/QCDb_7.root");
-			chain->Add("QCDb_cleanTk/QCDb_8.root");
-			chain->Add("QCDb_cleanTk/QCDb_9.root");
+			stem = "QCDb_cleanTk/QCDb_";
+			nFiles = 10;
+			// chain->Add("QCDb_cleanTk/QCDb_10.root");
+			// chain->Add("QCDb_cleanTk/QCDb_2.root");
+			// chain->Add("QCDb_cleanTk/QCDb_3.root");
+			// chain->Add("QCDb_cleanTk/QCDb_4.root");
+			// chain->Add("QCDb_cleanTk/QCDb_5.root");
+			// chain->Add("QCDb_cleanTk/QCDb_6.root");
+			// chain->Add("QCDb_cleanTk/QCDb_7.root");
+			// chain->Add("QCDb_cleanTk/QCDb_8.root");
+			// chain->Add("QCDb_cleanTk/QCDb_9.root");
 		}
+	}
+	for (int i = 1; i <= nFiles; i ++){
+		chain->Add((stem+boost::lexical_cast<std::string>(i)+".root").c_str());
 	}
 }
