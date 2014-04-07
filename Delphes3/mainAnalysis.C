@@ -758,8 +758,18 @@ void mainAnalysis()
 	histM1->Write("",TObject::kOverwrite);
 	histM2->Write("",TObject::kOverwrite);
 
-	// histM1_M2.Write("",TObject::kOverwrite);
-	// histM1_side_M2.Write("",TObject::kOverwrite);
+	histM1_truth_0to1->Write("",TObject::kOverwrite);
+	histM1_truth_1to2->Write("",TObject::kOverwrite);
+	histM1_truth_2to3->Write("",TObject::kOverwrite);
+	histM1_truth_3toInf->Write("",TObject::kOverwrite);
+	histM1_0to1->Write("",TObject::kOverwrite);
+	histM1_1to2->Write("",TObject::kOverwrite);
+	histM1_2to3->Write("",TObject::kOverwrite);
+	histM1_3toInf->Write("",TObject::kOverwrite);
+	histM1_side_0to1->Write("",TObject::kOverwrite);
+	histM1_side_1to2->Write("",TObject::kOverwrite);
+	histM1_side_2to3->Write("",TObject::kOverwrite);
+	histM1_side_3toInf->Write("",TObject::kOverwrite);
 
 	outFile->Close();
 
