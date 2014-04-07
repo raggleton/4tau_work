@@ -19,7 +19,7 @@ void mainAnalysis()
 	bool doSignal = true;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT = true; // for signal MC - require HLT conditions or not. TODO: QCDb
+	bool doHLT = false; // for signal MC - require HLT conditions or not. TODO: QCDb
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -27,9 +27,9 @@ void mainAnalysis()
 
 	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
 	else cout << "mu1 has higher pT than mu2" << endl;
-	
-	if (doHLT) cout << "Using files with HLT cuts already made" << endl;
-	else cout << "Using file swihtout any HLT cut" << endl;
+
+	// if (doHLT) cout << "Using files with HLT cuts already made" << endl;
+	// else cout << "Using files without any HLT cut" << endl;
 
 	// Create object of class ExRootTreeReader
 	ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);

@@ -400,6 +400,7 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_7_HLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_8_HLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_HLT_bare.root");
+			cout << "Doing signal with HLT cuts" << endl;
 			stem = "Signal_1prong_500K_bare/signal_1prong_500K_HLT_";
 			nFiles = 10;
 		} else { 
@@ -413,16 +414,21 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_7_NoHLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_8_NoHLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_NoHLT_bare.root");
+			cout << "Doing signal without HLT cuts" << endl;
 			stem = "Signal_1prong_500K_bare/signal_1prong_500K_NoHLT_";
 			nFiles = 10;
 		}
-		cout << "Doing signal" << endl;
 	} else {
 		if (doMu){
-			cout << "Doing QCDb_mu" << endl;
-			// std::string stem = "QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_";
-			stem = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/QCDb_mu_pthatmin20_Mu17_Mu8_";
-			nFiles = 300;
+			if(doHLT){
+				cout << "Doing QCDb_mu with HLT cuts" << endl;
+				stem = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/QCDb_mu_pthatmin20_Mu17_Mu8_";
+				nFiles = 300;
+			} else{
+				cout << "Doing QCDb_mu without HLT cuts" << endl;
+				stem = "QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_";
+				nFiles = 60;
+			}
 		} else {
 			cout << "Doing QCDb" << endl;
 			stem = "QCDb_cleanTk/QCDb_";
@@ -439,6 +445,7 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 		}
 	}
 	for (int i = 1; i <= nFiles; i ++){
+		cout << "Adding " << stem+boost::lexical_cast<std::string>(i)+".root" << endl;
 		chain->Add((stem+boost::lexical_cast<std::string>(i)+".root").c_str());
 	}
 }
