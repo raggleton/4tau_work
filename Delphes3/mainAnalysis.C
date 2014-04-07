@@ -8,17 +8,17 @@ using std::cout;
 using std::endl;
 
 /**
- * Main analysis script to make plots etc. Really should rename it.
+ * Main analysis script to make plots etc. 
  */
-void testScript_cleanTk()
+void mainAnalysis()
 {
 	TH1::SetDefaultSumw2();
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
+	bool doSignal = false;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT = true; // for signal MC - require HLT conditions or not
 
 	// Create chain of root trees
@@ -550,6 +550,9 @@ void testScript_cleanTk()
 	if (swapMuRandomly)
 		app += "_muRand";
 	
+	if (!doHLT)
+		app += "_NoHLT";
+
 	// Get directory that input file was in - put plots in there
 	std::string fullpath = chain.GetFile()->GetDirectory("")->GetName();
 	std::vector<std::string> elems;

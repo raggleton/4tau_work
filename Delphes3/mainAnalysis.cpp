@@ -32,19 +32,19 @@ using namespace std;
 // Instructions: in your Delphes folder do
 // ./configure
 // make (may need a make clean first)
-// ./testScript_cleanTk (uses the filename of this cpp as the program name)
+// ./mainAnalysis(uses the filename of this cpp as the program name)
 
 //------------------------------------------------------------------------------
 
 // Here you can put your analysis macro   
 
-#include "testScript_cleanTk.C"
+#include "mainAnalysis.C"
 
 //------------------------------------------------------------------------------
 
 int main(int argc, char *argv[])
 {
-	char *appName = "testScript_cleanTk";
+	char *appName = "mainAnalysis";
 
 	// if(argc != 2)
 	// {
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
 // Here you call your macro's main function 
 
-	testScript_cleanTk();
+	mainAnalysis();
 
 //------------------------------------------------------------------------------
 
