@@ -8,7 +8,7 @@
 
 // BOOST headers
 // Need to add 
-// -I $(HOME)/boost_1_55_0
+// -I $(HOME)/boost_1_55_0 -I $(HOME)/boost_1_55_0_install/include 
 // to CXXFLAGS in Delphes/Makefile
 #include <boost/lexical_cast.hpp>
 // #include <boost/filesystem.hpp>
