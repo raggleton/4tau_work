@@ -314,6 +314,11 @@ void basicScript()
 		app += "_NoHLT";	
 
 	// app += "_samePtEta";
+
+	// Get directory that input file was in - put plots in there
+	std::string directory = getDirectory(chain.GetFile());
+	// Get Delphes file config used - last part of directory name
+	std::string delph = getDelph(directory);
 	
 	// drawHistAndSave(histMu1Pt, "HISTE", "Mu1Pt", directory, app);
 	// drawHistAndSave(histMu2Pt, "HISTE", "Mu2Pt", directory, app);
