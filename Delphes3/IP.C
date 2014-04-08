@@ -52,7 +52,7 @@ void IP()
 		// Load selected branches with data from specified event
 		treeReader->ReadEntry(entry);
 
-		cout << "*** Event" << endl;
+		// cout << "*** Event" << endl;
 
 		if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons!
 
@@ -116,10 +116,6 @@ void IP()
 				// Assign charged products to be mu or track
 				bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, *charged1a, *charged1b);				
 				bool truth2HasMu = assignMuonAndTrack(muTruth2, trackTruth2, *charged2a, *charged2b);
-				cout << charged1a->PID << endl;
-				cout << charged1b->PID << endl;
-				cout << charged2a->PID << endl;
-				cout << charged2b->PID << endl;
 
 				// NOTE: muons are NOT pT ordered
 
