@@ -39,6 +39,21 @@ std::vector<std::string> &split(const std::string &s, char delim, std::vector<st
 	return elems;
 }
 
+// Get directory that input file was in - put plots in there
+std::string getDirectory(TFile* f){	
+	std::string fullpath = f->GetDirectory("")->GetName();
+	std::vector<std::string> elems;
+	split(fullpath, '/', elems);
+	return elems[0];
+}
+
+// Get Delphes file config used - last part of directory name
+std::string getDelph(std::string directory){	
+	std::vector<std::string> elems2;
+	split(directory, '_', elems2);
+	return elems2[elems2.size()-1];
+}
+
 // For sorting track vectors by pT
 // Ideally we'd use the templated methods in classes/SortableObject.h ...
 bool sortTracksByPT(Track* a, Track* b){ 
@@ -402,7 +417,7 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_HLT_bare.root");
 			cout << "Doing signal with HLT cuts" << endl;
 			stem = "Signal_1prong_500K_bare/signal_1prong_500K_HLT_";
-			nFiles = 10;
+			nFiles = 1;
 		} else { 
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_10_NoHLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_NoHLT_bare.root");
@@ -427,7 +442,7 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			} else{
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
 				stem = "QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_";
-				nFiles = 60;
+				nFiles = 91;
 			}
 		} else {
 			cout << "Doing QCDb" << endl;
