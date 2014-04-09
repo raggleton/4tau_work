@@ -11,10 +11,11 @@ using namespace Pythia8;
  
 int main(int argc, char* argv[]) {
 
-  bool outputEvent  = false; // output entire event listing to STDOUT (long!), for debugging only
-  bool writeToHEPMC = true; // output to HEPMC
-  bool muOnly       = true; // Only allow b hadrons to decay to muons or taus
-  bool tauToMuOnly  = true; // Only allow those taus from b hadrons to decay to muons 
+  bool outputEvent       = false; // output entire event listing to STDOUT (long!), for debugging only
+  bool writeHLTToHEPMC   = false; // output to HEPMC events passing HLT
+  bool writeNoHLTToHEPMC = true; // output to HEPMC events without any HLT cuts
+  bool muOnly            = true; // Only allow b hadrons to decay to muons or taus
+  bool tauToMuOnly       = true; // Only allow those taus from b hadrons to decay to muons 
 
   // Check that correct number of command-line arguments
   // Unfortunately required even if writeToHEPMC = false
@@ -49,7 +50,7 @@ int main(int argc, char* argv[]) {
   // Number of events. For HLT. NoHLT has about 60X HLT amount (320K NoHLT evt for 5K HLT evnt)
   // Warning, 5K events ~900MB hepmc file and takes ~5 min.
   // Warning, 50K events ~9GB hepmc file and takes ~40 min.
-  pythia.readString("Main:numberOfEvents = 200");
+  pythia.readString("Main:numberOfEvents = 200000");
   int nEvent = pythia.mode("Main:numberOfEvents");
   pythia.readString("Next:numberShowEvent = 00");
   // pythia.readString("Next:numberShowProcess = 100");
@@ -139,7 +140,7 @@ int main(int argc, char* argv[]) {
     bool wantedHLT = false;
     bool wantedNoHLT = false;
 
-    if ((iEvent % 50 == 0) && (iEvent!= lastiEvent)){
+    if ((iEvent % 500 == 0) && (iEvent!= lastiEvent)){
       lastiEvent = iEvent;
       cout << "iEvent: " << iEvent << endl;
     }
@@ -230,32 +231,37 @@ int main(int argc, char* argv[]) {
     }
 
     if (nMuPos+nMuNeg < 2) continue; // Skip if there's only 1 muon
+    
+    if (!writeHLTToHEPMC) iEvent++; // Count evt if not doing HLT mode. Need to be careful when testing this without either...
+    wantedNoHLT = true;
+    
     for (unsigned a = 0; a < muPtVec.size(); a++){
         muPtNoHLT.fill(muPtVec.at(a));
-      }
-    wantedNoHLT = true;
-
-    // order mu pt vector
-    std::sort(muPtVec.begin(),muPtVec.end(), std::greater<int>());
-
-    // Emulate HLT - HLT_Mu17_Mu8
-    if (muPtVec[0] > 17 && muPtVec[1] > 8 ){
-      // if it gets to here, then we're happy with the event
-      iEvent++;
-      for (unsigned a = 0; a < muPtVec.size(); a++){
-        muPt.fill(muPtVec.at(a));
-      }
-      nMuInEvent.fill(nMuPos + nMuNeg);
-      wantedHLT = true;
     }
+    
+    // Do HLT cuts
+    if (writeHLTToHEPMC){
+      // order mu pt vector
+      std::sort(muPtVec.begin(),muPtVec.end(), std::greater<int>());
 
+      // Emulate HLT - HLT_Mu17_Mu8
+      if (muPtVec[0] > 17 && muPtVec[1] > 8 ){
+        // if it gets to here, then we're happy with the event
+        iEvent++;
+        for (unsigned a = 0; a < muPtVec.size(); a++){
+          muPt.fill(muPtVec.at(a));
+        }
+        nMuInEvent.fill(nMuPos + nMuNeg);
+        wantedHLT = true;
+      }
+    }
 
     // Output the event to screen
     if (outputEvent)
       event.list();
 
     // Write out events that pass HLT cuts
-    if (wantedHLT && writeToHEPMC){
+    if (wantedHLT && writeHLTToHEPMC){
       // Construct new empty HepMC event and fill it.
       // Units will be as chosen for HepMC build, but can be changed
       // by arguments, e.g. GenEvt( HepMC::Units::GEV, HepMC::Units::MM)  
@@ -268,7 +274,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Write out events that have 2+ muons, regardless of whether they pass HLT cuts
-    if (wantedNoHLT && writeToHEPMC){
+    if (wantedNoHLT && writeNoHLTToHEPMC){
       // Construct new empty HepMC event and fill it.
       // Units will be as chosen for HepMC build, but can be changed
       // by arguments, e.g. GenEvt( HepMC::Units::GEV, HepMC::Units::MM)  
@@ -283,7 +289,7 @@ int main(int argc, char* argv[]) {
 
   // Statistics. Histograms. 
   pythia.stat();
-  cout << muPt << nMuInEvent << endl;
+  cout << muPt << nMuInEvent << muPtNoHLT << endl;
   cout << "Number of events with pair, & passing HLT: " << nWithPair << endl;
 
   // Done. 
