@@ -6,6 +6,20 @@ using std::endl;
 /**
  * Plot IP of tracks, and displacement of object from PV
  */
+
+template<typename T>
+ double calculateIP(T* candTk){
+	// Calculate impact paramter (IP) of track object.
+	// Let x = position vector to object from PV
+	// Let v = velocity vector of object
+	// IP = |x|*sin(theta)
+	// Where cos(theta) = v.x/|v||x|
+	TVector3 v = (candTk->P4()).Vect();
+	TVector3 x(candTk->X,candTk->Y,candTk->Z);
+	double theta = TMath::ACos(v.Unit() * x.Unit());
+	return fabs(x.Mag() * TMath::Sin(theta));
+}
+
 void IP()
 {
 	TH1::SetDefaultSumw2();
@@ -37,10 +51,10 @@ void IP()
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
 	// Book histograms
-	TH1D *histIPTracks1OS = new TH1D("hIPTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
-	TH1D *histIPTracks1   = new TH1D("hIPTracks1" ,"Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
-	TH1D *histIPTracks2OS = new TH1D("hIPTracks2OS" ,"Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
-	TH1D *histIPTracks2   = new TH1D("hIPTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
+	TH1D *histIPTracks    = new TH1D("hIPTracks" ,"Track IP, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
+	TH1D *histIPTracksOS = new TH1D("hIPTracksOS" ,"Track IP, OS to #mu, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
+	TH1D *histIPTracksTruth    = new TH1D("hIPTracksTruth" ,"Track IP for #tau decay products, MC truth, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
+	TH1D *histIPTracksTruthOS    = new TH1D("hIPTracksTruthOS" ,"Track IP for #tau decay products, MC truth, OS to #mu, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
 
 	// Loop over all events
 	Long64_t numberOfEntries = treeReader->GetEntries();
@@ -155,6 +169,15 @@ void IP()
 					// 	histM1_truth_2to3->Fill(m1);
 					// else
 					// 	histM1_truth_3toInf->Fill(m1);
+					
+					// Do IP for tau decay products
+					double IP = calculateIP(trackTruth1);
+					histIPTracksTruth->Fill(IP);
+					if((trackTruth1->Charge * muTruth1->Charge)< 0) histIPTracksTruthOS->Fill(IP);
+					IP = calculateIP(trackTruth2);
+					histIPTracksTruth->Fill(IP);
+					if((trackTruth2->Charge * muTruth2->Charge)< 0) histIPTracksTruthOS->Fill(IP);
+
 				}
 			} 
 		} // end if(doSignal)
@@ -248,15 +271,15 @@ void IP()
 				// Let v = velocity vector of object
 				// IP = |x|*sin(theta)
 				// Where cos(theta) = v.x/|v||x|
-				TVector3 v = (candTk->P4()).Vect();
-				TVector3 x(candTk->X,candTk->Y,candTk->Z);
-				double theta = TMath::ACos(v.Unit() * x.Unit());
-				double IP = x.Mag() * TMath::Sin(theta);
+				// TVector3 v = (candTk->P4()).Vect();
+				// TVector3 x(candTk->X,candTk->Y,candTk->Z);
+				// double theta = TMath::ACos(v.Unit() * x.Unit());
+				// double IP = x.Mag() * TMath::Sin(theta);
+				double IP = calculateIP(candTk);
+				histIPTracks->Fill(IP);
 
-				histIPTracks1->Fill(IP);
-
-				if((candTk->Charge * mu1->Charge)< 0) histIPTracks1OS->Fill(IP);
-				if((candTk->Charge * mu2->Charge)< 0) histIPTracks2OS->Fill(IP);
+				// Do OS tracks (SS muon requirement is above)
+				if((candTk->Charge * mu1->Charge)< 0) histIPTracksOS->Fill(IP);
 			}
 
 			// Standard track conditions
@@ -323,9 +346,9 @@ void IP()
 
 	std::string app("");
 	if (doSignal) {
-		app = "_sig";
+		app = "sig";
 	} else {
-		app = "_bg";
+		app = "bg";
 	}
 	if (swapMuRandomly)
 		app += "_muRand";
@@ -342,9 +365,15 @@ void IP()
 	// Get Delphes file config used - last part of directory name
 	std::string delph = getDelph(directory);
 	
-	drawHistAndSave(histIPTracks1, "HISTE", "TrackIP", directory, app);
-	drawHistAndSave(histIPTracks1OS, "HISTE", "TrackIP1OS", directory, app);
-	drawHistAndSave(histIPTracks2OS, "HISTE", "TrackIP2OS", directory, app);
+	normaliseHist(histIPTracks);
+	normaliseHist(histIPTracksOS);
+	normaliseHist(histIPTracksTruth);
+	normaliseHist(histIPTracksTruthOS);
+
+	drawHistAndSave(histIPTracks, "HISTE", "TrackIP", directory, app, true);
+	drawHistAndSave(histIPTracksOS, "HISTE", "TrackIPOS", directory, app, true);
+	drawHistAndSave(histIPTracksTruth, "HISTE", "TrackIPTruth", directory, app, true);
+	drawHistAndSave(histIPTracksTruthOS, "HISTE", "TrackIPTruthOS", directory, app, true);
 
 	// TFile* outFile = TFile::Open((name+"cleanTk/output"+app+".root").c_str(),"RECREATE");
 
