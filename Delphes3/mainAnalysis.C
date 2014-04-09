@@ -192,12 +192,12 @@ void mainAnalysis()
 			}
 		}
 
-		histMu1Pt->Fill(mu1PT);
-		histMu2Pt->Fill(mu2PT);
-
 		TLorentzVector mu1Mom, mu2Mom;
 		mu1Mom = mu1->P4();
 		mu2Mom = mu2->P4();
+
+		histMu1Pt->Fill(mu1->PT);
+		histMu2Pt->Fill(mu2->PT);
 
 		//////////////////////////////////////////////////////
 		// Get the hard interaction particles for signal MC //
@@ -557,10 +557,10 @@ void mainAnalysis()
 	histNTracksAbs2OS->SetYTitle("Ave. OS N_{trk} per #mu_{2}");
 
 	// AU scaling
-	histNTracks1->Scale(1./histNTracks1->Integral());
-	histNTracks2->Scale(1./histNTracks2->Integral());
-	histNTracks1OS->Scale(1./histNTracks1OS->Integral());
-	histNTracks2OS->Scale(1./histNTracks2OS->Integral());
+	normaliseHist(histNTracks1);
+	normaliseHist(histNTracks2);
+	normaliseHist(histNTracks1OS);
+	normaliseHist(histNTracks2OS);
 
 	// Cumulative plots
 	histNTracksCum1   = (TH1D*)histNTracksAbs1->Clone("hNTracksCum1");
@@ -595,15 +595,10 @@ void mainAnalysis()
 		app += "_NoHLT";
 
 	// Get directory that input file was in - put plots in there
-	std::string fullpath = chain.GetFile()->GetDirectory("")->GetName();
-	std::vector<std::string> elems;
-	split(fullpath, '/', elems);
-	std::string directory = elems[0];
-
+	std::string directory = getDirectory(chain.GetFile());
 	// Get Delphes file config used - last part of directory name
-	std::vector<std::string> elems2;
-	split(directory, '_', elems2);
-	std::string delph = elems2[elems2.size()-1];
+	std::string delph = getDelph(directory);
+
 
 	// app += "_samePtEta";
 
@@ -757,11 +752,12 @@ void mainAnalysis()
 	// Mass plots
 	histM1->Write("",TObject::kOverwrite);
 	histM2->Write("",TObject::kOverwrite);
-
-	histM1_truth_0to1->Write("",TObject::kOverwrite);
-	histM1_truth_1to2->Write("",TObject::kOverwrite);
-	histM1_truth_2to3->Write("",TObject::kOverwrite);
-	histM1_truth_3toInf->Write("",TObject::kOverwrite);
+	if (doSignal){
+		histM1_truth_0to1->Write("",TObject::kOverwrite);
+		histM1_truth_1to2->Write("",TObject::kOverwrite);
+		histM1_truth_2to3->Write("",TObject::kOverwrite);
+		histM1_truth_3toInf->Write("",TObject::kOverwrite);
+	}
 	histM1_0to1->Write("",TObject::kOverwrite);
 	histM1_1to2->Write("",TObject::kOverwrite);
 	histM1_2to3->Write("",TObject::kOverwrite);
