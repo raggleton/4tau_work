@@ -61,10 +61,16 @@ void massPlots()
 	TH1D *histM1_side_3toInf  = new TH1D("hM1_side_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 
 	// mu1 pT plots in bins of m2
-	TH1D* histMu1Pt_0to1   = new TH1D("hMu1Pt_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",50,0.,50.);
-	TH1D* histMu1Pt_1to2   = new TH1D("hMu1Pt_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",50,0.,50.);
-	TH1D* histMu1Pt_2to3   = new TH1D("hMu1Pt_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",50,0.,50.);
-	TH1D* histMu1Pt_3toInf = new TH1D("hMu1Pt_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",50,0.,50.);
+	TH1D* histMu1Pt_0to1   = new TH1D("hMu1Pt_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",20,10.,50.);
+	TH1D* histMu1Pt_1to2   = new TH1D("hMu1Pt_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",20,10.,50.);
+	TH1D* histMu1Pt_2to3   = new TH1D("hMu1Pt_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",20,10.,50.);
+	TH1D* histMu1Pt_3toInf = new TH1D("hMu1Pt_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",20,10.,50.);
+
+	// mu1 pT plots in bins of m2 - MC truth
+	TH1D* histMu1Pt_truth_0to1   = new TH1D("hMu1Pt_truth_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+	TH1D* histMu1Pt_truth_1to2   = new TH1D("hMu1Pt_truth_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+	TH1D* histMu1Pt_truth_2to3   = new TH1D("hMu1Pt_truth_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+	TH1D* histMu1Pt_truth_3toInf = new TH1D("hMu1Pt_truth_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
 
 	int nMu(0);
 	int n1(0), n2(0), nMuPass(0);
@@ -186,39 +192,51 @@ void massPlots()
 				if (!truth1HasMu || !truth2HasMu) {
 					// cout << "Problem, no truth mu for 1 and/or 2!" << endl;
 				} else { 
-					// Do m1 distribution in bins of m2 - for MC truth (is it actually correlated?)
-					double m1(0.);
-					double m2(0.);
 					
-					// Assign m1 to higher pT muon
-					if (muTruth1->PT > muTruth2->PT) {
-						m1 = (muTruth1->P4()+trackTruth1->P4()).M();
-						m2 = (muTruth2->P4()+trackTruth2->P4()).M();
-					} else {
-						m2 = (muTruth1->P4()+trackTruth1->P4()).M();
-						m1 = (muTruth2->P4()+trackTruth2->P4()).M();
+					// Assign system "1" to higher pT muon
+					// Swap obj if necessary
+					if (muTruth1->PT < muTruth2->PT) {
+						GenParticle* tempMu = muTruth1;
+						GenParticle* tempTk = trackTruth1;
+						muTruth1 = muTruth2;
+						trackTruth1 = trackTruth2;
+						muTruth2 = tempMu;
+						trackTruth2 = tempTk;
 					}
-
+					
 					// Randomly swap trk-mu pairs 1<->2 if desired
 					if(swapMuRandomly){
 						double randNum = (double)rand() / RAND_MAX;
 						if (randNum > 0.5){
-							double tmp = m2;
-							m2 = m1;
-							m1 = tmp;
+							GenParticle* tempMu = muTruth1;
+							GenParticle* tempTk = trackTruth1;
+							muTruth1 = muTruth2;
+							trackTruth1 = trackTruth2;
+							muTruth2 = tempMu;
+							trackTruth2 = tempTk;
 						}
 					}
 
+					// Do m1 distribution in bins of m2 - for MC truth (is it actually correlated?)
+					double m1 = (muTruth1->P4()+trackTruth1->P4()).M();
+					double m2 = (muTruth2->P4()+trackTruth2->P4()).M();
+
+
 					// plot mu-tk system properties (MC truth)
 					// cout << m1 << "     " << m2 << endl;
-					if(m2 < 1.)
+					if(m2 < 1.){
 						histM1_truth_0to1->Fill(m1);
-					else if (m2 < 2.)
+						histMu1Pt_truth_0to1->Fill(muTruth1->PT);
+					} else if (m2 < 2.){
 						histM1_truth_1to2->Fill(m1);
-					else if (m2 < 3.)
+						histMu1Pt_truth_1to2->Fill(muTruth1->PT);
+					} else if (m2 < 3.){
 						histM1_truth_2to3->Fill(m1);
-					else
+						histMu1Pt_truth_2to3->Fill(muTruth1->PT);
+					} else{
 						histM1_truth_3toInf->Fill(m1);
+						histMu1Pt_truth_3toInf->Fill(muTruth1->PT);
+					}
 				}
 
 				if (!muTruth1) delete muTruth1;
@@ -436,14 +454,13 @@ void massPlots()
 	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
 
 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
-
 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (at least 1 #mu has add. tk with p_{T} = (1,2.5));m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, "M1_M2_side", directory, app);
-
 	if(doSignal){
 		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
 	}
 
 	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - signal region;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_0to1, histMu1Pt_1to2, histMu1Pt_2to3, histMu1Pt_3toInf, "Mu1Pt_M2", directory, app);
+	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - MC truth;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_truth_0to1, histMu1Pt_truth_1to2, histMu1Pt_truth_2to3, histMu1Pt_truth_3toInf, "Mu1Pt_M2_truth", directory, app);
 
 	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
@@ -464,10 +481,15 @@ void massPlots()
 	histM1_side_1to2->Write("",TObject::kOverwrite);
 	histM1_side_2to3->Write("",TObject::kOverwrite);
 	histM1_side_3toInf->Write("",TObject::kOverwrite);
+
 	histMu1Pt_0to1->Write("",TObject::kOverwrite);
 	histMu1Pt_1to2->Write("",TObject::kOverwrite);
 	histMu1Pt_2to3->Write("",TObject::kOverwrite);
 	histMu1Pt_3toInf->Write("",TObject::kOverwrite);
+	histMu1Pt_truth_0to1->Write("",TObject::kOverwrite);
+	histMu1Pt_truth_1to2->Write("",TObject::kOverwrite);
+	histMu1Pt_truth_2to3->Write("",TObject::kOverwrite);
+	histMu1Pt_truth_3toInf->Write("",TObject::kOverwrite);
 	
 	outFile->Close();
 
