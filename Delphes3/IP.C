@@ -51,10 +51,10 @@ void IP()
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
 	// Book histograms
-	TH1D *histIPTracks    = new TH1D("hIPTracks" ,"Track IP, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
-	TH1D *histIPTracksOS = new TH1D("hIPTracksOS" ,"Track IP, OS to #mu, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
-	TH1D *histIPTracksTruth    = new TH1D("hIPTracksTruth" ,"Track IP for #tau decay products, MC truth, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
-	TH1D *histIPTracksTruthOS    = new TH1D("hIPTracksTruthOS" ,"Track IP for #tau decay products, MC truth, OS to #mu, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
+	TH1D *histIPTracks        = new TH1D("hIPTracks" ,"Track IP, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
+	TH1D *histIPTracksOS      = new TH1D("hIPTracksOS" ,"Track IP, OS to #mu, p_{T}(trk)>2.5 GeV, muon selection;Track IP; A.U.", 50,0,0.5);
+	TH1D *histIPTracksTruth   = new TH1D("hIPTracksTruth" ,"Track IP for #tau decay products, MC truth, p_{T}(trk)>2.5 GeV, no muon selection;Track IP; A.U.", 50,0,0.5);
+	TH1D *histIPTracksTruthOS = new TH1D("hIPTracksTruthOS" ,"Track IP for #tau decay products, MC truth, OS to #mu, p_{T}(trk)>2.5 GeV, no muon selection;Track IP; A.U.", 50,0,0.5);
 
 	// Loop over all events
 	Long64_t numberOfEntries = treeReader->GetEntries();
@@ -137,7 +137,7 @@ void IP()
 					// cout << "Problem, no truth mu for 1 and/or 2!" << endl;
 				} else { 
 					
-					// Do m1 distribution in bins of m2 - for MC truth (is it actually correlated?)
+/*					// Do m1 distribution in bins of m2 - for MC truth (is it actually correlated?)
 					double m1(0.);
 					double m2(0.);
 					
@@ -159,7 +159,7 @@ void IP()
 							m1 = tmp;
 						}
 					}
-
+*/
 					// cout << m1 << "     " << m2 << endl;
 					// if(m2 < 1.)
 					// 	histM1_truth_0to1->Fill(m1);
@@ -375,17 +375,14 @@ void IP()
 	drawHistAndSave(histIPTracksTruth, "HISTE", "TrackIPTruth", directory, app, true);
 	drawHistAndSave(histIPTracksTruthOS, "HISTE", "TrackIPTruthOS", directory, app, true);
 
-	// TFile* outFile = TFile::Open((name+"cleanTk/output"+app+".root").c_str(),"RECREATE");
+	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"RECREATE");
 
-	// histNMu->Write("",TObject::kOverwrite);
-	// histMu1Pt->Write("",TObject::kOverwrite);
-	// histMu2Pt->Write("",TObject::kOverwrite);
-	// histMu1PtSel
-	// if (doSignal){
-	// 	histDRa1->Write("",TObject::kOverwrite);
-	// 	histDRa2->Write("",TObject::kOverwrite);
-	// 	histPID->Write("",TObject::kOverwrite);
-	// }
+	histIPTracks->Write("",TObject::kOvewrite);
+	histIPTracksOS->Write("",TObject::kOvewrite);
+	if (doSignal){
+		histIPTracksTruth->Write("",TObject::kOvewrite);
+		histIPTracksTruthOS->Write("",TObject::kOvewrite);
+	}
 
-	// outFile->Close();
+	outFile->Close();
 }
