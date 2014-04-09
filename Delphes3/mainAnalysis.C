@@ -381,7 +381,7 @@ void mainAnalysis()
 					&& (candTk->PT > 1.)
 					&& (fabs(candTk->Z) < 1.) //dz < 1mm
 					&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
-					&& (fabs(candTk->Eta)<3)
+					&& (fabs(candTk->Eta)<2.4)
 				){
 					// Store track in suitable vector
 					double dR1 = (candTk->P4()).DeltaR(mu1Mom);
