@@ -176,8 +176,8 @@ void IP()
 					if((trackTruth1->Charge * muTruth1->Charge)< 0) histIPTracksTruthOS->Fill(IP);
 					IP = calculateIP(trackTruth2);
 					histIPTracksTruth->Fill(IP);
-					if((trackTruth2->Charge * muTruth2->Charge)< 0) histIPTracksTruthOS->Fill(IP);
-
+					if((trackTruth2->Charge * muTruth2->Charge)< 0) histIPTracksTruthOS->Fill(IP); 
+					// note: OS plto should be identical to non OS one, if your MC is right!
 				}
 			} 
 		} // end if(doSignal)
@@ -375,7 +375,7 @@ void IP()
 	drawHistAndSave(histIPTracksTruth, "HISTE", "TrackIPTruth", directory, app, true);
 	drawHistAndSave(histIPTracksTruthOS, "HISTE", "TrackIPTruthOS", directory, app, true);
 
-	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"RECREATE");
+	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
 	histIPTracks->Write("",TObject::kOverwrite);
 	histIPTracksOS->Write("",TObject::kOverwrite);

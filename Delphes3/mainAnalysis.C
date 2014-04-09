@@ -697,7 +697,7 @@ void mainAnalysis()
 		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
 	}
 
-	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"RECREATE");
+	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
 	histMu1Pt->Write("",TObject::kOverwrite);
 	histMu2Pt->Write("",TObject::kOverwrite);
