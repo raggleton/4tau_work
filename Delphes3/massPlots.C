@@ -9,10 +9,10 @@ void massPlots()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = false;
+	bool doSignal = true;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT = true; // for signal MC - require HLT conditions (29K/5*500K evt) or not (500K evt)
+	bool doHLT = false; // for signal MC - require HLT conditions (29K/5*500K evt) or not (500K evt)
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -38,7 +38,7 @@ void massPlots()
 	// Book histograms  //
 	//////////////////////
 	// Plots for testing invariant mass correlation
-	double massBins[6]           = {0,1,2,3,4,10};
+	double massBins[6]        = {0,1,2,3,4,10};
 	TH1D *histM1              = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}",10,0,10);
 	TH1D *histM2              = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}",10,0,10);
 
@@ -60,6 +60,12 @@ void massPlots()
 	TH1D *histM1_side_2to3    = new TH1D("hM1_side_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 	TH1D *histM1_side_3toInf  = new TH1D("hM1_side_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 
+	// mu1 pT plots in bins of m2
+	TH1D* histMu1Pt_0to1   = new TH1D("hMu1Pt_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",50,0.,50.);
+	TH1D* histMu1Pt_1to2   = new TH1D("hMu1Pt_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",50,0.,50.);
+	TH1D* histMu1Pt_2to3   = new TH1D("hMu1Pt_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",50,0.,50.);
+	TH1D* histMu1Pt_3toInf = new TH1D("hMu1Pt_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",50,0.,50.);
+
 	int nMu(0);
 	int n1(0), n2(0), nMuPass(0);
 
@@ -76,14 +82,14 @@ void massPlots()
 		if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons!
 
 		//////////////////////////////////////////////////////////////////////
-		// First, get the two highest pT muons in the event, store their pT //
+		// Now, get the two highest pT muons in the event, store their pT //
 		// and pointers to the GenParticles                                 //
 		//////////////////////////////////////////////////////////////////////
 		
 		GenParticle *cand(0),*mu1(0), *mu2(0);
 		Track *candTk(0);
 
-		double mu1PT(0.), mu2PT(0.);
+		double mu1PT(0.), mu2PT(0.); // These stay ordered!
 		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
 			cand = (GenParticle*) branchGenMuons->At(i);
 			if (cand->PT > mu1PT) {
@@ -117,10 +123,10 @@ void massPlots()
 		mu1Mom = mu1->P4();
 		mu2Mom = mu2->P4();
 
-		//////////////////////////////////////////////////////
-		// Get the hard interaction particles for signal MC //
-		// No selection cuts applied (only >=2 muons)       //
-		//////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////
+		// Get the hard interaction particles for signal MC truth //
+		// No selection cuts applied (only >=2 muons)             //
+		////////////////////////////////////////////////////////////
 		
 		GenParticle *charged1a(0);
 		GenParticle *charged1b(0);
@@ -316,14 +322,20 @@ void massPlots()
 				histM1->Fill(m1);
 				histM2->Fill(m2);
 
-				if(m2 < 1.)
+				if(m2 < 1.){
 					histM1_0to1->Fill(m1);
-				else if (m2 < 2.)
+					histMu1Pt_0to1->Fill(mu1->PT);
+				} else if (m2 < 2.){
 					histM1_1to2->Fill(m1);
-				else if (m2 < 3.)
+					histMu1Pt_1to2->Fill(mu1->PT);
+				} else if (m2 < 3.){
 					histM1_2to3->Fill(m1);
-				else
+					histMu1Pt_2to3->Fill(mu1->PT);
+				} else {
 					histM1_3toInf->Fill(m1);
+					histMu1Pt_3toInf->Fill(mu1->PT);
+				}
+
 			}
 
 			// SIDEBAND REGION
@@ -431,32 +443,33 @@ void massPlots()
 		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
 	}
 
-	// TFile* outFile = TFile::Open((name+delph+"/output"+app+".root").c_str(),"RECREATE");
+	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - signal region;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_0to1, histMu1Pt_1to2, histMu1Pt_2to3, histMu1Pt_3toInf, "Mu1Pt_M2", directory, app);
 
-	// histNMu->Write("",TObject::kOverwrite);
-	// histMu1Pt->Write("",TObject::kOverwrite);
-	// histMu2Pt->Write("",TObject::kOverwrite);
-	// histMu1PtSel->Write("",TObject::kOverwrite);
-	// histMu2PtSel->Write("",TObject::kOverwrite);
-	// histNTracks1->Write("",TObject::kOverwrite);
-	// histNTracks2->Write("",TObject::kOverwrite);
-	// histNTracks1OS->Write("",TObject::kOverwrite);
-	// histNTracks2OS->Write("",TObject::kOverwrite);
-	// // histNTracksCum1->Write("",TObject::kOverwrite);
-	// // histNTracksCum2->Write("",TObject::kOverwrite);
-	// // histNTracksCum1OS->Write("",TObject::kOverwrite);
-	// // histNTracksCum2OS->Write("",TObject::kOverwrite);
-	// histDRMuMu->Write("",TObject::kOverwrite);
-	// histNTk->Write("",TObject::kOverwrite);
-	// histNTk1->Write("",TObject::kOverwrite);
-	// histNTk25->Write("",TObject::kOverwrite);
-	// if (doSignal){
-	// 	histDRa1->Write("",TObject::kOverwrite);
-	// 	histDRa2->Write("",TObject::kOverwrite);
-	// 	histPID->Write("",TObject::kOverwrite);
-	// }
+	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
-	// outFile->Close();
+	// Mass plots
+	histM1->Write("",TObject::kOverwrite);
+	histM2->Write("",TObject::kOverwrite);
+	if (doSignal){
+		histM1_truth_0to1->Write("",TObject::kOverwrite);
+		histM1_truth_1to2->Write("",TObject::kOverwrite);
+		histM1_truth_2to3->Write("",TObject::kOverwrite);
+		histM1_truth_3toInf->Write("",TObject::kOverwrite);
+	}
+	histM1_0to1->Write("",TObject::kOverwrite);
+	histM1_1to2->Write("",TObject::kOverwrite);
+	histM1_2to3->Write("",TObject::kOverwrite);
+	histM1_3toInf->Write("",TObject::kOverwrite);
+	histM1_side_0to1->Write("",TObject::kOverwrite);
+	histM1_side_1to2->Write("",TObject::kOverwrite);
+	histM1_side_2to3->Write("",TObject::kOverwrite);
+	histM1_side_3toInf->Write("",TObject::kOverwrite);
+	histMu1Pt_0to1->Write("",TObject::kOverwrite);
+	histMu1Pt_1to2->Write("",TObject::kOverwrite);
+	histMu1Pt_2to3->Write("",TObject::kOverwrite);
+	histMu1Pt_3toInf->Write("",TObject::kOverwrite);
+	
+	outFile->Close();
 
 	delete treeReader;
 }
