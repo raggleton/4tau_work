@@ -325,7 +325,7 @@ void basicScript()
 	// drawHistAndSave(histTrack1Pt, "HISTE", "Track1Pt", directory, app);
 	// drawHistAndSave(histTrack2Pt, "HISTE", "Track2Pt", directory, app);
 
-	// TFile* outFile = TFile::Open((name+"cleanTk/output"+app+".root").c_str(),"RECREATE");
+	// TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"RECREATE");
 
 	// histNMu->Write("",TObject::kOverwrite);
 	// histMu1Pt->Write("",TObject::kOverwrite);
