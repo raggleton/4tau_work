@@ -301,9 +301,9 @@ void basicScript()
 
 	std::string app("");
 	if (doSignal) {
-		app = "_sig";
+		app = "sig";
 	} else {
-		app = "_bg";
+		app = "bg";
 	}
 	if (swapMuRandomly)
 		app += "_muRand";
