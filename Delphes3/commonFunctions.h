@@ -245,17 +245,15 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
  * @param directory Directory for output PDF
  * @param app       Appendage eg muRand, sig
  */
-void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std::string directory, std::string app){
+void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std::string directory, std::string app, bool drawLogY = false){
 
 	TH1::SetDefaultSumw2();
 
 	TCanvas c;
+	if (drawLogY) c.SetLogy();
 	h->Draw(drawOpt.c_str());
 
-	std::vector<std::string> elems2;
-	split(directory, '_', elems2);
-	std::string delph = elems2[elems2.size()-1];
-	
+	std::string delph = getDelph(directory);
 	c.SaveAs((directory+"/"+filename+"_"+delph+"_"+app+".pdf").c_str());
 }
 
@@ -382,9 +380,7 @@ void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* hi
 	line->Draw();
 
 	// To get the delphes config used, which is always the last part of the directory name
-	std::vector<std::string> elems2;
-	split(directory, '_', elems2);
-	std::string delph = elems2[elems2.size()-1];
+	std::string delph = getDelph(directory);
 	
 	c.SaveAs((directory+"/"+filename+"_"+delph+"_"+app+".pdf").c_str());
 	delete pad1;
