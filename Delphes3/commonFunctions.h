@@ -357,7 +357,7 @@ void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* hi
 	histM1_3toInf_copy->Divide(histM1_0to1);
 
 	histM1_1to2_copy->SetTitle("");
-	histM1_1to2_copy->SetXTitle("m(#mu_{1}-tk) [GeV]");
+	histM1_1to2_copy->SetXTitle(histM1_1to2->GetXaxis()->GetTitle());
 	histM1_1to2_copy->SetYTitle("#frac{i^{th} m_{2} bin}{1^{st} m_{2} bin}");
 	histM1_1to2_copy->GetXaxis()->SetTitleSize(0.1);
 	histM1_1to2_copy->GetXaxis()->SetTitleOffset(0.9);
@@ -373,7 +373,10 @@ void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* hi
 	histM1_2to3_copy->Draw("epSAME");
 	histM1_3toInf_copy->Draw("epSAME");
 
-	TLine *line = new TLine(0,1,10,1);
+	// Draw dotted line at 1 on ratio plot
+	double min = histM1_0to1->GetBinLowEdge(1);
+	double max = histM1_0to1->GetBinLowEdge(histM1_0to1->GetNbinsX()+1);
+	TLine *line = new TLine(min,1,max,1);
 	line->SetLineColor(kBlack);
 	line->SetLineWidth(2);
 	line->SetLineStyle(2);
@@ -413,7 +416,7 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_HLT_bare.root");
 			cout << "Doing signal with HLT cuts" << endl;
 			stem = "Signal_1prong_500K_bare/signal_1prong_500K_HLT_";
-			nFiles = 1;
+			nFiles = 10;
 		} else { 
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_10_NoHLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_NoHLT_bare.root");
@@ -434,10 +437,13 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			if(doHLT){
 				cout << "Doing QCDb_mu with HLT cuts" << endl;
 				stem = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/QCDb_mu_pthatmin20_Mu17_Mu8_";
-				nFiles = 300;
+				nFiles = 350;
 			} else{
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
 				stem = "QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_";
+				chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_94.root");
+				chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_93.root");
+				chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_92.root");
 				nFiles = 91;
 			}
 		} else {
@@ -455,8 +461,8 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			// chain->Add("QCDb_cleanTk/QCDb_9.root");
 		}
 	}
-	for (int i = 1; i <= nFiles; i ++){
-		cout << "Adding " << stem+boost::lexical_cast<std::string>(i)+".root" << endl;
-		chain->Add((stem+boost::lexical_cast<std::string>(i)+".root").c_str());
-	}
+			for (int i = 1; i <= nFiles; i ++){
+				cout << "Adding " << stem+boost::lexical_cast<std::string>(i)+".root" << endl;
+				chain->Add((stem+boost::lexical_cast<std::string>(i)+".root").c_str());
+			}
 }
