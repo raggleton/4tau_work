@@ -9,10 +9,10 @@ void massPlots()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
+	bool doSignal = false;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT = false; // for signal MC - require HLT conditions (29K/5*500K evt) or not (500K evt)
+	bool doHLT = true; // for signal MC - require HLT conditions (29K/5*500K evt) or not (500K evt)
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -28,49 +28,54 @@ void massPlots()
 	// Get pointers to branches used in this analysis
 	// Use the data_flow.png and tcl file to figure out what branches are available, and what class they are
 	// and use https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription
-	// TClonesArray *branchMuon = treeReader->UseBranch("Muon");
-	TClonesArray *branchTracks   = treeReader->UseBranch("Track");
-	TClonesArray *branchGenMuons = treeReader->UseBranch("OnlyGenMuons");
-	TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
-	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
+	// TClonesArray* branchMuon = treeReader->UseBranch("Muon");
+	TClonesArray* branchTracks   = treeReader->UseBranch("Track");
+	TClonesArray* branchGenMuons = treeReader->UseBranch("OnlyGenMuons");
+	TClonesArray* branchStable   = treeReader->UseBranch("StableParticle");
+	TClonesArray* branchAll      = treeReader->UseBranch("AllParticle");
 
 	//////////////////////
 	// Book histograms  //
 	//////////////////////
 	// Plots for testing invariant mass correlation
-	double massBins[6]        = {0,1,2,3,4,10};
-	TH1D *histM1              = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}",10,0,10);
-	TH1D *histM2              = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}",10,0,10);
+	double massBins[6]                 = {0,1,2,3,4,10};
+	TH1D* histM1                       = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}",10,0,10);
+	TH1D* histM2                       = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}",10,0,10);
 
 	// MC truth - use actual mu-tk pairs from tau
-	TH1D *histM1_truth_0to1   = new TH1D("hM1_truth_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_1to2   = new TH1D("hM1_truth_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_2to3   = new TH1D("hM1_truth_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_truth_3toInf = new TH1D("hM1_truth_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_truth_0to1            = new TH1D("hM1_truth_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_truth_1to2            = new TH1D("hM1_truth_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_truth_2to3            = new TH1D("hM1_truth_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_truth_3toInf          = new TH1D("hM1_truth_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 	
 	// actual dist using signal selection
-	TH1D *histM1_0to1         = new TH1D("hM1_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_1to2         = new TH1D("hM1_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_2to3         = new TH1D("hM1_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_3toInf       = new TH1D("hM1_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_0to1                  = new TH1D("hM1_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_1to2                  = new TH1D("hM1_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_2to3                  = new TH1D("hM1_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_3toInf                = new TH1D("hM1_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 
 	// actual dist using sideband selection
-	TH1D *histM1_side_0to1    = new TH1D("hM1_side_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_side_1to2    = new TH1D("hM1_side_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_side_2to3    = new TH1D("hM1_side_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D *histM1_side_3toInf  = new TH1D("hM1_side_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_side_0to1             = new TH1D("hM1_side_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_side_1to2             = new TH1D("hM1_side_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_side_2to3             = new TH1D("hM1_side_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_side_3toInf           = new TH1D("hM1_side_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 
 	// mu1 pT plots in bins of m2
-	TH1D* histMu1Pt_0to1   = new TH1D("hMu1Pt_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",20,10.,50.);
-	TH1D* histMu1Pt_1to2   = new TH1D("hMu1Pt_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",20,10.,50.);
-	TH1D* histMu1Pt_2to3   = new TH1D("hMu1Pt_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",20,10.,50.);
-	TH1D* histMu1Pt_3toInf = new TH1D("hMu1Pt_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",20,10.,50.);
+	TH1D* histMu1Pt_0to1               = new TH1D("hMu1Pt_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_1to2               = new TH1D("hMu1Pt_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_2to3               = new TH1D("hMu1Pt_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_3toInf             = new TH1D("hMu1Pt_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
 
 	// mu1 pT plots in bins of m2 - MC truth
-	TH1D* histMu1Pt_truth_0to1   = new TH1D("hMu1Pt_truth_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
-	TH1D* histMu1Pt_truth_1to2   = new TH1D("hMu1Pt_truth_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
-	TH1D* histMu1Pt_truth_2to3   = new TH1D("hMu1Pt_truth_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
-	TH1D* histMu1Pt_truth_3toInf = new TH1D("hMu1Pt_truth_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+	TH1D* histMu1Pt_truth_0to1         = new TH1D("hMu1Pt_truth_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+	TH1D* histMu1Pt_truth_1to2         = new TH1D("hMu1Pt_truth_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+	TH1D* histMu1Pt_truth_2to3         = new TH1D("hMu1Pt_truth_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+	TH1D* histMu1Pt_truth_3toInf       = new TH1D("hMu1Pt_truth_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+
+	// 2D plots of m1 Vs m2 - sideband
+	TH2D* histM1vsM2_side              = new TH2D("hM1vsM2_side","m(#mu_{1}-tk) vs m(#mu_{2}-tk);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
+	TH2D* histM1timesM1_side           = new TH2D("hM1timesM2_side","m(sideband) #times m(sideband);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
+	// TH2D* histM1vsM2_corrections_side  = new TH2D("hM1vsM2_corrections_side","m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
 
 	int nMu(0);
 	int n1(0), n2(0), nMuPass(0);
@@ -407,19 +412,50 @@ void massPlots()
 				else
 					m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
 				
-				if(m2 < 1.)
+				// Fill 2D m1 vs m2 plot
+				histM1vsM2_side->Fill(m1,m2);
+
+				// Fill m1 plot for whole sideband
+				// histM1_side->Fill(m1);
+
+				// Fill for the various m2 bins
+				if(m2 < 1.) {
 					histM1_side_0to1->Fill(m1);
-				else if (m2 < 2.)
+				} else if (m2 < 2.) {
 					histM1_side_1to2->Fill(m1);
-				else if (m2 < 3.)
+				} else if (m2 < 3.) {
 					histM1_side_2to3->Fill(m1);
-				else
+				} else {
 					histM1_side_3toInf->Fill(m1);
+				}
+
 			}
 
 		} // end of muon selection
 		
 	} // end of event loop
+
+	// Make m1 sideband plot
+	TH1D* histM1_side = new TH1D("hM1_side","m(#mu_{1}-tk) in sideband;m(#mu_{1}-tk) [GeV];A.U.",5,massBins);
+	histM1_side->Add(histM1_side_0to1);
+	histM1_side->Add(histM1_side_1to2);
+	histM1_side->Add(histM1_side_2to3);
+	histM1_side->Add(histM1_side_3toInf);
+
+	// Do some normalizing
+	normaliseHist(histM1_side);
+	normaliseHist(histM1vsM2_side);
+	
+	// Do corrections plot by making m1*m1 first, then dividing m1vsm2 by m1*m1
+	// Don't need to normalise m1timesm1, as histM1_side already normalised
+	for(int a = 1; a <= 5; a++){
+		for (int b = 1; b <=5; b++){
+			histM1timesM1_side->Fill(a,b,histM1_side->GetBinContent(a)*histM1_side->GetBinContent(b));
+		}
+	}
+	TH2D* histM1vsM2_corrections_side = (TH2D*)histM1vsM2_side->Clone("hM1vsM2_corrections_side");
+	histM1vsM2_corrections_side->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
+	histM1vsM2_corrections_side->Divide(histM1timesM1_side);
 
 	TCanvas c;
 	std::string app("");
@@ -437,60 +473,64 @@ void massPlots()
 		app += "_NoHLT";
 
 	// Get directory that input file was in - put plots in there
-	std::string fullpath = chain.GetFile()->GetDirectory("")->GetName();
-	std::vector<std::string> elems;
-	split(fullpath, '/', elems);
-	std::string directory = elems[0];
+	std::string directory = getDirectory(chain.GetFile());
 
 	// Get Delphes file config used - last part of directory name
-	std::vector<std::string> elems2;
-	split(directory, '_', elems2);
-	std::string delph = elems2[elems2.size()-1];
+	std::string delph = getDelph(directory);
 
 	// app += "_samePtEta";
 
 	// Mass plots
-	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
-	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
+	// drawHistAndSave(histM1, "HISTE", "M1", directory, app);
+	// drawHistAndSave(histM2, "HISTE", "M2", directory, app);
 
-	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
-	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (at least 1 #mu has add. tk with p_{T} = (1,2.5));m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, "M1_M2_side", directory, app);
-	if(doSignal){
-		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
-	}
+	// drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
+	// drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (at least 1 #mu has add. tk with p_{T} = (1,2.5));m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, "M1_M2_side", directory, app);
+	// if(doSignal){
+	// 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
+	// }
 
-	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - signal region;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_0to1, histMu1Pt_1to2, histMu1Pt_2to3, histMu1Pt_3toInf, "Mu1Pt_M2", directory, app);
-	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - MC truth;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_truth_0to1, histMu1Pt_truth_1to2, histMu1Pt_truth_2to3, histMu1Pt_truth_3toInf, "Mu1Pt_M2_truth", directory, app);
+	// drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - signal region;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_0to1, histMu1Pt_1to2, histMu1Pt_2to3, histMu1Pt_3toInf, "Mu1Pt_M2", directory, app);
+	// drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - MC truth;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_truth_0to1, histMu1Pt_truth_1to2, histMu1Pt_truth_2to3, histMu1Pt_truth_3toInf, "Mu1Pt_M2_truth", directory, app);
+
+	drawHistAndSave(histM1_side, "HISTE", "M1_side", directory, app);
+	drawHistAndSave(histM1vsM2_side, "colzTEXT","M1vsM2_side", directory, app);
+	drawHistAndSave(histM1timesM1_side, "colzTEXT","M1timesM1_side", directory, app);
+	drawHistAndSave(histM1vsM2_corrections_side, "colzTEXT","M1vsM2_corrections_side", directory, app);
 
 	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
 	// Mass plots
-	histM1->Write("",TObject::kOverwrite);
-	histM2->Write("",TObject::kOverwrite);
-	if (doSignal){
-		histM1_truth_0to1->Write("",TObject::kOverwrite);
-		histM1_truth_1to2->Write("",TObject::kOverwrite);
-		histM1_truth_2to3->Write("",TObject::kOverwrite);
-		histM1_truth_3toInf->Write("",TObject::kOverwrite);
-	}
-	histM1_0to1->Write("",TObject::kOverwrite);
-	histM1_1to2->Write("",TObject::kOverwrite);
-	histM1_2to3->Write("",TObject::kOverwrite);
-	histM1_3toInf->Write("",TObject::kOverwrite);
-	histM1_side_0to1->Write("",TObject::kOverwrite);
-	histM1_side_1to2->Write("",TObject::kOverwrite);
-	histM1_side_2to3->Write("",TObject::kOverwrite);
-	histM1_side_3toInf->Write("",TObject::kOverwrite);
+	// histM1->Write("",TObject::kOverwrite);
+	// histM2->Write("",TObject::kOverwrite);
+	// if (doSignal){
+	// 	histM1_truth_0to1->Write("",TObject::kOverwrite);
+	// 	histM1_truth_1to2->Write("",TObject::kOverwrite);
+	// 	histM1_truth_2to3->Write("",TObject::kOverwrite);
+	// 	histM1_truth_3toInf->Write("",TObject::kOverwrite);
+	// }
+	// histM1_0to1->Write("",TObject::kOverwrite);
+	// histM1_1to2->Write("",TObject::kOverwrite);
+	// histM1_2to3->Write("",TObject::kOverwrite);
+	// histM1_3toInf->Write("",TObject::kOverwrite);
+	// histM1_side_0to1->Write("",TObject::kOverwrite);
+	// histM1_side_1to2->Write("",TObject::kOverwrite);
+	// histM1_side_2to3->Write("",TObject::kOverwrite);
+	// histM1_side_3toInf->Write("",TObject::kOverwrite);
 
-	histMu1Pt_0to1->Write("",TObject::kOverwrite);
-	histMu1Pt_1to2->Write("",TObject::kOverwrite);
-	histMu1Pt_2to3->Write("",TObject::kOverwrite);
-	histMu1Pt_3toInf->Write("",TObject::kOverwrite);
-	histMu1Pt_truth_0to1->Write("",TObject::kOverwrite);
-	histMu1Pt_truth_1to2->Write("",TObject::kOverwrite);
-	histMu1Pt_truth_2to3->Write("",TObject::kOverwrite);
-	histMu1Pt_truth_3toInf->Write("",TObject::kOverwrite);
+	// histMu1Pt_0to1->Write("",TObject::kOverwrite);
+	// histMu1Pt_1to2->Write("",TObject::kOverwrite);
+	// histMu1Pt_2to3->Write("",TObject::kOverwrite);
+	// histMu1Pt_3toInf->Write("",TObject::kOverwrite);
+	// histMu1Pt_truth_0to1->Write("",TObject::kOverwrite);
+	// histMu1Pt_truth_1to2->Write("",TObject::kOverwrite);
+	// histMu1Pt_truth_2to3->Write("",TObject::kOverwrite);
+	// histMu1Pt_truth_3toInf->Write("",TObject::kOverwrite);
 	
+	histM1_side->Write("",TObject::kOverwrite);
+	histM1vsM2_side->Write("",TObject::kOverwrite);
+	histM1vsM2_corrections_side->Write("",TObject::kOverwrite);
+
 	outFile->Close();
 
 	delete treeReader;
