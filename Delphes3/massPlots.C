@@ -38,43 +38,43 @@ void massPlots()
 	// Book histograms  //
 	//////////////////////
 	// Plots for testing invariant mass correlation
-	double massBins[6]                 = {0,1,2,3,4,10};
-	TH1D* histM1                       = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}",10,0,10);
-	TH1D* histM2                       = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}",10,0,10);
+	double massBins[6]           = {0,1,2,3,4,10};
+	TH1D* histM1                 = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}",10,0,10);
+	TH1D* histM2                 = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}",10,0,10);
 
 	// MC truth - use actual mu-tk pairs from tau
-	TH1D* histM1_truth_0to1            = new TH1D("hM1_truth_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D* histM1_truth_1to2            = new TH1D("hM1_truth_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D* histM1_truth_2to3            = new TH1D("hM1_truth_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D* histM1_truth_3toInf          = new TH1D("hM1_truth_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_truth_0to1      = new TH1D("hM1_truth_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_truth_1to2      = new TH1D("hM1_truth_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_truth_2to3      = new TH1D("hM1_truth_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_truth_3toInf    = new TH1D("hM1_truth_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 	
 	// actual dist using signal selection
-	TH1D* histM1_0to1                  = new TH1D("hM1_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D* histM1_1to2                  = new TH1D("hM1_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D* histM1_2to3                  = new TH1D("hM1_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D* histM1_3toInf                = new TH1D("hM1_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_0to1            = new TH1D("hM1_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_1to2            = new TH1D("hM1_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_2to3            = new TH1D("hM1_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_3toInf          = new TH1D("hM1_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 
 	// actual dist using sideband selection
-	TH1D* histM1_side_0to1             = new TH1D("hM1_side_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D* histM1_side_1to2             = new TH1D("hM1_side_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D* histM1_side_2to3             = new TH1D("hM1_side_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
-	TH1D* histM1_side_3toInf           = new TH1D("hM1_side_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_side_0to1       = new TH1D("hM1_side_0to1","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 0-1 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_side_1to2       = new TH1D("hM1_side_1to2","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 1-2 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_side_2to3       = new TH1D("hM1_side_2to3","m(#mu_{1}-tk) for m(#mu_{2}-tk) = 2-3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
+	TH1D* histM1_side_3toInf     = new TH1D("hM1_side_3toInf","m(#mu_{1}-tk) for m(#mu_{2}-tk) > 3 GeV; m(#mu_{1}-tk) [GeV]; A.U.",5,massBins);
 
 	// mu1 pT plots in bins of m2
-	TH1D* histMu1Pt_0to1               = new TH1D("hMu1Pt_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
-	TH1D* histMu1Pt_1to2               = new TH1D("hMu1Pt_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
-	TH1D* histMu1Pt_2to3               = new TH1D("hMu1Pt_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
-	TH1D* histMu1Pt_3toInf             = new TH1D("hMu1Pt_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_0to1         = new TH1D("hMu1Pt_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_1to2         = new TH1D("hMu1Pt_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_2to3         = new TH1D("hMu1Pt_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_3toInf       = new TH1D("hMu1Pt_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
 
 	// mu1 pT plots in bins of m2 - MC truth
-	TH1D* histMu1Pt_truth_0to1         = new TH1D("hMu1Pt_truth_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
-	TH1D* histMu1Pt_truth_1to2         = new TH1D("hMu1Pt_truth_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
-	TH1D* histMu1Pt_truth_2to3         = new TH1D("hMu1Pt_truth_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
-	TH1D* histMu1Pt_truth_3toInf       = new TH1D("hMu1Pt_truth_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+	TH1D* histMu1Pt_truth_0to1   = new TH1D("hMu1Pt_truth_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+	TH1D* histMu1Pt_truth_1to2   = new TH1D("hMu1Pt_truth_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+	TH1D* histMu1Pt_truth_2to3   = new TH1D("hMu1Pt_truth_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
+	TH1D* histMu1Pt_truth_3toInf = new TH1D("hMu1Pt_truth_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",25,0.,50.);
 
 	// 2D plots of m1 Vs m2 - sideband
-	TH2D* histM1vsM2_side              = new TH2D("hM1vsM2_side","m(#mu_{1}-tk) vs m(#mu_{2}-tk);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
-	TH2D* histM1timesM1_side           = new TH2D("hM1timesM2_side","m(sideband) #times m(sideband);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
+	TH2D* histM1vsM2_side        = new TH2D("hM1vsM2_side","m(#mu_{1}-tk) vs m(#mu_{2}-tk);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
+	TH2D* histM1timesM1_side     = new TH2D("hM1timesM2_side","m(sideband) #times m(sideband);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
 	// TH2D* histM1vsM2_corrections_side  = new TH2D("hM1vsM2_corrections_side","m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
 
 	int nMu(0);
@@ -82,7 +82,7 @@ void massPlots()
 
 	// Loop over all events
 	cout << "Nevts : " << numberOfEntries <<endl;
-	bool stop = false;
+	bool stop = false; // used to stop the loop, for debugging/testing
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
 
 		// Load selected branches with data from specified event
@@ -450,7 +450,7 @@ void massPlots()
 	// Don't need to normalise m1timesm1, as histM1_side already normalised
 	for(int a = 1; a <= 5; a++){
 		for (int b = 1; b <=5; b++){
-			histM1timesM1_side->Fill(a,b,histM1_side->GetBinContent(a)*histM1_side->GetBinContent(b));
+			histM1timesM1_side->SetBinContent(a,b,histM1_side->GetBinContent(a)*histM1_side->GetBinContent(b));
 		}
 	}
 	TH2D* histM1vsM2_corrections_side = (TH2D*)histM1vsM2_side->Clone("hM1vsM2_corrections_side");
@@ -494,9 +494,9 @@ void massPlots()
 	// drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - MC truth;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_truth_0to1, histMu1Pt_truth_1to2, histMu1Pt_truth_2to3, histMu1Pt_truth_3toInf, "Mu1Pt_M2_truth", directory, app);
 
 	drawHistAndSave(histM1_side, "HISTE", "M1_side", directory, app);
-	drawHistAndSave(histM1vsM2_side, "colzTEXT","M1vsM2_side", directory, app);
-	drawHistAndSave(histM1timesM1_side, "colzTEXT","M1timesM1_side", directory, app);
-	drawHistAndSave(histM1vsM2_corrections_side, "colzTEXT","M1vsM2_corrections_side", directory, app);
+	drawHistAndSave(histM1vsM2_side, "colz","M1vsM2_side", directory, app);
+	drawHistAndSave(histM1timesM1_side, "colz","M1timesM1_side", directory, app);
+	drawHistAndSave(histM1vsM2_corrections_side, "colzTEXTE","M1vsM2_corrections_side", directory, app);
 
 	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
