@@ -238,7 +238,7 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 }
 
 /**
- * Draw a histogram and save it to PDF, saves file as directory/filename_<delphes setup from directory>_app.pdf
+ * Draw a histogram (1D or 2D!) and save it to PDF, saves file as directory/filename_<delphes setup from directory>_app.pdf
  * @param h         Hist to draw (TObject* to handle THStacks, which don't inherit from TH1)
  * @param drawOpt   Options for drawing hist
  * @param filename  Main filename (e.g. Mu1Pt)
@@ -416,7 +416,7 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_HLT_bare.root");
 			cout << "Doing signal with HLT cuts" << endl;
 			stem = "Signal_1prong_500K_bare/signal_1prong_500K_HLT_";
-			nFiles = 10;
+			nFiles = 20;
 		} else { 
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_10_NoHLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_NoHLT_bare.root");
@@ -430,7 +430,7 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_NoHLT_bare.root");
 			cout << "Doing signal without HLT cuts" << endl;
 			stem = "Signal_1prong_500K_bare/signal_1prong_500K_NoHLT_";
-			nFiles = 10;
+			nFiles = 20;
 		}
 	} else {
 		if (doMu){
@@ -441,10 +441,10 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			} else{
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
 				stem = "QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_";
-				chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_94.root");
-				chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_93.root");
-				chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_92.root");
-				nFiles = 91;
+				// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_94.root");
+				// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_93.root");
+				// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_92.root");
+				nFiles = 94;
 			}
 		} else {
 			cout << "Doing QCDb" << endl;
