@@ -246,7 +246,9 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
  * @param app       Appendage eg muRand, sig
  */
 void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std::string directory, std::string app, bool drawLogY = false){
-
+	gStyle->SetOptStat("ne"); // display name and # entries only
+	gStyle->SetPaintTextFormat(".3g"); // set text format to be printed
+	
 	TH1::SetDefaultSumw2();
 
 	TCanvas c;
