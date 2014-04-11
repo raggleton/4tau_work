@@ -20,10 +20,10 @@ void cutFlow()
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
+	bool doSignal = false;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT = true; // for signal MC - require HLT conditions or not
+	bool doHLT = false; // for signal MC - require HLT conditions or not
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -272,12 +272,12 @@ void cutFlow()
 				}
 
 				if (candTk->PT > 2.5){
-					if (dR1 < 0.5){
-						tk1_2p5.push_back(candTk);
-					}
-					if (dR2 < 0.5){
-						tk2_2p5.push_back(candTk);
-					}
+					// if (dR1 < 0.5){
+					// 	tk1_2p5.push_back(candTk);
+					// }
+					// if (dR2 < 0.5){
+					// 	tk2_2p5.push_back(candTk);
+					// }
 					if ((candTk->Charge) * (mu1->Charge) < 0) {
 						if (dR1 < 0.5){
 							tk1_2p5_OS.push_back(candTk);
@@ -294,8 +294,8 @@ void cutFlow()
 		// Now pT order the track collections for each muon
 		sortTrackVector(tk1_1);
 		sortTrackVector(tk2_1);
-		sortTrackVector(tk1_2p5);
-		sortTrackVector(tk2_2p5);
+		// sortTrackVector(tk1_2p5);
+		// sortTrackVector(tk2_2p5);
 		sortTrackVector(tk1_2p5_OS);
 		sortTrackVector(tk2_2p5_OS);
 
