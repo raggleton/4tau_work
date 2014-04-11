@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#PBS -l walltime=2:00:00
+#PBS -l walltime=3:00:00
 #
 cd ${HOME}/Delphes-3.0.12/
 if [ -f ${rootname} ]
