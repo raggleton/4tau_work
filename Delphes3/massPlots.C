@@ -11,7 +11,7 @@ void massPlots()
 
 	bool doSignal = true;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT = true; // for signal MC - require HLT conditions (29K/5*500K evt) or not (500K evt)
 
 	// Create chain of root trees
@@ -105,20 +105,21 @@ void massPlots()
 		GenParticle *cand(0),*mu1(0), *mu2(0);
 		Track *candTk(0);
 
-		double mu1PT(0.), mu2PT(0.); // These stay ordered!
+		double muLeadingPT = 0.;
+		double muSubLeadingPT = 0.; 
 		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
 			cand = (GenParticle*) branchGenMuons->At(i);
-			if (cand->PT > mu1PT) {
+			if (cand->PT > muLeadingPT) {
 				mu1 = cand;
-				mu1PT = cand->PT;
+				muLeadingPT = cand->PT;
 			}
 		}
 
 		for(int j = 0; j < branchGenMuons->GetEntries(); j++){
 			cand = (GenParticle*) branchGenMuons->At(j);
-			if ((cand->PT > mu2PT) && (cand->PT != mu1->PT)) {
+			if ((cand->PT > muSubLeadingPT) && (cand->PT != mu1->PT)) {
 				mu2 = cand;
-				mu2PT = cand->PT;
+				muSubLeadingPT = cand->PT;
 			}
 		}
 
@@ -260,8 +261,8 @@ void massPlots()
 		// Muon selection //
 		////////////////////
 		
-		if ((mu1PT > 17.)
-		&& (mu2PT > 10.)
+		if ((muLeadingPT > 17.)
+		&& (muSubLeadingPT > 10.)
 		&& ((mu1->Charge) == (mu2->Charge))
 		&& (fabs(origMu1->Eta) < 2.1)
 		// && (fabs(origMu2->Eta) < 2.1)
