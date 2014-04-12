@@ -123,30 +123,30 @@ void basicScript()
 					cout << "Problem, no truth mu for 1 and/or 2!" << endl;
 				} else { 
 					
-					// Do m1 distribution in bins of m2 - for MC truth (is it actually correlated?)
-					double m1(0.);
-					double m2(0.);
-					
-					// Assign m1 to higher pT muon
-					if (muTruth1->PT > muTruth2->PT) {
-						m1 = (muTruth1->P4()+trackTruth1->P4()).M();
-						m2 = (muTruth2->P4()+trackTruth2->P4()).M();
-					} else {
-						m2 = (muTruth1->P4()+trackTruth1->P4()).M();
-						m1 = (muTruth2->P4()+trackTruth2->P4()).M();
+					// Assign system "1" to higher pT muon
+					// Swap obj if necessary
+					if (muTruth1->PT < muTruth2->PT) {
+						GenParticle* tempMu = muTruth1;
+						GenParticle* tempTk = trackTruth1;
+						muTruth1 = muTruth2;
+						trackTruth1 = trackTruth2;
+						muTruth2 = tempMu;
+						trackTruth2 = tempTk;
 					}
-
+					
 					// Randomly swap trk-mu pairs 1<->2 if desired
 					if(swapMuRandomly){
 						double randNum = (double)rand() / RAND_MAX;
 						if (randNum > 0.5){
-							double tmp = m2;
-							m2 = m1;
-							m1 = tmp;
+							GenParticle* tempMu = muTruth1;
+							GenParticle* tempTk = trackTruth1;
+							muTruth1 = muTruth2;
+							trackTruth1 = trackTruth2;
+							muTruth2 = tempMu;
+							trackTruth2 = tempTk;
 						}
 					}
-
-					cout << m1 << "     " << m2 << endl;
+					// cout << m1 << "     " << m2 << endl;
 					// if(m2 < 1.)
 					// 	histM1_truth_0to1->Fill(m1);
 					// else if (m2 < 2.)
@@ -168,21 +168,22 @@ void basicScript()
 		
 		GenParticle *cand(0),*mu1(0), *mu2(0);
 
-		double mu1PT(0.), mu2PT(0.);
+		double muLeadingPT = 0.;
+		double muSubLeadingPT = 0.;
 		// Get highest pT muon
 		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
 			cand = (GenParticle*) branchGenMuons->At(i);
-			if (cand->PT > mu1PT) {
+			if (cand->PT > muLeadingPT) {
 				mu1 = cand;
-				mu1PT = cand->PT;
+				muLeadingPT = cand->PT;
 			}
 		}
 		// Get 2nd highest pT muon
 		for(int j = 0; j < branchGenMuons->GetEntries(); j++){
 			cand = (GenParticle*) branchGenMuons->At(j);
-			if ((cand->PT > mu2PT) && (cand->PT != mu1->PT)) {
+			if ((cand->PT > muSubLeadingPT) && (cand->PT != mu1->PT)) {
 				mu2 = cand;
-				mu2PT = cand->PT;
+				muSubLeadingPT = cand->PT;
 			}
 		}
 
@@ -207,8 +208,8 @@ void basicScript()
 		// Muon selection //
 		////////////////////
 		
-		if ((mu1PT < 17.)
-		|| (mu2PT < 10.)
+		if ((muLeadingPT < 17.)
+		|| (muSubLeadingPT < 10.)
 		|| ((mu1->Charge) != (mu2->Charge))
 		|| (fabs(origMu1->Eta) > 2.1)
 		|| (fabs(origMu2->Eta) > 2.4)
@@ -320,17 +321,17 @@ void basicScript()
 	// Get Delphes file config used - last part of directory name
 	std::string delph = getDelph(directory);
 	
-	// drawHistAndSave(histMu1Pt, "HISTE", "Mu1Pt", directory, app);
-	// drawHistAndSave(histMu2Pt, "HISTE", "Mu2Pt", directory, app);
+	// drawHistAndSave(histmu1PT, "HISTE", "muLeadingPT", directory, app);
+	// drawHistAndSave(histmu2PT, "HISTE", "muSubLeadingPT", directory, app);
 	// drawHistAndSave(histTrack1Pt, "HISTE", "Track1Pt", directory, app);
 	// drawHistAndSave(histTrack2Pt, "HISTE", "Track2Pt", directory, app);
 
 	// TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
 	// histNMu->Write("",TObject::kOverwrite);
-	// histMu1Pt->Write("",TObject::kOverwrite);
-	// histMu2Pt->Write("",TObject::kOverwrite);
-	// histMu1PtSel
+	// histmu1PT->Write("",TObject::kOverwrite);
+	// histmu2PT->Write("",TObject::kOverwrite);
+	// histmuLeadingPTSel
 	// if (doSignal){
 	// 	histDRa1->Write("",TObject::kOverwrite);
 	// 	histDRa2->Write("",TObject::kOverwrite);
