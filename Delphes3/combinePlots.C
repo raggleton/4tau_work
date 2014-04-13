@@ -17,6 +17,10 @@ void combineHists( TFile* fSig, TFile* fBg, std::string histName, std::string pl
 	// hSig->Draw(plotOpt.c_str());
 	// hBg->Draw((plotOpt+"SAME").c_str());
 	st.Draw((plotOpt+"NOSTACK").c_str());
+	st.GetXaxis()->SetTitle(hSig->GetXaxis()->GetTitle());
+	st.GetYaxis()->SetTitle(hSig->GetYaxis()->GetTitle());
+	st.SetTitle(hSig->GetTitle());
+	st.Draw((plotOpt+"NOSTACK").c_str());
 	TLegend leg(0.75,0.75,0.88,0.88);
 	leg.SetFillColor(kWhite);
 	leg.SetLineColor(kWhite);
@@ -37,10 +41,10 @@ void combinePlots(){
 	
 	gStyle->SetOptStat("");
 
-	TFile fSig("Signal_1prong_500K_bare/output_bare_sig.root","READ");
+	TFile fSig("Signal_1prong_500K_bare/output_bare_sig_HLT.root","READ");
 	TFile fBg("QCDb_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg.root","READ");
 	
-	TFile fSigRand("Signal_1prong_500K_bare/output_bare_sig_muRand.root","READ");
+	TFile fSigRand("Signal_1prong_500K_bare/output_bare_sig_muRand_HLT.root","READ");
 	TFile fBgRand("QCDb_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg_muRand.root","READ");
 
 	//////////////////
