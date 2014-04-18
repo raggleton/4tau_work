@@ -1,21 +1,58 @@
 #include "commonFunctions.h"
+#include <boost/program_options.hpp>
 
 using std::cout;
 using std::endl;
 
+namespace po = boost::program_options;
+
 /**
  * Template script for Delphes analysis. Use with makeScript.sh
  */
-void basicScript()
+void basicScript(int argc, char* argv[])
 {
 	TH1::SetDefaultSumw2();
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = false;
+	bool doSignal = true;
 	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT = false; // whether to use MC that has HLT cuts already applied or not.
+	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool doHLT = true; // whether to use MC that has HLT cuts already applied or not.
+	
+	po::options_description desc("Allowed options");
+	desc.add_options()
+		("help", "produce help message")
+		("doSignal", po::value<bool>(&doSignal), "TRUE - do signal, FALSE - do QCDb_mu")
+		("swapMuRandomly", po::value<bool>(&swapMuRandomly), "TRUE - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
+		("doHLT", po::value<bool>(&doHLT), "TRUE - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
+	;
+
+	po::variables_map vm;
+	po::store(po::parse_command_line(argc, argv, desc), vm);
+	po::notify(vm);    
+
+	if (vm.count("help")) {
+	    cout << desc << "\n";
+	    return;
+	}
+
+	if (vm.count("doSignal")) {
+	    doSignal = vm["doSignal"].as<bool>();
+	} else {
+	    cout << "Signal/QCD was not set. Defaulting to signal.\n";
+	}
+	if (vm.count("swapMuRandomly")) {
+	    swapMuRandomly = vm["swapMuRandomly"].as<bool>();
+	} else {
+	    cout << "Mu ordering not set. Defaulting to random.\n";
+	}
+	if (vm.count("doHLT")) {
+	    doHLT = vm["doHLT"].as<bool>();
+	} else {
+	    cout << "HLT requirement not set. Defaulting to using samples with HLT cuts.\n";
+	}
+	
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
