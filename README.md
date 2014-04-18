@@ -13,24 +13,25 @@ http://www.boost.org/doc/libs/1_55_0/more/getting_started/unix-variants.html
 1. Download `boost_1_55_0.tar.bz2`.
 2. Extract `tar --bzip2 -xf /path/to/boost_1_55_0.tar.bz2` (say to `~/boost_1_55_0`).
 3. Now need to build the separate Boost libraries 
-	>The only Boost libraries that must be built separately are:
+	>- The only Boost libraries that must be built separately are:
 	>
-	>Boost.Chrono
-	>Boost.Context
-	>Boost.Filesystem
-	>Boost.GraphParallel
-	>Boost.IOStreams
-	>Boost.Locale
-	>Boost.MPI
-	>Boost.ProgramOptions
-	>Boost.Python (see the Boost.Python build documentation before building and installing it)
-	>Boost.Regex
-	>Boost.Serialization
-	>Boost.Signals
-	>Boost.System
-	>Boost.Thread
-	>Boost.Timer
-	>Boost.Wave
+	>
+	>- Boost.Chrono
+	>- Boost.Context
+	>- Boost.Filesystem
+	>- Boost.GraphParallel
+	>- Boost.IOStreams
+	>- Boost.Locale
+	>- Boost.MPI
+	>- Boost.ProgramOptions
+	>- Boost.Python (see the Boost.Python build documentation before building and installing it)
+	>- Boost.Regex
+	>- Boost.Serialization
+	>- Boost.Signals
+	>- Boost.System
+	>- Boost.Thread
+	>- Boost.Timer
+	>- Boost.Wave
 
 4. Create installation folder for those libraries: `mkdir ~/boost_1_55_0_install`
 5. In the original boost folder, do `./bootsrap.sh --prefix=$(HOME)/boost_1_55_0_install`
