@@ -39,6 +39,9 @@ http://www.boost.org/doc/libs/1_55_0/more/getting_started/unix-variants.html
 7. In the Delphes Makefile, change the following:
 	- Add `-I $(HOME)/boost_1_55_0 -I $(HOME)/boost_1_55_0_install/include` to `CCXFLAGS` (line 18)
 	- Add `-L/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib -lboost_program_options` to `DELPHES_LIBS` (line 19)
-	- (May also require adding the lib folder to LD_LIBRARY_PATH, but even if you do, you still need the -L with path so ???)
+	- Also adding the `lib` folder to `LD_LIBRARY_PATH` in your `~/.bashrc`:
+		```
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib/
+		```
 8. Note that if you use another boost library (like Filesystem) you'll need to add `-lboost_XXX` to `DELPHES_LIBS`
 9. For Boost Program Options, you can now follow the tutorial. 
