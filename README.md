@@ -4,7 +4,9 @@
 For Robin's work on NMSSM H1 -> 2a1 -> 4tau
 
 Monte Carlo stuff is in `pythia8` and `Delphes3` folders.
-
+```
+LD_LIBRARY_PATH=/cm/shared/apps/gcc/4.7.0/lib:/cm/shared/apps/gcc/4.7.0/lib64:/cm/shared/languages/Python-2.7.6/lib:/cm/shared/apps/torque/4.2.4.1/lib:/cm/shared/apps/moab/7.2.2/lib:/cm/shared/tools/git-1.8.4.2/lib:/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib/:/panfs/panasas01/phys/ra12451/root/root/lib/
+```
 Installing & compiling against Boost
 ====================================
 
