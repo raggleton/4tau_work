@@ -117,7 +117,7 @@ void massPlots()
 	// -------------------
 
 	// 2D plots of m1 Vs m2 - signal region
-	TH2D* histM1vsM2                   = new TH2D("hM1vsM2_sidee_1to2p5","m(#mu_{1}-tk) vs m(#mu_{2}-tk) (signal region);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",massBins.size()-1,&massBins[0],massBins.size()-1,&massBins[0]);
+	TH2D* histM1vsM2                   = new TH2D("hM1vsM2_side_1to2p5","m(#mu_{1}-tk) vs m(#mu_{2}-tk) (signal region);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",massBins.size()-1,&massBins[0],massBins.size()-1,&massBins[0]);
 	TH2D* histM1timesM1                = new TH2D("hM1timesM2_side_1to2p5","m(sideband) #times m(sideband) (signal region);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",massBins.size()-1,&massBins[0],massBins.size()-1,&massBins[0]);
 
 	// 2D plots of m1 Vs m2 - sideband (soft track pT 1-2.5)
@@ -403,12 +403,18 @@ void massPlots()
 				TLorentzVector track1Mom=tk1_2p5_OS[0]->P4();
 				TLorentzVector track2Mom=tk2_2p5_OS[0]->P4();
 
+				// random since mu1Mom andmu2Mom are randomly assigned (if selected at top)
 				double m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 				double m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
 				histM1->Fill(m1);
 				histM2->Fill(m2);
-
+				
+				// Fill symmetrically to increase stats
+				histM1vsM2->Fill(m1,m2);
+				// if (getMassBin(m1) != getMassBin(m2)){
+				histM1vsM2->Fill(m2,m1);
+				
 				if(m2 < 1.){
 					histM1_0to1->Fill(m1);
 					histMu1Pt_0to1->Fill(mu1->PT);
@@ -467,7 +473,7 @@ void massPlots()
 			if (tk1_2p5.size() == 1 && tk2_2p5.size() == 1 // main tk with pT > 2.5
 				&& ((tk1_1to2p5.size() == 1 && tk1_1to2p5.size() == 1) || (tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 1) || (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 0))){ // additional soft track
 				
-				double m1(0), m2(0);				
+				double m1(0), m2(0);		
 				if (tk1_1to2p5.size() == 1)
 					m1 = (mu1Mom+tk1_2p5[0]->P4()+tk1_1to2p5[0]->P4()).M();
 				else
@@ -479,6 +485,7 @@ void massPlots()
 					m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
 				
 				// Fill 2D m1 vs m2 plot
+				// Fill symmetrically to increase stats
 				histM1vsM2_side_1to2p5->Fill(m1,m2);
 				// if (getMassBin(m1) != getMassBin(m2)){
 					histM1vsM2_side_1to2p5->Fill(m2,m1);
@@ -519,6 +526,7 @@ void massPlots()
 					m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
 				
 				// Fill 2D m1 vs m2 plot
+				// Fill symmetrically to increase stats
 				histM1vsM2_side_1to1p5->Fill(m1,m2);
 				// if (getMassBin(m1) != getMassBin(m2)){
 					histM1vsM2_side_1to1p5->Fill(m2,m1);
@@ -546,18 +554,20 @@ void massPlots()
 	} // end of event loop
 
 	// Make m1 sideband plot (soft pT 1-2.5)
-	TH1D* histM1_side_1to2p5 = new TH1D("hM1_side","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",massBins.size(),&massBins[0]);
+	TH1D* histM1_side_1to2p5 = new TH1D("hM1_side_1to2p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",massBins.size(),&massBins[0]);
 	histM1_side_1to2p5->Add(histM1_side_1to2p5_0to1);
 	histM1_side_1to2p5->Add(histM1_side_1to2p5_1to2);
 	histM1_side_1to2p5->Add(histM1_side_1to2p5_2to3);
 	histM1_side_1to2p5->Add(histM1_side_1to2p5_3toInf);
 	
 	// Make m1 sideband plot (soft pT 1-1.5)
-	TH1D* histM1_side_1to1p5 = new TH1D("hM1_side","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",massBins.size(),&massBins[0]);
+	TH1D* histM1_side_1to1p5 = new TH1D("hM1_side_1to1p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",massBins.size(),&massBins[0]);
 	histM1_side_1to1p5->Add(histM1_side_1to1p5_0to1);
 	histM1_side_1to1p5->Add(histM1_side_1to1p5_1to2);
 	histM1_side_1to1p5->Add(histM1_side_1to1p5_2to3);
 	histM1_side_1to1p5->Add(histM1_side_1to1p5_3toInf);
+
+	// Don't need to do for signal region as we filles histM1...maybe should do the same for sideband regions...
 
 	// Do some normalizing
 	normaliseHist(histM1_side_1to2p5);
@@ -565,6 +575,9 @@ void massPlots()
 
 	normaliseHist(histM1_side_1to1p5);
 	normaliseHist(histM1vsM2_side_1to1p5);
+
+	normaliseHist(histM1);
+	normaliseHist(histM1vsM2);
 	
 	// Do corrections plot by making m1*m1 first, then dividing m1vsm2 by m1*m1
 	// Don't need to normalise m1timesm1, as histM1_side already normalised
@@ -572,6 +585,7 @@ void massPlots()
 		for (unsigned b = 1; b <=massBins.size()-1; b++){
 			histM1timesM1_side_1to2p5->SetBinContent(a,b,histM1_side_1to2p5->GetBinContent(a)*histM1_side_1to2p5->GetBinContent(b));
 			histM1timesM1_side_1to1p5->SetBinContent(a,b,histM1_side_1to1p5->GetBinContent(a)*histM1_side_1to1p5->GetBinContent(b));
+			histM1timesM1->SetBinContent(a,b,histM1->GetBinContent(a)*histM1->GetBinContent(b));
 		}
 	}
 	TH2D* histM1vsM2_corrections_side_1to2p5 = (TH2D*)histM1vsM2_side_1to2p5->Clone("hM1vsM2_corrections_side_1to2p5");
@@ -581,6 +595,10 @@ void massPlots()
 	TH2D* histM1vsM2_corrections_side_1to1p5 = (TH2D*)histM1vsM2_side_1to1p5->Clone("hM1vsM2_corrections_side_1to1p5");
 	histM1vsM2_corrections_side_1to1p5->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
 	histM1vsM2_corrections_side_1to1p5->Divide(histM1timesM1_side_1to1p5);
+
+	TH2D* histM1vsM2_corrections = (TH2D*)histM1vsM2->Clone("hM1vsM2_corrections");
+	histM1vsM2_corrections->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m_{1} #times m_{1};m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
+	histM1vsM2_corrections->Divide(histM1timesM1);
 
 	TCanvas c;
 	std::string app("");
@@ -606,9 +624,6 @@ void massPlots()
 	// app += "_samePtEta";
 
 	// Mass plots
-	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
-	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
-
 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (soft tk with p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_1to2p5_0to1, histM1_side_1to2p5_1to2, histM1_side_1to2p5_2to3, histM1_side_1to2p5_3toInf, "M1_M2_side_1to2p5_1to1p5", directory, app);
 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (soft tk with p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_1to1p5_0to1, histM1_side_1to1p5_1to2, histM1_side_1to1p5_2to3, histM1_side_1to1p5_3toInf, "M1_M2_side_1to1p5_1to1p5", directory, app);
@@ -630,6 +645,12 @@ void massPlots()
 	drawHistAndSave(histM1vsM2_side_1to1p5, "colz","M1vsM2_side_1to1p5", directory, app);
 	drawHistAndSave(histM1timesM1_side_1to1p5, "colz","M1timesM1_side_1to1p5", directory, app);
 	drawHistAndSave(histM1vsM2_corrections_side_1to1p5, "colzTEXTE","M1vsM2_corrections_side_1to1p5", directory, app);
+
+	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
+	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
+	drawHistAndSave(histM1vsM2, "colz","M1vsM2", directory, app);
+	drawHistAndSave(histM1timesM1, "colz","M1timesM1", directory, app);
+	drawHistAndSave(histM1vsM2_corrections, "colzTEXTE","M1vsM2_corrections", directory, app);
 
 	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
@@ -678,6 +699,8 @@ void massPlots()
 	histM1_side_1to1p5->Write("",TObject::kOverwrite);
 	histM1vsM2_side_1to1p5->Write("",TObject::kOverwrite);
 	histM1vsM2_corrections_side_1to1p5->Write("",TObject::kOverwrite);
+	histM1vsM2->Write("",TObject::kOverwrite);
+	histM1vsM2_corrections->Write("",TObject::kOverwrite);
 
 	outFile->Close();
 
