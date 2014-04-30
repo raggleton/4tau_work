@@ -15,45 +15,14 @@ void basicScript(int argc, char* argv[])
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
-	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT = true; // whether to use MC that has HLT cuts already applied or not.
-	
-	po::options_description desc("Allowed options");
-	desc.add_options()
-		("help", "produce help message")
-		("doSignal", po::value<bool>(&doSignal), "TRUE - do signal, FALSE - do QCDb_mu")
-		("swapMuRandomly", po::value<bool>(&swapMuRandomly), "TRUE - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
-		("doHLT", po::value<bool>(&doHLT), "TRUE - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
-	;
+	ProgramOpts pOpts(argc, argv);
 
-	po::variables_map vm;
-	po::store(po::parse_command_line(argc, argv, desc), vm);
-	po::notify(vm);    
-
-	if (vm.count("help")) {
-	    cout << desc << "\n";
-	    return;
-	}
-
-	if (vm.count("doSignal")) {
-	    doSignal = vm["doSignal"].as<bool>();
-	} else {
-	    cout << "Signal/QCD was not set. Defaulting to signal.\n";
-	}
-	if (vm.count("swapMuRandomly")) {
-	    swapMuRandomly = vm["swapMuRandomly"].as<bool>();
-	} else {
-	    cout << "Mu ordering not set. Defaulting to random.\n";
-	}
-	if (vm.count("doHLT")) {
-	    doHLT = vm["doHLT"].as<bool>();
-	} else {
-	    cout << "HLT requirement not set. Defaulting to using samples with HLT cuts.\n";
-	}
+	bool doSignal = pOpts.getSignal(); // for signal or QCDb
+	bool doMu = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
+	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool doHLT = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 	
-	
+
 	// Create chain of root trees
 	TChain chain("Delphes");
 	addInputFiles(&chain, doSignal, doMu, doHLT);
@@ -70,7 +39,7 @@ void basicScript(int argc, char* argv[])
 	// TClonesArray *branchMuon = treeReader->UseBranch("Muon");
 	TClonesArray *branchTracks   = treeReader->UseBranch("Track");
 	TClonesArray *branchGenMuons = treeReader->UseBranch("OnlyGenMuons");
-	TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
+	// TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
 	// Book histograms

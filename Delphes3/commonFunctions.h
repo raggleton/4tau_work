@@ -11,16 +11,103 @@
 // -I $(HOME)/boost_1_55_0 -I $(HOME)/boost_1_55_0_install/include 
 // to CXXFLAGS in Delphes/Makefile
 #include <boost/lexical_cast.hpp>
-// #include <boost/filesystem.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 
 using std::cout;
 using std::endl;
+
+namespace fs=boost::filesystem;
+namespace po = boost::program_options;
 
 /**
  * This header contains common functiosn for all my Delphes analysis scripts
  *
  * Robin Aggleton 2014
  */
+
+/**
+ * This class is to handle program options using boost::program_options
+ */
+class ProgramOpts
+{
+	private:
+		bool doSignal; //do signal or QCD
+		bool doMu; // for QCDb - either inclusive decays or mu only decays - DEPRECIATED
+		bool swapMuRandomly; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+		bool doHLT; // whether to use MC that has HLT cuts already applied or not.
+
+	public: 
+		ProgramOpts(int argc, char* argv[]):
+			// some sensible defaults
+			doSignal(true),
+			doMu(true),
+			swapMuRandomly(true),
+			doHLT(true)
+		{
+			po::options_description desc("Allowed options");
+			desc.add_options()
+				("help", "produce help message")
+				("doSignal", po::value<bool>(&doSignal), "TRUE - do signal, FALSE - do QCDb_mu")
+				("swapMuRandomly", po::value<bool>(&swapMuRandomly), "TRUE - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
+				("doHLT", po::value<bool>(&doHLT), "TRUE - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
+			;
+
+			po::variables_map vm;
+			try {
+				po::store(po::parse_command_line(argc, argv, desc), vm);
+			} catch (boost::program_options::unknown_option e) {
+				cout << "Unrecognised option " << e.what() << endl;
+				cout << "Exiting" << endl;
+				exit(1);
+			}
+
+			po::notify(vm);    
+
+			if (vm.count("help")) {
+			    cout << desc << "\n";
+			    exit(1);
+			}
+
+			// Process program options
+			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+			cout << "PROGRAM OPTIONS" << endl;
+			cout << "++++++++++++++++" << endl;
+			if (vm.count("doSignal")) {
+			    doSignal = vm["doSignal"].as<bool>();
+			    if (doSignal) 
+			    	cout << "Doing signal MC" << endl;
+			    else 
+			    	cout << "Doing QCD" << endl;
+			} else {
+			    cout << "Signal/QCD was not set. Defaulting to signal." << endl;
+			}
+			if (vm.count("swapMuRandomly")) {
+			    swapMuRandomly = vm["swapMuRandomly"].as<bool>();
+			    if (swapMuRandomly) 
+			    	cout << "Swapping mu 1<->2 randomly" << endl;
+			    else 
+			    	cout << "Mu 1,2 are pT ordered" << endl;
+			} else {
+			    cout << "Mu ordering not set. Defaulting to random" << endl;
+			}
+			if (vm.count("doHLT")) {
+			    doHLT = vm["doHLT"].as<bool>();
+			    if (doHLT) 
+			    	cout << "Using MC with HLT cuts already applied" << endl;
+			    else 
+			    	cout << "Using MC without any HLT cuts" << endl;
+			} else {
+			    cout << "HLT requirement not set. Defaulting to using samples with HLT cuts" << endl;
+			}
+			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+		} // end of constructor
+
+		bool getSignal(){ return doSignal; }
+		bool getQCDMu(){ return doMu; }
+		bool getMuOrdering(){ return swapMuRandomly; }
+		bool getHLT(){ return doHLT; }
+};
 
 
 /**
@@ -402,7 +489,8 @@ void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* hi
 void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 	// Create chain of root trees
 	int nFiles = 0; // number of files to be added
-	std::string stem = ""; // folder & file stem, expect files to be named like myFile_i.root, where i = 1 -> nFiles
+	std::string folder = ""; // folder & file stem, expect files to be named like myFile_i.root, where i = 1 -> nFiles
+	std::string file = ""; // folder & file stem, expect files to be named like myFile_i.root, where i = 1 -> nFiles
 
 	if (doSignal){
 		if (doHLT){
@@ -417,7 +505,8 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_8_HLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_HLT_bare.root");
 			cout << "Doing signal with HLT cuts" << endl;
-			stem = "Signal_1prong_500K_bare/signal_1prong_500K_HLT_";
+			folder = "Signal_1prong_500K_bare/";
+			file= "signal_1prong_500K_HLT_";
 			nFiles = 20;
 		} else { 
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_10_NoHLT_bare.root");
@@ -431,18 +520,21 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_8_NoHLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_NoHLT_bare.root");
 			cout << "Doing signal without HLT cuts" << endl;
-			stem = "Signal_1prong_500K_bare/signal_1prong_500K_NoHLT_";
+			folder = "Signal_1prong_500K_bare/";
+			file = "signal_1prong_500K_NoHLT_";
 			nFiles = 20;
 		}
 	} else {
 		if (doMu){
 			if(doHLT){
 				cout << "Doing QCDb_mu with HLT cuts" << endl;
-				stem = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/QCDb_mu_pthatmin20_Mu17_Mu8_";
+				folder = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/";
+				file = "QCDb_mu_pthatmin20_Mu17_Mu8_";
 				nFiles = 350;
 			} else{
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
-				stem = "QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_";
+				folder = "QCDb_mu_pthatmin20_bare/";
+				file = "QCDb_mu_pthatmin20_";
 				// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_94.root");
 				// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_93.root");
 				// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_92.root");
@@ -450,7 +542,8 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			}
 		} else {
 			cout << "Doing QCDb" << endl;
-			stem = "QCDb_cleanTk/QCDb_";
+			folder = "QCDb_cleanTk/";
+			file = "QCDb_";
 			nFiles = 10;
 			// chain->Add("QCDb_cleanTk/QCDb_10.root");
 			// chain->Add("QCDb_cleanTk/QCDb_2.root");
@@ -463,8 +556,16 @@ void addInputFiles(TChain* chain, bool doSignal, bool doMu, bool doHLT){
 			// chain->Add("QCDb_cleanTk/QCDb_9.root");
 		}
 	}
-			for (int i = 1; i <= nFiles; i ++){
-				cout << "Adding " << stem+boost::lexical_cast<std::string>(i)+".root" << endl;
-				chain->Add((stem+boost::lexical_cast<std::string>(i)+".root").c_str());
-			}
+	
+	// Auto-loop over ROOT files in folder using Boost::Filesystem
+	
+
+
+
+	// For manually looping over files in a folder from 1 to nFiles (inclusive)	
+	for (int i = 1; i <= nFiles; i ++){
+		cout << "Adding " << folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
+		chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
+	}
+
 }
