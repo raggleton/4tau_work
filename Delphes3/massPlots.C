@@ -134,7 +134,7 @@ void massPlots()
 	///////////////////////////
 	// Loop over all events  //
 	///////////////////////////
-	numberOfEntries = 50000; // for testing only!
+	// numberOfEntries = 50000; // for testing only!
 	//-------------------------
 	cout << "Nevts : " << numberOfEntries << endl;
 	bool stop = false; // used to stop the loop, for debugging/testing
@@ -633,10 +633,10 @@ void massPlots()
 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (soft tk with p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_1to1p5_0to1, histM1_side_1to1p5_1to2, histM1_side_1to1p5_2to3, histM1_side_1to1p5_3toInf, "M1_M2_side_1to1p5_1to1p5", directory, app);
 	if(doSignal){
 		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
+		drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - MC truth;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_truth_0to1, histMu1Pt_truth_1to2, histMu1Pt_truth_2to3, histMu1Pt_truth_3toInf, "Mu1Pt_M2_truth", directory, app);
 	}
 
 	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - signal region;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_0to1, histMu1Pt_1to2, histMu1Pt_2to3, histMu1Pt_3toInf, "Mu1Pt_M2", directory, app);
-	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - MC truth;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_truth_0to1, histMu1Pt_truth_1to2, histMu1Pt_truth_2to3, histMu1Pt_truth_3toInf, "Mu1Pt_M2_truth", directory, app);
 	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - sideband (soft tk p_{T} = 1 - 2.5 GeV);#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_side_1to2p5_0to1, histMu1Pt_side_1to2p5_1to2, histMu1Pt_side_1to2p5_2to3, histMu1Pt_side_1to2p5_3toInf, "Mu1Pt_M2_side_1to2p5_1to1p5", directory, app);
 	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - sideband (soft tk p_{T} = 1 - 1.5 GeV);#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_side_1to1p5_0to1, histMu1Pt_side_1to1p5_1to2, histMu1Pt_side_1to1p5_2to3, histMu1Pt_side_1to1p5_3toInf, "Mu1Pt_M2_side_1to1p5_1to1p5", directory, app);
 
@@ -687,10 +687,12 @@ void massPlots()
 	histMu1Pt_2to3->Write("",TObject::kOverwrite);
 	histMu1Pt_3toInf->Write("",TObject::kOverwrite);
 	
-	histMu1Pt_truth_0to1->Write("",TObject::kOverwrite);
-	histMu1Pt_truth_1to2->Write("",TObject::kOverwrite);
-	histMu1Pt_truth_2to3->Write("",TObject::kOverwrite);
-	histMu1Pt_truth_3toInf->Write("",TObject::kOverwrite);
+	if (doSignal){
+		histMu1Pt_truth_0to1->Write("",TObject::kOverwrite);
+		histMu1Pt_truth_1to2->Write("",TObject::kOverwrite);
+		histMu1Pt_truth_2to3->Write("",TObject::kOverwrite);
+		histMu1Pt_truth_3toInf->Write("",TObject::kOverwrite);
+	}
 	
 	histMu1Pt_side_1to2p5_0to1->Write("",TObject::kOverwrite);
 	histMu1Pt_side_1to2p5_1to2->Write("",TObject::kOverwrite);
