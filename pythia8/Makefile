@@ -47,7 +47,7 @@ ifneq (x$(HEPMCLOCATION),x)
   main41 main42 mainQCDb mainQCDc mainLHEhadronise: \
 	$(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8.a $(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8tohepmc.a
 	@mkdir -p $(BINDIR)
-	$(CXX) $(CXXFLAGS) -Wno-shadow -I$(PYTHIA8LOCATION)/$(INCDIR) -I$(HEPMCLOCATION)/include \
+	$(CXX) $(CXXFLAGS) -std=c++11 -Wno-shadow -I$(PYTHIA8LOCATION)/$(INCDIR) -I$(HEPMCLOCATION)/include \
 	$@.cc -o $(BINDIR)/$@.exe \
 	-L$(PYTHIA8LOCATION)/$(LIBDIRARCH) -lpythia8 -llhapdfdummy $(LIBGZIP) \
 	-lpythia8tohepmc \
