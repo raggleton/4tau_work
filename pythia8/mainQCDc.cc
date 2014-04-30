@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
   // Number of events. For HLT. NoHLT has about 60X HLT amount (320K NoHLT evt for 5K HLT evnt)
   // Warning, 5K events ~900MB hepmc file and takes ~5 min.
   // Warning, 50K events ~9GB hepmc file and takes ~40 min.
-  pythia.readString("Main:numberOfEvents = 10000");
+  pythia.readString("Main:numberOfEvents = 5000");
   int nEvent = pythia.mode("Main:numberOfEvents");
   pythia.readString("Next:numberShowEvent = 00");
   // pythia.readString("Next:numberShowProcess = 100");
@@ -81,33 +81,30 @@ int main(int argc, char* argv[]) {
   // pythia.readString("HadronLevel:all = off");   
 
   // All C hadrons from PDG
-  int bCodes[90] = {511,521,10511,10521,513,523,10513,10523,20513,20523,515,525,531,10531,533,10533,
-    20533,535,541,10541,543,10543,20543,545,51,10551,100551,110551,200551,210551,553,10553,20553,30553,
-    100553,110553,120553,130553,200553,210553,220553,300553,10860,9000553,11020,9010553,555,10555,20555,
-    100555,110555,120555,200555,557,100557,5122,5112,5212,5222,5114,5214,5224,5132,5232,5312,5322,5314,
-    5324,5332,5334,5142,5242,5412,5422,5414,5424,5342,5432,5434,5442,5444,5512,5522,5514,5524,5532,5534,
-    5542,5544,5554};
-  int nCodes = 90;
+  std::vector<int> cCodes{ 411,421,10411,10421,413,423,10413,10423,20413,20423,415,425,431,10431,433,
+    10433,20433, 435,441,10441,100441,443,10443,20443,100443,30443,9000443,9010443,9020443,445,100445,
+    4122,4222,4212,4112,4224,4214,4114,4232,4132,4322,4312,4324,4314,4332,4334,4412,4422,4414,4424,4432,4434,4444 };
+  int nCodes = cCodes.size();
 
   if (muOnly){
     // For B hadrons to decay weakly to muons or taus
     for (int iC = 0; iC < nCodes; ++iC) {
       // Check PDGID is in PYTHIA
-      if(! pythia.particleData.isParticle(bCodes[iC])) continue;
+      if(! pythia.particleData.isParticle(cCodes[iC])) continue;
       
       // Get particle name.
       // If excited state, then just skip it, we want it to decay to less excited states.
-      if (pythia.particleData.name(bCodes[iC]).find("*") != std::string::npos) continue;
+      if (pythia.particleData.name(cCodes[iC]).find("*") != std::string::npos) continue;
       
       // Turn off all decay modes first
       std::stringstream sstm;
-      sstm << bCodes[iC] << ":onMode = off";
+      sstm << cCodes[iC] << ":onMode = off";
       std::string command = sstm.str();
       pythia.readString(command);
       sstm.str("");
       
       // Now just turn on tau or mu ones
-      sstm << bCodes[iC] << ":onIfAny = 13 15";
+      sstm << cCodes[iC] << ":onIfAny = 13 15";
       command = sstm.str();
       pythia.readString(command);
     }
@@ -119,8 +116,8 @@ int main(int argc, char* argv[]) {
   if(tauToMuOnly)
     pythia.readString("15:onMode = off");
   
-  std::vector<int> tausFromB;
-  std::vector<int> tausNotFromB;
+  std::vector<int> tausFromC;
+  std::vector<int> tausNotFromC;
 
   // Initialize 
   pythia.init();
@@ -148,8 +145,8 @@ int main(int argc, char* argv[]) {
       // have to turn off tau decays for each event
       pythia.readString("15:onMode = off"); 
       // reset tau vectors to empty
-      tausFromB.resize(0);
-      tausNotFromB.resize(0);
+      tausFromC.resize(0);
+      tausNotFromC.resize(0);
     }
 
     // Generate event. Skip it if error.
@@ -167,22 +164,22 @@ int main(int argc, char* argv[]) {
           // Mark as decayed 
           event[i].statusNeg();
 
-          // Loop through and see if mother of tau is in B hadron list
+          // Loop through and see if mother of tau is in C hadron list
           // Must be a better way?
-          bool daughterOfB = false;
+          bool daughterOfC = false;
           // motherN() gets the particle # not the PDGID number
           for (int iC = 0; iC < nCodes; ++iC) {
-            if (event[event[i].mother1()].idAbs() == bCodes[iC] || event[event[i].mother2()].idAbs() == bCodes[iC]){
-              daughterOfB = true;
+            if (event[event[i].mother1()].idAbs() == cCodes[iC] || event[event[i].mother2()].idAbs() == cCodes[iC]){
+              daughterOfC = true;
               event[i].statusNeg();
               break;
             }
           }
 
-          if (daughterOfB)
-            tausFromB.push_back(i);    
+          if (daughterOfC)
+            tausFromC.push_back(i);    
           else
-            tausNotFromB.push_back(i);    
+            tausNotFromC.push_back(i);    
 
         } 
       } //end loop over particles
@@ -190,16 +187,16 @@ int main(int argc, char* argv[]) {
       // Now we do decays in 2 goes.
       // First do all the taus from Bs
       pythia.readString("15:onIfAny = 13");
-      for(unsigned a =0; a < tausFromB.size(); a++){
-        event[tausFromB[a]].statusPos();
+      for(unsigned a =0; a < tausFromC.size(); a++){
+        event[tausFromC[a]].statusPos();
       }
       if (!pythia.moreDecays()) continue; // Go ahead and decay the undecayed taus
       
       // Now do all other taus 
       // Turn on all modes of decay
       pythia.readString("15:onMode = on");
-      for(unsigned a =0; a < tausNotFromB.size(); a++){
-        event[tausNotFromB[a]].statusPos(); // Mark the taus not from B as needing decaying
+      for(unsigned a =0; a < tausNotFromC.size(); a++){
+        event[tausNotFromC[a]].statusPos(); // Mark the taus not from B as needing decaying
       }
       if (!pythia.moreDecays()) continue;
     } // end of if(tauToMuOnly)
