@@ -21,7 +21,7 @@ namespace fs=boost::filesystem;
 namespace po = boost::program_options;
 
 /**
- * This header contains common functiosn for all my Delphes analysis scripts
+ * This header contains common functions for all my Delphes analysis scripts
  *
  * Robin Aggleton 2014
  */
@@ -38,6 +38,7 @@ class ProgramOpts
 		bool doHLT; // whether to use MC that has HLT cuts already applied or not.
 
 	public: 
+		// constructor, parses input
 		ProgramOpts(int argc, char* argv[]):
 			// some sensible defaults
 			doSignal(true),
@@ -59,14 +60,14 @@ class ProgramOpts
 			} catch (boost::program_options::unknown_option e) {
 				cout << "Unrecognised option " << e.what() << endl;
 				cout << "Exiting" << endl;
-				exit(1);
+				exit(1); // NOT ELEGANT - DO BETTER!
 			}
 
 			po::notify(vm);    
 
 			if (vm.count("help")) {
 			    cout << desc << "\n";
-			    exit(1);
+			    exit(1); // NOT ELEGANT - DO BETTER!
 			}
 
 			// Process program options

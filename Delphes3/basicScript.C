@@ -1,10 +1,10 @@
 #include "commonFunctions.h"
-#include <boost/program_options.hpp>
+// #include <boost/program_options.hpp>
 
 using std::cout;
 using std::endl;
 
-namespace po = boost::program_options;
+// namespace po = boost::program_options;
 
 /**
  * Template script for Delphes analysis. Use with makeScript.sh
@@ -22,7 +22,6 @@ void basicScript(int argc, char* argv[])
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 	
-
 	// Create chain of root trees
 	TChain chain("Delphes");
 	addInputFiles(&chain, doSignal, doMu, doHLT);

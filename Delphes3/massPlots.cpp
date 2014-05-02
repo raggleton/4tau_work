@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
 // Here you call your macro's main function 
 
-	massPlots();
+	massPlots(argc, argv);
 
 //------------------------------------------------------------------------------
 

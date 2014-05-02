@@ -10,16 +10,18 @@ using std::endl;
 /**
  * Main analysis script to make plots etc. 
  */
-void mainAnalysis()
+void mainAnalysis(int argc, char* argv[])
 {
 	TH1::SetDefaultSumw2();
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = true;
-	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT = false; // whether to use MC that has HLT cuts already applied or not.
+	ProgramOpts pOpts(argc, argv);
+
+	bool doSignal = pOpts.getSignal(); // for signal or QCDb
+	bool doMu = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
+	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool doHLT = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -157,6 +159,7 @@ void mainAnalysis()
 
 	int nMu(0);
 	int n2p5(0), n2p5OS(0); // count # muons with 1+ tracks with pT > 2.5 for SS+OS, and OS
+	int n1to2p5(0), n1to2p5OS(0); // count # muons with 1+ tracks with 1 < pT < 2.5 for SS+OS, and OS
 	int nMuPass(0);
 
 	// Loop over all events

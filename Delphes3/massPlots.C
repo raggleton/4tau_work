@@ -12,16 +12,18 @@ using std::endl;
 // 	return 5;
 // }
 
-void massPlots()
+void massPlots(int argc, char* argv[])
 {
 	TH1::SetDefaultSumw2();
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = false;
-	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = true; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT = true; // for signal MC - require HLT conditions (29K/5*500K evt) or not (500K evt)
+	ProgramOpts pOpts(argc, argv);
+
+	bool doSignal = pOpts.getSignal(); // for signal or QCDb
+	bool doMu = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
+	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool doHLT = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -101,16 +103,16 @@ void massPlots()
 	TH1D* histMu1Pt_truth_3toInf       = new TH1D("hMu1Pt_truth_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
 
 	// mu1 pT plots in bins of m2 - sideband (soft track pT 1-2.5)
-	TH1D* histMu1Pt_side_1to2p5_0to1   = new TH1D("hMu1Pt_side_1to2p5_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV (soft tk p_{T} = 1-2.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
-	TH1D* histMu1Pt_side_1to2p5_1to2   = new TH1D("hMu1Pt_side_1to2p5_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV (soft tk p_{T} = 1-2.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
-	TH1D* histMu1Pt_side_1to2p5_2to3   = new TH1D("hMu1Pt_side_1to2p5_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV (soft tk p_{T} = 1-2.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
-	TH1D* histMu1Pt_side_1to2p5_3toInf = new TH1D("hMu1Pt_side_1to2p5_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV (soft tk p_{T} = 1-2.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
+	TH1D* histMu1Pt_side_1to2p5_0to1   = new TH1D("hMu1Pt_side_1to2p5_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV (soft tk p_{T} = 1-2.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_side_1to2p5_1to2   = new TH1D("hMu1Pt_side_1to2p5_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV (soft tk p_{T} = 1-2.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_side_1to2p5_2to3   = new TH1D("hMu1Pt_side_1to2p5_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV (soft tk p_{T} = 1-2.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_side_1to2p5_3toInf = new TH1D("hMu1Pt_side_1to2p5_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV (soft tk p_{T} = 1-2.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
 
 	// mu1 pT plots in bins of m2 - sideband (soft track pT 1-1.5)
-	TH1D* histMu1Pt_side_1to1p5_0to1   = new TH1D("hMu1Pt_side_1to1p5_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV (soft tk p_{T} = 1-1.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
-	TH1D* histMu1Pt_side_1to1p5_1to2   = new TH1D("hMu1Pt_side_1to1p5_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV (soft tk p_{T} = 1-1.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
-	TH1D* histMu1Pt_side_1to1p5_2to3   = new TH1D("hMu1Pt_side_1to1p5_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV (soft tk p_{T} = 1-1.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
-	TH1D* histMu1Pt_side_1to1p5_3toInf = new TH1D("hMu1Pt_side_1to1p5_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV (soft tk p_{T} = 1-1.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
+	TH1D* histMu1Pt_side_1to1p5_0to1   = new TH1D("hMu1Pt_side_1to1p5_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV (soft tk p_{T} = 1-1.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_side_1to1p5_1to2   = new TH1D("hMu1Pt_side_1to1p5_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV (soft tk p_{T} = 1-1.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_side_1to1p5_2to3   = new TH1D("hMu1Pt_side_1to1p5_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV (soft tk p_{T} = 1-1.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
+	TH1D* histMu1Pt_side_1to1p5_3toInf = new TH1D("hMu1Pt_side_1to1p5_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV (soft tk p_{T} = 1-1.5 GeV); #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
 
 	// -------------------
 	// 2D plots of m1 V m2
@@ -693,7 +695,7 @@ void massPlots()
 		histMu1Pt_truth_2to3->Write("",TObject::kOverwrite);
 		histMu1Pt_truth_3toInf->Write("",TObject::kOverwrite);
 	}
-	
+
 	histMu1Pt_side_1to2p5_0to1->Write("",TObject::kOverwrite);
 	histMu1Pt_side_1to2p5_1to2->Write("",TObject::kOverwrite);
 	histMu1Pt_side_1to2p5_2to3->Write("",TObject::kOverwrite);

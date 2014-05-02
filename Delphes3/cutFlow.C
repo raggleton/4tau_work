@@ -14,16 +14,18 @@ void sortTrackVector(std::vector<Track*>& tk){
 }
 
 
-void cutFlow()
+void cutFlow(int argc, char* argv[])
 {
 	TH1::SetDefaultSumw2();
 
 	gSystem->Load("libDelphes");
 
-	bool doSignal = false;
-	bool doMu = true; // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = false; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT = false; // for signal MC - require HLT conditions or not
+	ProgramOpts pOpts(argc, argv);
+
+	bool doSignal = pOpts.getSignal(); // for signal or QCDb
+	bool doMu = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
+	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool doHLT = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -257,7 +259,7 @@ void cutFlow()
 				&& (candTk->PT > 1.)
 				&& (fabs(candTk->Z) < 1.) //dz < 1mm
 				&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
-				&& (fabs(candTk->Eta)<3)
+				&& (fabs(candTk->Eta)<2.4)
 			){
 
 				// Store track in suitable vector

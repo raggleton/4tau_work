@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
 // Here you call your macro's main function 
 
-	mainAnalysis();
+	mainAnalysis(argc, argv);
 
 //------------------------------------------------------------------------------
 
