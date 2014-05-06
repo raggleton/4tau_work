@@ -21,15 +21,16 @@ void cutFlow(int argc, char* argv[])
 	gSystem->Load("libDelphes");
 
 	ProgramOpts pOpts(argc, argv);
-
-	bool doSignal = pOpts.getSignal(); // for signal or QCDb
+	
+	MCsource source = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
+	bool doSignal = pOpts.getSignal(); // for signal or not
 	bool doMu = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
-	addInputFiles(&chain, doSignal, doMu, doHLT);
+	addInputFiles(&chain, source, doMu, doHLT);
 
 	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
 
