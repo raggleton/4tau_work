@@ -31,7 +31,8 @@ namespace po = boost::program_options;
 // Note convention of all lower case
 enum MCsource { signal, qcdb, qcdc };
 
-// Have to define <<, and >> ops to get enum to work with boost::lexical_cast and program_options
+// Have to define <<, and >> ops to get enum to work with boost::lexical_cast and program_options,
+// and also so we can cout the enum easily
 std::ostream& operator<<(std::ostream& out, const MCsource value){
 
     const char* s = 0;
@@ -46,6 +47,7 @@ std::ostream& operator<<(std::ostream& out, const MCsource value){
     return out << s;
 }
 
+// Must be a way to improve this using static_cast
 std::istream & operator>>(std::istream & in, MCsource & value) {
   std::string token;
   if (in >> token){
@@ -55,6 +57,8 @@ std::istream & operator>>(std::istream & in, MCsource & value) {
   		value = qcdb;
   	else if (token == "qcdc")
   		value = qcdc;
+  	else
+  		throw runtime_error("Invalid string cast to enum");
   }
   return in;
   // unsigned int source = 0;
@@ -118,7 +122,7 @@ class ProgramOpts
 			// Process program options
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 			cout << "PROGRAM OPTIONS" << endl;
-			cout << "++++++++++++++++" << endl;
+			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 
 			if (vm.count("source")) {
 			    source = vm["source"].as<MCsource>();
@@ -140,7 +144,7 @@ class ProgramOpts
 			    else 
 			    	cout << "Mu 1,2 are pT ordered" << endl;
 			} else {
-			    cout << "Mu ordering not set. Defaulting to random" << endl;
+			    cout << "Mu ordering not set. Defaulting to random." << endl;
 			}
 			
 			if (vm.count("doHLT")) {
@@ -150,7 +154,7 @@ class ProgramOpts
 			    else 
 			    	cout << "Using MC without any HLT cuts" << endl;
 			} else {
-			    cout << "HLT requirement not set. Defaulting to using samples with HLT cuts" << endl;
+			    cout << "HLT requirement not set. Defaulting to using samples with HLT cuts." << endl;
 			}
 			
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
