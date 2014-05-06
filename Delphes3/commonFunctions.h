@@ -31,7 +31,7 @@ namespace po = boost::program_options;
 // Note convention of all lower case
 enum MCsource { signal, qcdb, qcdc };
 
-// Have to define <, and >> ops to get enum to work with boost::lexical_cast
+// Have to define <<, and >> ops to get enum to work with boost::lexical_cast and program_options
 std::ostream& operator<<(std::ostream& out, const MCsource value){
 
     const char* s = 0;
@@ -46,11 +46,21 @@ std::ostream& operator<<(std::ostream& out, const MCsource value){
     return out << s;
 }
 
-std::istream & operator>>(std::istream & str, MCsource & v) {
-  unsigned int source = 0;
-  if (str >> source)
-    v = static_cast<MCsource>(source);
-  return str;
+std::istream & operator>>(std::istream & in, MCsource & value) {
+  std::string token;
+  if (in >> token){
+  	if (token == "signal")
+  		value = signal;
+  	else if (token == "qcdb")
+  		value = qcdb;
+  	else if (token == "qcdc")
+  		value = qcdc;
+  }
+  return in;
+  // unsigned int source = 0;
+  // if (str >> source)
+  //   v = static_cast<MCsource>(source);
+  // return str;
 }
 
 /**
@@ -59,7 +69,7 @@ std::istream & operator>>(std::istream & str, MCsource & v) {
 class ProgramOpts
 {
 	private:
-		MCsource source; // do signal or QCD(b)(c)
+		MCsource source; // do signal or qcd(b)(c)
 		bool doSignal; // do signal, not QCD
 		bool doMu; // for QCDb - either inclusive decays or mu only decays - DEPRECIATED
 		bool swapMuRandomly; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
@@ -86,8 +96,14 @@ class ProgramOpts
 			po::variables_map vm;
 			try {
 				po::store(po::parse_command_line(argc, argv, desc), vm);
+			} catch (boost::program_options::invalid_option_value e) {
+				cout << "Invalid option value: " << e.what() << endl;
+				cout << desc << endl;
+				cout << "Exiting" << endl;
+				exit(1); // NOT ELEGANT - DO BETTER!
 			} catch (boost::program_options::unknown_option e) {
-				cout << "Unrecognised option " << e.what() << endl;
+				cout << "Unrecognised option: " << e.what() << endl;
+				cout << desc << endl;
 				cout << "Exiting" << endl;
 				exit(1); // NOT ELEGANT - DO BETTER!
 			}
@@ -95,7 +111,7 @@ class ProgramOpts
 			po::notify(vm);    
 
 			if (vm.count("help")) {
-			    cout << desc << "\n";
+			    cout << desc << endl;
 			    exit(1); // NOT ELEGANT - DO BETTER!
 			}
 
@@ -107,19 +123,11 @@ class ProgramOpts
 			if (vm.count("source")) {
 			    source = vm["source"].as<MCsource>();
 			    if (source == signal){ 
-			    	cout << source << endl;
-			    	cout << "Doing signal MC" << endl;
 			    	doSignal = true;
 			    } else {
 			    	doSignal = false;
-			    	if (source == qcdb){
-				    	cout << "Doing QCDb" << endl;
-				    } else if (source == qcdc){
-				    	cout << "Doing QCDc" << endl;
-				    	doSignal = false;
-				    }
 			    }
-			    cout << "Doing " << source << " MC" << endl;
+			    cout << "Doing " << source << " MC." << endl;
 			} else {
 			    cout << "MC source was not set. Defaulting to signal." << endl;
 			    doSignal = true;
