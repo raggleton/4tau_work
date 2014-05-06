@@ -44,8 +44,10 @@ void mainAnalysis(int argc, char* argv[])
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
 	//////////////////////
-	// Book histograms //
+	// Book histograms  //
 	//////////////////////
+	
+	// Track distributions
 	TH1D *histNTracks1           = new TH1D("hNTracks1" ,"Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
 	TH1D *histNTracks2           = new TH1D("hNTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
 	TH1D *histNTracks1OS         = new TH1D("hNTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
@@ -56,36 +58,39 @@ void mainAnalysis(int argc, char* argv[])
 	TH1D *histNTracksCum1OS      = new TH1D("hNTracksCum1OS" ,"Cumulative Number of tracks about mu1, OS,p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); Average N_{trk} about #mu_{1}", 50,0,5);
 	TH1D *histNTracksCum2OS      = new TH1D("hNTracksCum2OS" ,"Cumulative Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); Average N_{trk} about #mu_{2}", 50,0,5);
 
+	// Soft track distributions, for events where you already have 1 track with pT > 2.5
+	TH1D *histNSoftTracks1       = new TH1D("hNSoftTracks1" ,"Number of tracks about mu1, p_{T}(trk) = (1-2.5)GeV, muon selection, 1 OS trk with pT > 2.5 GeV;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
+	TH1D *histNSoftTracks2       = new TH1D("hNSoftTracks2" ,"Number of tracks about mu2, p_{T}(trk) = (1-2.5)GeV, muon selection, 1 OS trk with pT > 2.5 GeV;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
+	TH1D *histNSoftTracks1OS     = new TH1D("hNSoftTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk) = (1-2.5)GeV, muon selection, 1 OS trk with pT > 2.5 GeV;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
+	TH1D *histNSoftTracks2OS     = new TH1D("hNSoftTracks2OS" ,"Number of tracks about mu2, OS, p_{T}(trk) = (1-2.5)GeV, muon selection, 1 OS trk with pT > 2.5 GeV;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
+
+	TH1D *histNSoftTracksCum1    = new TH1D("hNSoftTracksCum1" ,"Cumulative Number of tracks about mu1, p_{T}(trk) = (1-2.5) GeV, muon selection, 1 OS trk with pT > 2.5 GeV;#Delta R (#mu_{1}-track); Average N_{trk} about #mu_{1}", 50,0,5);
+	TH1D *histNSoftTracksCum2    = new TH1D("hNSoftTracksCum2" ,"Cumulative Number of tracks about mu2, p_{T}(trk) = (1-2.5) GeV, muon selection, 1 OS trk with pT > 2.5 GeV;#Delta R (#mu_{2}-track); Average N_{trk} about #mu_{2}", 50,0,5);
+	TH1D *histNSoftTracksCum1OS  = new TH1D("hNSoftTracksCum1OS" ,"Cumulative Number of tracks about mu1, OS,p_{T}(trk) = (1-2.5) GeV, muon selection, 1 OS trk with pT > 2.5 GeV;#Delta R (#mu_{1}-track); Average N_{trk} about #mu_{1}", 50,0,5);
+	TH1D *histNSoftTracksCum2OS  = new TH1D("hNSoftTracksCum2OS" ,"Cumulative Number of tracks about mu2, OS, p_{T}(trk) = (1-2.5) GeV, muon selection, 1 OS trk with pT > 2.5 GeV;#Delta R (#mu_{2}-track); Average N_{trk} about #mu_{2}", 50,0,5);
+
+	// Particle kinematics
 	TH1D *histMu1Pt              = new TH1D("hMu1Pt", "#mu_{1} p_{T}, no selection ;#mu_{1} p_{T} [GeV]; N_{events}", 50,0,50.);
 	TH1D *histMu2Pt              = new TH1D("hMu2Pt", "#mu_{2} p_{T}, no selection;#mu_{2} p_{T} [GeV]; N_{events}", 50,0,50.);
 
 	TH1D *histTrack1Pt           = new TH1D("hTrack1Pt","Track 1 p_{T}, signal selection; track 1 p_{T} [GeV]; N_{events}", 25,0,25.);
 	TH1D *histTrack2Pt           = new TH1D("hTrack2Pt","Track 2 p_{T}, signal selection; track 2 p_{T} [GeV]; N_{events}", 25,0,25.);
 	
-	// for mu+tk systems
+	// For combined mu+tk systems
 	TH1D *histSys1Pt             = new TH1D("hSys1Pt", "System 1 p_{T}, signal selection ;System 1 p_{T} [GeV]; N_{events}", 50,0,50.);
 	TH1D *histSys2Pt             = new TH1D("hSys2Pt", "System 2 p_{T}, signal selection;System 2 p_{T} [GeV]; N_{events}", 50,0,50.);
 	TH1D *histDRSys              = new TH1D("hDRSys", "#Delta R(Sys_{1}-Sys_{2}), signal selection;#Delta R(Sys_{1}-Sys_{2}); N_{events}", 30,0,5);
 	TH2D *histDEtaVsDPhiSys      = new TH2D("hDEtaVsDPhiSys","dPhi vs dEta for system 2 wrt system 1 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
 
-	// for mu+tk systems - MC Truth
+	// For combined mu+tk systems - MC Truth
 	TH1D *histSys1PtTruth        = new TH1D("hSys1PtTruth", "System 1 p_{T}, signal selection, MC truth;System 1 p_{T} [GeV]; N_{events}", 50,0,50.);
 	TH1D *histSys2PtTruth        = new TH1D("hSys2PtTruth", "System 2 p_{T}, signal selection, MC truth;System 2 p_{T} [GeV]; N_{events}", 50,0,50.);
 	TH1D *histDRSysTruth         = new TH1D("hDRSysTruth", "#Delta R(Sys_{1}-Sys_{2}), signal selection, MC truth;#Delta R(Sys_{1}-Sys_{2}); N_{events}", 30,0,5);
 	TH2D *histDEtaVsDPhiSysTruth = new TH2D("hDEtaVsDPhiSysTruth","dPhi vs dEta for system 2 wrt system 1, MC Truth ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
 
-	TH1D *histNuPt               = new TH1D("hNuPt", "#nu p_{T}, no selection ;#nu p_{T} [GeV]; N_{events}", 50,0,50.);
 	
 	TH1D *histMu1PtSel           = new TH1D("hMu1PtSel", "#mu_{1} p_{T}, muon selection, no tk selection;#mu_{1} p_{T} [GeV]; N_{events}", 50,0,50.);
 	TH1D *histMu2PtSel           = new TH1D("hMu2PtSel", "#mu_{2} p_{T}, muon selection, no tk selection;#mu_{2} p_{T} [GeV]; N_{events}", 50,0,50.);
-
-	// TH1D *histNMu             = new TH1D("hNMu", "No. muons;N mu; N_{events}", 5,0,5);
-	// TH1D *histNMu1            = new TH1D("hNMu1", "No. muons about 1;N mu; N_{events}", 5,0,5);
-	// TH1D *histNMu2            = new TH1D("hNMu2", "No. muons about 2;N mu; N_{events}", 5,0,5);
-
-	// TH1D *histNTk25              = new TH1D("hNTk25", "No. tracks, p_{T} > 2.5 GeV;N_{tk}; N_{events}", 25,0,50);
-	// TH1D *histNTk1               = new TH1D("hNTk1", "No. tracks, p_{T} > 1 GeV;N_{tk}; N_{events}", 25,0,100);
-	// TH1D *histNTk                = new TH1D("hNTk", "No. tracks, p_{T} > 0 GeV;N_{tk}; N_{events}", 25,50,250);
 
 	TH1D *histDRMuMu             = new TH1D("hDRMuMu", "#Delta R(#mu-#mu), muon selection;#Delta R(#mu_{1}-#mu_{2}); N_{events}", 30,0,5);
 	TH2D *histDEtaVsDPhiMuMu     = new TH2D("hDEtaVsDPhiMuMu","dPhi vs dEta of selection muons ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
@@ -95,23 +100,14 @@ void mainAnalysis(int argc, char* argv[])
 	TH1D *histDRa2               = new TH1D("hDRa2","#Delta R(#tau-#tau) 2nd a_{1}, no muon selection;#Delta R(#tau-#tau); N_{events}", 10,0,1.);
 
 	TH1D *histHPt                = new TH1D("hHPt","h_{1,2} p_{T}, no selection ;h_{1,2} p_{T} [GeV]; N_{events}",25,0,50); // Isn't included in MC file from Calchep :(
+	TH1D *histNuPt               = new TH1D("hNuPt", "#nu p_{T}, no selection ;#nu p_{T} [GeV]; N_{events}", 50,0,50.);
 
 	TH1D *histPID                = new TH1D("hPID","PID of tau 1-prong; PID; N_{events}", 350,0,350);
 
-	// TH1D *histRand               = new TH1D("hRand","Testing rand(); Value; N_{events}", 100,0,1);
+	// TH1D *histRand            = new TH1D("hRand","Testing rand(); Value; N_{events}", 100,0,1);
 	
-	// TH1D *histTroublePt          = new TH1D("hTroublePt","p_{T} for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 25,0,25.);
-	// TH1D *histTroublePID         = new TH1D("hTroublePID","PDGID for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 2200,0,2200);
-	// TH1D *histTroubleEta         = new TH1D("hTroubleEta","#eta for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 25,0,5.);
-	// TH1D *histTroublePhi         = new TH1D("hTroublePhi","#phi for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 25,-TMath::Pi(),TMath::Pi());
-	// TH1D *histTroubleMatch       = new TH1D("hTroubleMatch","Whether trks with #Delta R(#mu1-trk) = 0.7 - 1.2 match to any of tau decay products ; Value; N_{events}", 2,0,2.);
-	// TH1D *histTroubleDRMuMu      = new TH1D("hTroubleDRMuMu","#Delta #R (#mu-#mu) for trks #Delta R(#mu1-trk) = 0.7 - 1.2  ; Value; N_{events}", 20,0,TMath::Pi());
-	// TH1D *histTroubleDPhiMuMu    = new TH1D("hTroubleDPhiMuMu","#Delta #phi (#mu-#mu) for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 20,0,TMath::Pi());
-	// TH1D *histTroubleDEtaMuMu    = new TH1D("hTroubleDEtaMuMu","#Delta #eta (#mu-#mu) for trks #Delta R(#mu-trk) = 0.7 - 1.2 ; Value; N_{events}", 20,-5,5);
-	// TH1D *histTroubleMu1Pt       = new TH1D("hTroubleMu1Pt","Mu1 p_{T} for trks #Delta R(#mu1-trk) = 0.7 - 1.2 ; Value; N_{events}", 25,0,35);
-	// TH1D *histTroubleMu2Pt       = new TH1D("hTroubleMu2Pt","Mu2 p_{T} for trks #Delta R(#mu2-trk) = 0.7 - 1.2 ; Value; N_{events}", 20,0,25);
-	TH2D *histTroubleEtaVsPhi1   = new TH2D("hTroubleEtaVsPhi1","dPhi vs dEta of tracks (>2.5 GeV) vs muon 1 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
-	TH2D *histTroubleEtaVsPhi2   = new TH2D("hTroubleEtaVsPhi2","dPhi vs dEta of tracks (>2.5 GeV) vs muon 2 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
+	TH2D *histTkEtaVsPhi1        = new TH2D("hTkEtaVsPhi1","dPhi vs dEta of tracks (>2.5 GeV) vs muon 1 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
+	TH2D *histTkEtaVsPhi2        = new TH2D("hTkEtaVsPhi2","dPhi vs dEta of tracks (>2.5 GeV) vs muon 2 ; #Delta #eta; #Delta #phi", 30,0,3, 20, 0, TMath::Pi());
 
 	// Plots for testing invariant mass correlation
 	double massBins[6]           = {0,1,2,3,4,10};
@@ -149,10 +145,10 @@ void mainAnalysis(int argc, char* argv[])
 	TH1D* histMu1Pt_truth_3toInf = new TH1D("hMu1Pt_truth_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
 
 	// mu1 pT plots in bins of m2 - sideband
-	TH1D* histMu1Pt_side_0to1   = new TH1D("hMu1Pt_side_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
-	TH1D* histMu1Pt_side_1to2   = new TH1D("hMu1Pt_side_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
-	TH1D* histMu1Pt_side_2to3   = new TH1D("hMu1Pt_side_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
-	TH1D* histMu1Pt_side_3toInf = new TH1D("hMu1Pt_side_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
+	TH1D* histMu1Pt_side_0to1    = new TH1D("hMu1Pt_side_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
+	TH1D* histMu1Pt_side_1to2    = new TH1D("hMu1Pt_side_1to2","#mu_{1} p_{T} for m(#mu_{2}-tk) = 1-2 GeV; #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
+	TH1D* histMu1Pt_side_2to3    = new TH1D("hMu1Pt_side_2to3","#mu_{1} p_{T} for m(#mu_{2}-tk) = 2-3 GeV; #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
+	TH1D* histMu1Pt_side_3toInf  = new TH1D("hMu1Pt_side_3toInf","#mu_{1} p_{T} for m(#mu_{2}-tk) = 3-Inf GeV; #mu_{1} p_{T} [GeV];A.U.",10,0.,50.);
 
 	// 2D plots of m1 Vs m2 - sideband
 	TH2D* histM1vsM2_side        = new TH2D("hM1vsM2_side","m(#mu_{1}-tk) vs m(#mu_{2}-tk);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
@@ -160,11 +156,14 @@ void mainAnalysis(int argc, char* argv[])
 
 	int nMu(0);
 	int n2p5(0), n2p5OS(0); // count # muons with 1+ tracks with pT > 2.5 for SS+OS, and OS
-	int n1to2p5(0), n1to2p5OS(0); // count # muons with 1+ tracks with 1 < pT < 2.5 for SS+OS, and OS
+	int nOnly2p5(0), nOnly2p5OS(0); // count # muons with 1 tracks with  pT > 2.5 for SS+OS, and OS
 	int nMuPass(0);
 
-	// Loop over all events
+	///////////////////////////
+	// Loop over all events //
+	///////////////////////////
 	Long64_t numberOfEntries = treeReader->GetEntries();
+	// numberOfEntries = 10000;
 	cout << "Nevts : " << numberOfEntries <<endl;
 	bool stop = false;
 
@@ -365,6 +364,7 @@ void mainAnalysis(int argc, char* argv[])
 
 				}
 
+				// Dirty!
 				if (!muTruth1) delete muTruth1;
 				if (!trackTruth1) delete trackTruth1;
 				if (!muTruth2) delete muTruth2;
@@ -410,6 +410,10 @@ void mainAnalysis(int argc, char* argv[])
 			// same but with 1 < pT < 2.5 (for sideband)
 			std::vector<Track*> tk1_1to2p5;
 			std::vector<Track*> tk2_1to2p5;
+
+			// same but with 1 < pT < 2.5, no dR restriction 
+			std::vector<Track*> tk1_1to2p5_alldR;
+			std::vector<Track*> tk2_1to2p5_alldR;
 			
 			Track *candTk(0);
 			bool atLeastTk2p5 = false; // to monitor if theres a tk with pT > 2.5
@@ -441,8 +445,8 @@ void mainAnalysis(int argc, char* argv[])
 						histNTracks2->Fill(dR2);
 						atLeastTk2p5 = true;
 
-						histTroubleEtaVsPhi1->Fill(fabs(candTk->Eta - mu1Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu1Mom)));
-						histTroubleEtaVsPhi2->Fill(fabs(candTk->Eta - mu2Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu2Mom)));
+						histTkEtaVsPhi1->Fill(fabs(candTk->Eta - mu1Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu1Mom)));
+						histTkEtaVsPhi2->Fill(fabs(candTk->Eta - mu2Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu2Mom)));
 
 						if (dR1 < 0.5){
 							tk1_2p5.push_back(candTk);
@@ -463,6 +467,8 @@ void mainAnalysis(int argc, char* argv[])
 							}
 						}					
 					}  else {
+						tk1_1to2p5_alldR.push_back(candTk);
+						tk2_1to2p5_alldR.push_back(candTk);
 						if (dR1 < 0.5){
 							tk1_1to2p5.push_back(candTk);
 						}
@@ -556,7 +562,8 @@ void mainAnalysis(int argc, char* argv[])
 			// where at least one muon has an additional track with 1< pT < 2.5,
 			// within dR < 0.5. No sign requirement.
 			if (tk1_2p5.size() == 1 && tk2_2p5.size() == 1 
-				&& ((tk1_1to2p5.size() == 1 && tk1_1to2p5.size() == 1) || (tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 1) || (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 0))){
+				&& ((tk1_1to2p5.size() == 1 && tk1_1to2p5.size() == 1) || (tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 1) || (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 0)))
+			{
 				
 				double m1(0), m2(0);				
 				if (tk1_1to2p5.size() == 1)
@@ -589,6 +596,26 @@ void mainAnalysis(int argc, char* argv[])
 
 			}
 
+			// Slightly different region - only require 1 track with pT > 2.5
+			// For soft track distributions
+			if (tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1){
+				nOnly2p5OS++;
+				if (tk1_1to2p5_alldR.size() > 0){
+					for( auto softTk : tk1_1to2p5_alldR ){
+						histNSoftTracks1->Fill((softTk->P4()).DeltaR(mu1Mom));
+						if (softTk->Charge * mu1->Charge < 0)
+							histNSoftTracks1OS->Fill((softTk->P4()).DeltaR(mu1Mom));
+					}
+				}
+				if (tk2_1to2p5_alldR.size() > 0){
+					for( auto softTk : tk2_1to2p5_alldR ){
+						histNSoftTracks2->Fill((softTk->P4()).DeltaR(mu2Mom));
+						if (softTk->Charge * mu2->Charge < 0)
+							histNSoftTracks2OS->Fill((softTk->P4()).DeltaR(mu2Mom));
+					}
+				}
+
+			}
 
 		} // end of muon selection
 		
@@ -600,6 +627,11 @@ void mainAnalysis(int argc, char* argv[])
 	TH1D* histNTracksAbs1OS = (TH1D*)histNTracks1OS->Clone("hNTracksAbs1OS");
 	TH1D* histNTracksAbs2OS = (TH1D*)histNTracks2OS->Clone("hNTracksAbs2OS");
 
+	TH1D* histNSoftTracksAbs1   = (TH1D*)histNSoftTracks1->Clone("hNSoftTracksAbs1");
+	TH1D* histNSoftTracksAbs2   = (TH1D*)histNSoftTracks2->Clone("hNSoftTracksAbs2");
+	TH1D* histNSoftTracksAbs1OS = (TH1D*)histNSoftTracks1OS->Clone("hNSoftTracksAbs1OS");
+	TH1D* histNSoftTracksAbs2OS = (TH1D*)histNSoftTracks2OS->Clone("hNSoftTracksAbs2OS");
+
 	// Rescale some hists
 	// Abs # of tracks per muon
 	histNTracksAbs1->Scale(1./n2p5);
@@ -607,10 +639,21 @@ void mainAnalysis(int argc, char* argv[])
 	histNTracksAbs2->Scale(1./n2p5);
 	histNTracksAbs2OS->Scale(1./n2p5OS);
 
+
 	histNTracksAbs1->SetYTitle("Ave. N_{trk} per #mu_{1}");
 	histNTracksAbs2->SetYTitle("Ave. N_{trk} per #mu_{2}");
 	histNTracksAbs1OS->SetYTitle("Ave. OS N_{trk} per #mu_{1}");
 	histNTracksAbs2OS->SetYTitle("Ave. OS N_{trk} per #mu_{2}");
+
+	histNSoftTracksAbs1->Scale(1./nOnly2p5OS);
+	histNSoftTracksAbs1OS->Scale(1./nOnly2p5OS);
+	histNSoftTracksAbs2->Scale(1./nOnly2p5OS);
+	histNSoftTracksAbs2OS->Scale(1./nOnly2p5OS);
+
+	histNSoftTracksAbs1->SetYTitle("Ave. N_{trk} per #mu_{1}");
+	histNSoftTracksAbs2->SetYTitle("Ave. N_{trk} per #mu_{2}");
+	histNSoftTracksAbs1OS->SetYTitle("Ave. OS N_{trk} per #mu_{1}");
+	histNSoftTracksAbs2OS->SetYTitle("Ave. OS N_{trk} per #mu_{2}");
 
 	// AU scaling
 	normaliseHist(histNTracks1);
@@ -618,17 +661,34 @@ void mainAnalysis(int argc, char* argv[])
 	normaliseHist(histNTracks1OS);
 	normaliseHist(histNTracks2OS);
 
+	normaliseHist(histNSoftTracks1);
+	normaliseHist(histNSoftTracks2);
+	normaliseHist(histNSoftTracks1OS);
+	normaliseHist(histNSoftTracks2OS);
+
 	// Cumulative plots
 	histNTracksCum1   = (TH1D*)histNTracksAbs1->Clone("hNTracksCum1");
 	histNTracksCum2   = (TH1D*)histNTracksAbs2->Clone("hNTracksCum2");
 	histNTracksCum1OS = (TH1D*)histNTracksAbs1OS->Clone("hNTracksCum1OS");
 	histNTracksCum2OS = (TH1D*)histNTracksAbs2OS->Clone("hNTracksCum2OS");
 
+	histNSoftTracksCum1   = (TH1D*)histNSoftTracksAbs1->Clone("hNSoftTracksCum1");
+	histNSoftTracksCum2   = (TH1D*)histNSoftTracksAbs2->Clone("hNSoftTracksCum2");
+	histNSoftTracksCum1OS = (TH1D*)histNSoftTracksAbs1OS->Clone("hNSoftTracksCum1OS");
+	histNSoftTracksCum2OS = (TH1D*)histNSoftTracksAbs2OS->Clone("hNSoftTracksCum2OS");
+
+
+
 	for (int i = 1; i <= histNTracks1->GetNbinsX(); i++){
 		histNTracksCum1->SetBinContent(i,histNTracksCum1->GetBinContent(i-1) + histNTracksAbs1->GetBinContent(i));
 		histNTracksCum2->SetBinContent(i,histNTracksCum2->GetBinContent(i-1) + histNTracksAbs2->GetBinContent(i));
 		histNTracksCum1OS->SetBinContent(i,histNTracksCum1OS->GetBinContent(i-1) + histNTracksAbs1OS->GetBinContent(i));
 		histNTracksCum2OS->SetBinContent(i,histNTracksCum2OS->GetBinContent(i-1) + histNTracksAbs2OS->GetBinContent(i));
+
+		histNSoftTracksCum1->SetBinContent(i,histNSoftTracksCum1->GetBinContent(i-1) + histNSoftTracksAbs1->GetBinContent(i));
+		histNSoftTracksCum2->SetBinContent(i,histNSoftTracksCum2->GetBinContent(i-1) + histNSoftTracksAbs2->GetBinContent(i));
+		histNSoftTracksCum1OS->SetBinContent(i,histNSoftTracksCum1OS->GetBinContent(i-1) + histNSoftTracksAbs1OS->GetBinContent(i));
+		histNSoftTracksCum2OS->SetBinContent(i,histNSoftTracksCum2OS->GetBinContent(i-1) + histNSoftTracksAbs2OS->GetBinContent(i));
 	}
 
 	cout << "# muons with 1+ track with pT >2.5 GeV: " << n2p5 << endl;
@@ -662,10 +722,6 @@ void mainAnalysis(int argc, char* argv[])
 
 	// app += "_samePtEta";
 
-	// drawHistAndSave(histNMu, "HISTE", "NMu", directory, app);
-	// drawHistAndSave(histNMu1, "HISTE", "NMu1", directory, app);
-	// drawHistAndSave(histNMu2, "HISTE", "NMu2", directory, app);
-
 	drawHistAndSave(histMu1Pt, "HISTE", "Mu1Pt", directory, app);
 	drawHistAndSave(histMu2Pt, "HISTE", "Mu2Pt", directory, app);
 	drawHistAndSave(histTrack1Pt, "HISTE", "Track1Pt", directory, app);
@@ -695,12 +751,24 @@ void mainAnalysis(int argc, char* argv[])
 	drawHistAndSave(histNTracksCum1OS, "HISTE", "NTracksCum1_OS", directory, app);
 	drawHistAndSave(histNTracksCum2OS, "HISTE", "NTracksCum2_OS", directory, app);
 
+	// Soft tracks around muon
+	drawHistAndSave(histNSoftTracks1, "HISTE", "NSoftTracks1_NS", directory, app);
+	drawHistAndSave(histNSoftTracks2, "HISTE", "NSoftTracks2_NS", directory, app);
+	drawHistAndSave(histNSoftTracks1OS, "HISTE", "NSoftTracks1_OS", directory, app);
+	drawHistAndSave(histNSoftTracks2OS, "HISTE", "NSoftTracks2_OS", directory, app);
+
+	drawHistAndSave(histNSoftTracksAbs1, "HISTE", "NSoftTracksAbs1_NS", directory, app);
+	drawHistAndSave(histNSoftTracksAbs2, "HISTE", "NSoftTracksAbs2_NS", directory, app);
+	drawHistAndSave(histNSoftTracksAbs1OS, "HISTE", "NSoftTracksAbs1_OS", directory, app);
+	drawHistAndSave(histNSoftTracksAbs2OS, "HISTE", "NSoftTracksAbs2_OS", directory, app);
+
+	drawHistAndSave(histNSoftTracksCum1, "HISTE", "NSoftTracksCum1_NS", directory, app);
+	drawHistAndSave(histNSoftTracksCum2, "HISTE", "NSoftTracksCum2_NS", directory, app);
+	drawHistAndSave(histNSoftTracksCum1OS, "HISTE", "NSoftTracksCum1_OS", directory, app);
+	drawHistAndSave(histNSoftTracksCum2OS, "HISTE", "NSoftTracksCum2_OS", directory, app);
+
 	drawHistAndSave(histDRMuMu, "HISTE", "DRMuMu", directory, app);
 	drawHistAndSave(histDEtaVsDPhiMuMu, "COLZ", "DEtaVsDPhiMuMu", directory, app);
-
-	// drawHistAndSave(histNTk, "HISTE", "NTk", directory, app);
-	// drawHistAndSave(histNTk1, "HISTE", "NTk1", directory, app);
-	// drawHistAndSave(histNTk25, "HISTE", "NTk25", directory, app);
 
 	if (doSignal){
 		drawHistAndSave(histSys1PtTruth, "HISTE", "Sys1PtTruth", directory, app);
@@ -714,18 +782,6 @@ void mainAnalysis(int argc, char* argv[])
 		drawHistAndSave(histHPt, "HISTE", "HPt", directory, app);
 	}
 
-	// drawHistAndSave(histTroublePt, "HISTE", "TroubleTkPt", directory, app);
-	// drawHistAndSave(histTroublePID, "HISTE", "TroubleTkPID", directory, app);
-	// drawHistAndSave(histTroubleEta, "HISTE", "TroubleTkEta", directory, app);
-	// drawHistAndSave(histTroublePhi, "HISTE", "TroubleTkPhi", directory, app);
-	// drawHistAndSave(histTroubleMatch, "HISTE", "TroubleMatch", directory, app);
-	// drawHistAndSave(histTroubleDRMuMu, "HISTE", "TroubleDRMuMu", directory, app);
-
-	// drawHistAndSave(histTroubleDPhiMuMu, "HISTE", "TroubleDPhiMuMu", directory, app);
-	// drawHistAndSave(histTroubleDEtaMuMu, "HISTE", "TroubleDEtaMuMu", directory, app);
-	// drawHistAndSave(histTroubleMu1Pt, "HISTE", "TroubleMu1Pt", directory, app);
-	// drawHistAndSave(histTroubleMu2Pt, "HISTE", "TroubleMu2Pt", directory, app);
-
 	TArc problemRing1(0,0,1,0,90);
 	problemRing1.SetLineColor(kRed);
 	problemRing1.SetLineWidth(2);
@@ -736,13 +792,13 @@ void mainAnalysis(int argc, char* argv[])
 	problemRing2.SetLineWidth(2);
 	problemRing2.SetFillStyle(0);
 
-	histTroubleEtaVsPhi1->Draw("COLZ");
-	problemRing1.Draw("only");
-	c.SaveAs((directory+"/TroubleEtaVsPhi1_"+delph+"_"+app+".pdf").c_str());
-	histTroubleEtaVsPhi2->Draw("COLZ");
-	problemRing1.Draw("only");
-	problemRing2.Draw("only");
-	c.SaveAs((directory+"/TroubleEtaVsPhi2_"+delph+"_"+app+".pdf").c_str());
+	histTkEtaVsPhi1->Draw("COLZ");
+	// problemRing1.Draw("only");
+	c.SaveAs((directory+"/TkEtaVsPhi1_"+delph+"_"+app+".pdf").c_str());
+	histTkEtaVsPhi2->Draw("COLZ");
+	// problemRing1.Draw("only");
+	// problemRing2.Draw("only");
+	c.SaveAs((directory+"/TkEtaVsPhi2_"+delph+"_"+app+".pdf").c_str());
 
 	// drawHistAndSave(histRand, "HISTE", "RandTest", directory, app);
 
@@ -817,35 +873,36 @@ void mainAnalysis(int argc, char* argv[])
 	histNTracksCum1OS->Write("",TObject::kOverwrite);
 	histNTracksCum2OS->Write("",TObject::kOverwrite);
 
+	histNSoftTracks1->Write("",TObject::kOverwrite);
+	histNSoftTracks2->Write("",TObject::kOverwrite);
+	histNSoftTracks1OS->Write("",TObject::kOverwrite);
+	histNSoftTracks2OS->Write("",TObject::kOverwrite);
+	histNSoftTracksAbs1->Write("",TObject::kOverwrite);
+	histNSoftTracksAbs2->Write("",TObject::kOverwrite);
+	histNSoftTracksAbs1OS->Write("",TObject::kOverwrite);
+	histNSoftTracksAbs2OS->Write("",TObject::kOverwrite);
+	histNSoftTracksCum1->Write("",TObject::kOverwrite);
+	histNSoftTracksCum2->Write("",TObject::kOverwrite);
+	histNSoftTracksCum1OS->Write("",TObject::kOverwrite);
+	histNSoftTracksCum2OS->Write("",TObject::kOverwrite);
+
 	histDRMuMu->Write("",TObject::kOverwrite);
 	histDEtaVsDPhiMuMu->Write("",TObject::kOverwrite);
-	// histNTk->Write("",TObject::kOverwrite);
-	// histNTk1->Write("",TObject::kOverwrite);
-	// histNTk25->Write("",TObject::kOverwrite);
 
 	if (doSignal){
 		histSys1PtTruth->Write("",TObject::kOverwrite);
 		histSys2PtTruth->Write("",TObject::kOverwrite);
 		histDRSysTruth->Write("",TObject::kOverwrite);
 		histDEtaVsDPhiSysTruth->Write("",TObject::kOverwrite);
+		histHPt->Write("",TObject::kOverwrite);
 		histNuPt->Write("",TObject::kOverwrite);
 		histDRa1->Write("",TObject::kOverwrite);
 		histDRa2->Write("",TObject::kOverwrite);
 		histPID->Write("",TObject::kOverwrite);
 	}
 
-	// histTroublePt->Write("",TObject::kOverwrite);
-	// histTroublePID->Write("",TObject::kOverwrite);
-	// histTroubleEta->Write("",TObject::kOverwrite);
-	// histTroublePhi->Write("",TObject::kOverwrite);
-	// histTroubleMatch->Write("",TObject::kOverwrite);
-	// histTroubleDRMuMu->Write("",TObject::kOverwrite);
-	// histTroubleDPhiMuMu->Write("",TObject::kOverwrite);
-	// histTroubleDEtaMuMu->Write("",TObject::kOverwrite);
-	// histTroubleMu1Pt->Write("",TObject::kOverwrite);
-	// histTroubleMu2Pt->Write("",TObject::kOverwrite);
-	histTroubleEtaVsPhi1->Write("",TObject::kOverwrite);
-	histTroubleEtaVsPhi2->Write("",TObject::kOverwrite);
+	histTkEtaVsPhi1->Write("",TObject::kOverwrite);
+	histTkEtaVsPhi2->Write("",TObject::kOverwrite);
 	
 	// Mass plots
 	// histM1->Write("",TObject::kOverwrite);
