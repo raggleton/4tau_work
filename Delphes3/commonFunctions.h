@@ -92,7 +92,7 @@ class ProgramOpts
 			po::options_description desc("Allowed options");
 			desc.add_options()
 				("help", "produce help message")
-				("source", po::value<MCsource>(&source), "signal [default], qcdb, qcdc")
+				("source", po::value<MCsource>(&source), "Process to run: signal [default], qcdb, qcdc")
 				("swapMuRandomly", po::value<bool>(&swapMuRandomly), "TRUE [default] - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
 				("doHLT", po::value<bool>(&doHLT), "TRUE [default] - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
 			;
@@ -540,7 +540,7 @@ void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* hi
 /**
  * Add Delphes ntuples to TChain so we can process them in one go
  * @param chain    Pointer to TChain to add files to
- * @param source Flag TRUE to do signalMC, FALSE to do QCD
+ * @param source   enum to determine which process to use (signal, qcdb, qcdc)
  * @param doMu     Flag TRUE to use sample that force B hadrons to decay to mu 
  * @param doHLT    Flag TRUE to use signal sample that emulates HLT conditions (Mu17_Mu8)
  */
@@ -603,22 +603,13 @@ void addInputFiles(TChain* chain, MCsource source, bool doMu, bool doHLT){
 			folder = "QCDb_cleanTk/";
 			file = "QCDb_";
 			nFiles = 10;
-			// chain->Add("QCDb_cleanTk/QCDb_10.root");
-			// chain->Add("QCDb_cleanTk/QCDb_2.root");
-			// chain->Add("QCDb_cleanTk/QCDb_3.root");
-			// chain->Add("QCDb_cleanTk/QCDb_4.root");
-			// chain->Add("QCDb_cleanTk/QCDb_5.root");
-			// chain->Add("QCDb_cleanTk/QCDb_6.root");
-			// chain->Add("QCDb_cleanTk/QCDb_7.root");
-			// chain->Add("QCDb_cleanTk/QCDb_8.root");
-			// chain->Add("QCDb_cleanTk/QCDb_9.root");
 		}
 	} else if (source == qcdc)
 		if(doHLT){
-			cout << "Doing QCDb_mu with HLT cuts" << endl;
+			cout << "Doing QCDc_mu with HLT cuts" << endl;
 			folder = "QCDc_mu_pthatmin20_Mu17_Mu8_bare/";
-			file = "QCDc_";
-			nFiles = 5;
+			file = "QCDc_mu_pthatmin20_Mu17_Mu8_";
+			nFiles = 20;
 		}
 	
 	// Auto-loop over ROOT files in folder using Boost::Filesystem
