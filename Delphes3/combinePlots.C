@@ -42,10 +42,10 @@ void combinePlots(){
 	gStyle->SetOptStat("");
 
 	TFile fSig("Signal_1prong_500K_bare/output_bare_sig_HLT.root","READ");
-	TFile fBg("QCDb_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg.root","READ");
+	TFile fBg("QCDb_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg_HLT.root","READ");
 	
 	TFile fSigRand("Signal_1prong_500K_bare/output_bare_sig_muRand_HLT.root","READ");
-	TFile fBgRand("QCDb_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg_muRand.root","READ");
+	TFile fBgRand("QCDb_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg_muRand_HLT.root","READ");
 
 	//////////////////
 	// Plot things //
@@ -86,6 +86,33 @@ void combinePlots(){
 	combineHists(&fSig, &fBg, "hNTracks2OS", "HISTE", "Combined/combined_NTrackOS2.pdf");
 	combineHists(&fSigRand, &fBgRand, "hNTracks1OS", "HISTE", "Combined/combined_NTrackOS1_muRand.pdf");
 	combineHists(&fSigRand, &fBgRand, "hNTracks2OS", "HISTE", "Combined/combined_NTrackOS2_muRand.pdf");
+
+	//////////////////////
+	// For soft tracks //
+	//////////////////////
+	// Cumulative track distr., for pT-ordered and random-ordered muons - no sign requirement
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracksCum1", "HISTE", "Combined/combined_NSoftTrackCum1_muRand.pdf");
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracksCum2", "HISTE", "Combined/combined_NSoftTrackCum2_muRand.pdf");
+
+	// Cumulative track distr., for pT-ordered and random-ordered muons - opposite sign requirement
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracksCum1OS", "HISTE", "Combined/combined_NSoftTrackCum1OS_muRand.pdf");
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracksCum2OS", "HISTE", "Combined/combined_NSoftTrackCum2OS_muRand.pdf");
+
+	// Absolute track distr., for pT-ordered and random-ordered muons - no sign requirement
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf");
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracksAbs2", "HISTE", "Combined/combined_NSoftTrackAbs2_muRand.pdf");
+
+	// Absolute track distr., for pT-ordered and random-ordered muons - opposite sign requirement
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracksAbs1OS", "HISTE", "Combined/combined_NSoftTrackAbs1OS_muRand.pdf");
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracksAbs2OS", "HISTE", "Combined/combined_NSoftTrackAbs2OS_muRand.pdf");
+
+	// Normalised track distr., for pT-ordered and random-ordered muons - no sign requirement
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf");
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracks2", "HISTE", "Combined/combined_NSoftTrack2_muRand.pdf");
+	
+	// Normalised track distr., for pT-ordered and random-ordered muons - opposite sign requirement
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracks1OS", "HISTE", "Combined/combined_NSoftTrackOS1_muRand.pdf");
+	combineHists(&fSigRand, &fBgRand, "hNSoftTracks2OS", "HISTE", "Combined/combined_NSoftTrackOS2_muRand.pdf");
 
 	//////////////////
 	// Close files //
