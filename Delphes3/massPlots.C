@@ -28,10 +28,8 @@ void massPlots(int argc, char* argv[])
 
 	// Create chain of root trees
 	TChain chain("Delphes");
-	addInputFiles(&chain, source, doMu, doHLT);
-
-	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
-	else cout << "mu1 has higher pT than mu2" << endl;
+	addInputFiles(&chain, &pOpts);
+	pOpts.printProgramOptions();
 
 	// Create object of class ExRootTreeReader
 	ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
@@ -591,8 +589,16 @@ void massPlots(int argc, char* argv[])
 	for(unsigned a = 1; a <= massBins.size()-1; a++){
 		for (unsigned b = 1; b <=massBins.size()-1; b++){
 			histM1timesM1_side_1to2p5->SetBinContent(a,b,histM1_side_1to2p5->GetBinContent(a)*histM1_side_1to2p5->GetBinContent(b));
+			histM1timesM1_side_1to2p5->SetBinError(a,b,sqrt(pow(histM1_side_1to2p5->GetBinContent(b)*histM1_side_1to2p5->GetBinError(a),2)
+															+pow(histM1_side_1to2p5->GetBinContent(a)*histM1_side_1to2p5->GetBinError(b),2)));
+
 			histM1timesM1_side_1to1p5->SetBinContent(a,b,histM1_side_1to1p5->GetBinContent(a)*histM1_side_1to1p5->GetBinContent(b));
+			histM1timesM1_side_1to1p5->SetBinError(a,b,sqrt(pow(histM1_side_1to1p5->GetBinContent(b)*histM1_side_1to1p5->GetBinError(a),2)
+															+pow(histM1_side_1to1p5->GetBinContent(a)*histM1_side_1to1p5->GetBinError(b),2)));
+
 			histM1timesM1->SetBinContent(a,b,histM1->GetBinContent(a)*histM1->GetBinContent(b));
+			histM1timesM1->SetBinError(a,b,sqrt(pow(histM1->GetBinContent(b)*histM1->GetBinError(a),2)
+												+pow(histM1->GetBinContent(a)*histM1->GetBinError(b),2)));
 		}
 	}
 	TH2D* histM1vsM2_corrections_side_1to2p5 = (TH2D*)histM1vsM2_side_1to2p5->Clone("hM1vsM2_corrections_side_1to2p5");

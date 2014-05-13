@@ -26,10 +26,8 @@ void mainAnalysis(int argc, char* argv[])
 
 	// Create chain of root trees
 	TChain chain("Delphes");
-	addInputFiles(&chain, source, doMu, doHLT);
-
-	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
-	else cout << "mu1 has higher pT than mu2" << endl;
+	addInputFiles(&chain, &pOpts);
+	pOpts.printProgramOptions();
 
 	// Create object of class ExRootTreeReader
 	ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
@@ -596,9 +594,9 @@ void mainAnalysis(int argc, char* argv[])
 
 			}
 
-			// Slightly different region - only require 1 track with pT > 2.5
+			// Slightly different region - for additional track investigations
 			// For soft track distributions
-			if (tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1){
+			if (tk1_1.size() == 1 && tk2_1.size() == 1 && tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1){
 				nOnly2p5OS++;
 				if (tk1_1to2p5_alldR.size() > 0){
 					for( auto softTk : tk1_1to2p5_alldR ){
@@ -804,44 +802,44 @@ void mainAnalysis(int argc, char* argv[])
 
 	// Draw mass plots
 	// Make m1 sideband plot
-	TH1D* histM1_side = new TH1D("hM1_side","m(#mu_{1}-tk) in sideband;m(#mu_{1}-tk) [GeV];A.U.",5,massBins);
-	histM1_side->Add(histM1_side_0to1);
-	histM1_side->Add(histM1_side_1to2);
-	histM1_side->Add(histM1_side_2to3);
-	histM1_side->Add(histM1_side_3toInf);
+	// TH1D* histM1_side = new TH1D("hM1_side","m(#mu_{1}-tk) in sideband;m(#mu_{1}-tk) [GeV];A.U.",5,massBins);
+	// histM1_side->Add(histM1_side_0to1);
+	// histM1_side->Add(histM1_side_1to2);
+	// histM1_side->Add(histM1_side_2to3);
+	// histM1_side->Add(histM1_side_3toInf);
 
 	// Do some normalizing
-	normaliseHist(histM1_side);
-	normaliseHist(histM1vsM2_side);
+	// normaliseHist(histM1_side);
+	// normaliseHist(histM1vsM2_side);
 	
 	// Do corrections plot by making m1*m1 first, then dividing m1vsm2 by m1*m1
 	// Don't need to normalise m1timesm1, as histM1_side already normalised
-	for(int a = 1; a <= 5; a++){
-		for (int b = 1; b <=5; b++){
-			histM1timesM1_side->SetBinContent(a,b,histM1_side->GetBinContent(a)*histM1_side->GetBinContent(b));
-		}
-	}
-	TH2D* histM1vsM2_corrections_side = (TH2D*)histM1vsM2_side->Clone("hM1vsM2_corrections_side");
-	histM1vsM2_corrections_side->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
-	histM1vsM2_corrections_side->Divide(histM1timesM1_side);
+	// for(int a = 1; a <= 5; a++){
+		// for (int b = 1; b <=5; b++){
+			// histM1timesM1_side->SetBinContent(a,b,histM1_side->GetBinContent(a)*histM1_side->GetBinContent(b));
+		// }
+	// }
+	// TH2D* histM1vsM2_corrections_side = (TH2D*)histM1vsM2_side->Clone("hM1vsM2_corrections_side");
+	// histM1vsM2_corrections_side->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
+	// histM1vsM2_corrections_side->Divide(histM1timesM1_side);
 
-	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
-	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
+	// drawHistAndSave(histM1, "HISTE", "M1", directory, app);
+	// drawHistAndSave(histM2, "HISTE", "M2", directory, app);
 
-	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
-	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (at least 1 #mu has add. tk with p_{T} = (1,2.5));m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, "M1_M2_side", directory, app);
+	// drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
+	// drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (at least 1 #mu has add. tk with p_{T} = (1,2.5));m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_0to1, histM1_side_1to2, histM1_side_2to3, histM1_side_3toInf, "M1_M2_side", directory, app);
 	if(doSignal){
-		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
+		// drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
 	}
 
-	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - signal region;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_0to1, histMu1Pt_1to2, histMu1Pt_2to3, histMu1Pt_3toInf, "Mu1Pt_M2", directory, app);
-	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - MC truth;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_truth_0to1, histMu1Pt_truth_1to2, histMu1Pt_truth_2to3, histMu1Pt_truth_3toInf, "Mu1Pt_M2_truth", directory, app);
-	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - sideband;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_side_0to1, histMu1Pt_side_1to2, histMu1Pt_side_2to3, histMu1Pt_side_3toInf, "Mu1Pt_M2_side", directory, app);
+	// drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - signal region;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_0to1, histMu1Pt_1to2, histMu1Pt_2to3, histMu1Pt_3toInf, "Mu1Pt_M2", directory, app);
+	// drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - MC truth;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_truth_0to1, histMu1Pt_truth_1to2, histMu1Pt_truth_2to3, histMu1Pt_truth_3toInf, "Mu1Pt_M2_truth", directory, app);
+	// drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - sideband;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_side_0to1, histMu1Pt_side_1to2, histMu1Pt_side_2to3, histMu1Pt_side_3toInf, "Mu1Pt_M2_side", directory, app);
 
-	drawHistAndSave(histM1_side, "HISTE", "M1_side", directory, app);
-	drawHistAndSave(histM1vsM2_side, "colz","M1vsM2_side", directory, app);
-	drawHistAndSave(histM1timesM1_side, "colz","M1timesM1_side", directory, app);
-	drawHistAndSave(histM1vsM2_corrections_side, "colzTEXTE","M1vsM2_corrections_side", directory, app);
+	// drawHistAndSave(histM1_side, "HISTE", "M1_side", directory, app);
+	// drawHistAndSave(histM1vsM2_side, "colz","M1vsM2_side", directory, app);
+	// drawHistAndSave(histM1timesM1_side, "colz","M1timesM1_side", directory, app);
+	// drawHistAndSave(histM1vsM2_corrections_side, "colzTEXTE","M1vsM2_corrections_side", directory, app);
 
 
 	///////////////////////////////

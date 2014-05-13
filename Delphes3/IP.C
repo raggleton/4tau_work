@@ -37,10 +37,8 @@ void IP(int argc, char* argv[])
 	
 	// Create chain of root trees
 	TChain chain("Delphes");
-	addInputFiles(&chain, source, doMu, doHLT);
-
-	if (swapMuRandomly) cout << "Swapping mu 1<->2 randomly" << endl;
-	else cout << "mu1 has higher pT than mu2" << endl;
+	addInputFiles(&chain, &pOpts);
+	pOpts.printProgramOptions();
 	
 	// Create object of class ExRootTreeReader
 	ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
