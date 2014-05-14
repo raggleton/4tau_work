@@ -161,7 +161,7 @@ void mainAnalysis(int argc, char* argv[])
 	// Loop over all events //
 	///////////////////////////
 	Long64_t numberOfEntries = treeReader->GetEntries();
-	numberOfEntries = 200;
+	// numberOfEntries = 200;
 	cout << "Nevts : " << numberOfEntries <<endl;
 	bool stop = false;
 
@@ -170,7 +170,7 @@ void mainAnalysis(int argc, char* argv[])
 		// Load selected branches with data from specified event
 		treeReader->ReadEntry(entry);
 
-		cout << "*** Event" << endl;
+		// cout << "*** Event" << endl;
 
 		// Do at gen particle level.
 		// histNMu->Fill(branchGenMuons->GetEntries());

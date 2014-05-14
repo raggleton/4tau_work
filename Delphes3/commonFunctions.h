@@ -278,7 +278,7 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 	}
 
 	if (nCharged == 1){
-		cout << "PRONG: " << prong->PID << endl;
+		// cout << "PRONG: " << prong->PID << endl;
 		return prong;
 	} else {
 		cout << "Damn, more than 1 prong!!!! Got " << nCharged << endl;
