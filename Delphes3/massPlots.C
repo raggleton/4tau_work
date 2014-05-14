@@ -153,8 +153,8 @@ void massPlots(int argc, char* argv[])
 		// and pointers to the GenParticles                                 //
 		//////////////////////////////////////////////////////////////////////
 		
-		GenParticle *cand(0),*mu1(0), *mu2(0);
-		// Track *candTk(0);
+		GenParticle *cand(nullptr),*mu1(nullptr), *mu2(nullptr);
+		// Track *candTk(nullptr);
 
 		double muLeadingPT = 0.;
 		double muSubLeadingPT = 0.; 
@@ -175,7 +175,7 @@ void massPlots(int argc, char* argv[])
 		}
 
 		// Now randomly swap mu1 - mu2
-		GenParticle *origMu1(0), *origMu2(0);
+		GenParticle *origMu1(nullptr), *origMu2(nullptr);
 		origMu1 = mu1;
 		origMu2 = mu2;
 		if (swapMuRandomly){
@@ -196,13 +196,13 @@ void massPlots(int argc, char* argv[])
 		// No selection cuts applied (only >=2 muons)             //
 		////////////////////////////////////////////////////////////
 		
-		GenParticle *charged1a(0);
-		GenParticle *charged1b(0);
-		GenParticle *charged2a(0);
-		GenParticle *charged2b(0);
+		GenParticle *charged1a(nullptr);
+		GenParticle *charged1b(nullptr);
+		GenParticle *charged2a(nullptr);
+		GenParticle *charged2b(nullptr);
 
 		if (doSignal) {
-			GenParticle *a1(0), *a2(0);
+			GenParticle *a1(nullptr), *a2(nullptr);
 			// Get a0s
 			for(int j = 0; j < branchAll->GetEntries(); j++){
 				cand = (GenParticle*) branchAll->At(j);
@@ -220,7 +220,7 @@ void massPlots(int argc, char* argv[])
 			}
 
 			// Get the tau daughters from a1 and a2
-			GenParticle *tau1a(0), *tau1b(0), *tau2a(0), *tau2b(0);
+			GenParticle *tau1a(nullptr), *tau1b(nullptr), *tau2a(nullptr), *tau2b(nullptr);
 			tau1a = (GenParticle*) branchAll->At(a1->D1);
 			tau1b = (GenParticle*) branchAll->At(a1->D2);
 			tau2a = (GenParticle*) branchAll->At(a2->D1);
@@ -240,10 +240,10 @@ void massPlots(int argc, char* argv[])
 			if (charged1a && charged1b && charged2a && charged2b){
 				
 				// To hold mu and tracks from each tau
-				GenParticle* muTruth1(0);
-				GenParticle* trackTruth1(0);
-				GenParticle* muTruth2(0);
-				GenParticle* trackTruth2(0);
+				GenParticle* muTruth1(nullptr);
+				GenParticle* trackTruth1(nullptr);
+				GenParticle* muTruth2(nullptr);
+				GenParticle* trackTruth2(nullptr);
 
 				// Assign charged products to be mu or track
 				bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, *charged1a, *charged1b);				
@@ -345,7 +345,7 @@ void massPlots(int argc, char* argv[])
 			std::vector<Track*> tk1_1to1p5;
 			std::vector<Track*> tk2_1to1p5;
 
-			Track *candTk(0);
+			Track *candTk(nullptr);
 			for(int a = 0; a < branchTracks->GetEntries(); a++){
 				candTk = (Track*) branchTracks->At(a);
 

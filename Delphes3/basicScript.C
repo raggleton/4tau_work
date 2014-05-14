@@ -66,7 +66,7 @@ void basicScript(int argc, char* argv[])
 		//////////////////////////////////////////////////////
 		
 		if (doSignal) {
-			GenParticle *a1(0), *a2(0);
+			GenParticle *a1(nullptr), *a2(nullptr);
 			// Get a0s
 			for(int j = 0; j < branchAll->GetEntries(); j++){
 				GenParticle *candHa = (GenParticle*) branchAll->At(j);
@@ -87,7 +87,7 @@ void basicScript(int argc, char* argv[])
 			}
 
 			// Get the tau daughters from a1 and a2 (no pT ordering)
-			GenParticle *tau1a(0), *tau1b(0), *tau2a(0), *tau2b(0);
+			GenParticle *tau1a(nullptr), *tau1b(nullptr), *tau2a(nullptr), *tau2b(nullptr);
 			tau1a = (GenParticle*) branchAll->At(a1->D1);
 			tau1b = (GenParticle*) branchAll->At(a1->D2);
 			tau2a = (GenParticle*) branchAll->At(a2->D1);
@@ -170,7 +170,7 @@ void basicScript(int argc, char* argv[])
 		// and pointers to the GenParticles                                 //
 		//////////////////////////////////////////////////////////////////////
 		
-		GenParticle *cand(0),*mu1(0), *mu2(0);
+		GenParticle *cand(nullptr),*mu1(nullptr), *mu2(nullptr);
 
 		double muLeadingPT = 0.;
 		double muSubLeadingPT = 0.;
@@ -192,7 +192,7 @@ void basicScript(int argc, char* argv[])
 		}
 
 		// Now randomly swap mu1 - mu2 if desired
-		GenParticle *origMu1(0), *origMu2(0);
+		GenParticle *origMu1(nullptr), *origMu2(nullptr);
 		origMu1 = mu1;
 		origMu2 = mu2;
 		if (swapMuRandomly){
@@ -239,7 +239,7 @@ void basicScript(int argc, char* argv[])
 		std::vector<Track*> tk1_2p5_OS;
 		std::vector<Track*> tk2_2p5_OS;
 
-		Track *candTk(0);
+		Track *candTk(nullptr);
 		for(int a = 0; a < branchTracks->GetEntries(); a++){
 			candTk = (Track*) branchTracks->At(a);
 

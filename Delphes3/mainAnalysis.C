@@ -161,7 +161,7 @@ void mainAnalysis(int argc, char* argv[])
 	// Loop over all events //
 	///////////////////////////
 	Long64_t numberOfEntries = treeReader->GetEntries();
-	// numberOfEntries = 10000;
+	numberOfEntries = 200;
 	cout << "Nevts : " << numberOfEntries <<endl;
 	bool stop = false;
 
@@ -170,7 +170,7 @@ void mainAnalysis(int argc, char* argv[])
 		// Load selected branches with data from specified event
 		treeReader->ReadEntry(entry);
 
-		// cout << "*** Event" << endl;
+		cout << "*** Event" << endl;
 
 		// Do at gen particle level.
 		// histNMu->Fill(branchGenMuons->GetEntries());
@@ -182,8 +182,8 @@ void mainAnalysis(int argc, char* argv[])
 		// and pointers to the GenParticles                                 //
 		//////////////////////////////////////////////////////////////////////
 		
-		GenParticle *cand(0),*mu1(0), *mu2(0);
-		// Track *candTk(0);
+		GenParticle *cand(nullptr),*mu1(nullptr), *mu2(nullptr);
+		// Track *candTk(nullptr);
 
 		// Store pT of highgest and 2nd highest pT muons
 		double muLeadingPT(0.);
@@ -205,7 +205,7 @@ void mainAnalysis(int argc, char* argv[])
 		}
 
 		// Now randomly swap mu1 - mu2
-		GenParticle *origMu1(0), *origMu2(0);
+		GenParticle *origMu1(nullptr), *origMu2(nullptr);
 		origMu1 = mu1;
 		origMu2 = mu2;
 		if (swapMuRandomly){
@@ -229,13 +229,13 @@ void mainAnalysis(int argc, char* argv[])
 		// No selection cuts applied (only >=2 muons)       //
 		//////////////////////////////////////////////////////
 		
-		GenParticle *charged1a(0);
-		GenParticle *charged1b(0);
-		GenParticle *charged2a(0);
-		GenParticle *charged2b(0);
+		GenParticle *charged1a(nullptr);
+		GenParticle *charged1b(nullptr);
+		GenParticle *charged2a(nullptr);
+		GenParticle *charged2b(nullptr);
 
 		if (doSignal) {
-			GenParticle *a1(0), *a2(0);
+			GenParticle *a1(nullptr), *a2(nullptr);
 			// Get a0s
 			for(int j = 0; j < branchAll->GetEntries(); j++){
 				cand = (GenParticle*) branchAll->At(j);
@@ -248,7 +248,7 @@ void mainAnalysis(int argc, char* argv[])
 				if ((fabs(cand->PID)==36) && (fabs(cand->Status)==62)){
 					if (a1==0){
 						a1=cand;
-						// cout << "found first a1 at " << j << endl;
+						// cout << "found first a1 at " << j << " check PID " << a1->PID << endl;
 					} else {
 						// cout << "found second a1 at " << j << endl;
 						a2=cand;
@@ -259,7 +259,7 @@ void mainAnalysis(int argc, char* argv[])
 			histHPt->Fill(((a1->P4())+(a2->P4())).Pt());
 
 			// Get the tau daughters from a1 and a2
-			GenParticle *tau1a(0), *tau1b(0), *tau2a(0), *tau2b(0);
+			GenParticle *tau1a(nullptr), *tau1b(nullptr), *tau2a(nullptr), *tau2b(nullptr);
 			tau1a = (GenParticle*) branchAll->At(a1->D1);
 			tau1b = (GenParticle*) branchAll->At(a1->D2);
 			tau2a = (GenParticle*) branchAll->At(a2->D1);
@@ -287,10 +287,10 @@ void mainAnalysis(int argc, char* argv[])
 				histPID->Fill(fabs(charged2b->PID));
 
 				// To hold mu and tracks from each tau
-				GenParticle* muTruth1(0);
-				GenParticle* trackTruth1(0);
-				GenParticle* muTruth2(0);
-				GenParticle* trackTruth2(0);
+				GenParticle* muTruth1(nullptr);
+				GenParticle* trackTruth1(nullptr);
+				GenParticle* muTruth2(nullptr);
+				GenParticle* trackTruth2(nullptr);
 
 				// Assign charged products to be mu or track
 				bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, *charged1a, *charged1b);				
@@ -299,7 +299,7 @@ void mainAnalysis(int argc, char* argv[])
 				// NOTE: muons are NOT pT ordered
 
 				if (!truth1HasMu || !truth2HasMu) {
-					// cout << "Problem, no truth mu for 1 and/or 2!" << endl;
+					cout << "Problem, no truth mu for 1 and/or 2!" << endl;
 				} else { 
 					
 					// Assign system "1" to higher pT muon
@@ -368,6 +368,9 @@ void mainAnalysis(int argc, char* argv[])
 				if (!muTruth2) delete muTruth2;
 				if (!trackTruth2) delete trackTruth2;
 			} // end if(charged1a...) 
+			else {
+				throw runtime_error("Not all prongs found!");
+			}
 		} // end if(doSignal)
 
 		////////////////////
@@ -413,7 +416,7 @@ void mainAnalysis(int argc, char* argv[])
 			std::vector<Track*> tk1_1to2p5_alldR;
 			std::vector<Track*> tk2_1to2p5_alldR;
 			
-			Track *candTk(0);
+			Track *candTk(nullptr);
 			bool atLeastTk2p5 = false; // to monitor if theres a tk with pT > 2.5
 			bool atLeastTk2p5OS = false; // same but for OS tk-muon
 			for(int a = 0; a < branchTracks->GetEntries(); a++){

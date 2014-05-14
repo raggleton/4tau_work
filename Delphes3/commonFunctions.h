@@ -198,7 +198,7 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 	std::vector<GenParticle*> current = { tau };
 	std::vector<GenParticle*> next; // holds decay products, not nec. all unique
 	
-	GenParticle *prong(0); // holds final charged product
+	GenParticle *prong = nullptr; // holds final charged product
 	
 	int nCharged = 0; // count charged particles - shouldn't have more than 1!
 	bool foundOne = false;
@@ -282,7 +282,7 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 		return prong;
 	} else {
 		cout << "Damn, more than 1 prong!!!! Got " << nCharged << endl;
-		return NULL;
+		return nullptr;
 	}
 
 }
