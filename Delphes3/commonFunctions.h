@@ -112,34 +112,65 @@ bool assignMuonAndTrack(GenParticle* &mu, GenParticle* &tk, GenParticle &a, GenP
 }
 
 /**
- * Get the 3 immediate duaghters of the tau (tau neutrino + qqbar or lepton+neutrino)
+ * Print outs cand's daughters info (index in branchAll array, PID).
+ * Useful for debugging
+ * @param branchAll  Branch of ALL GenParticles
+ * @param cand       Particle whose daughters you wish to print to screen 
+ */
+void printParticleDaughters(TClonesArray *branchAll, GenParticle* cand){
+	if (cand->D1 != -1 && cand->D2 != -1){
+		for(int i = cand->D1; i <= cand->D2; i++){
+			cout << "Daughter at " << i << ", PID: " << ((GenParticle*)branchAll->At(i))->PID << endl;
+		}
+	} else
+		cout << "No daughters, stable." << endl;
+}
+
+/**
+ * Get the 3 immediate daughters of the tau (tau neutrino + qqbar or lepton+neutrino)
  * @param branchAll  The branch of ALL gen particles
  * @param tau        Tau to get decay product from
  * @return           Vector of the tau's 3 immediate daughters
  */
 std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *tau) { 
 
-	// cout << "get tau daughters" << endl;
+	cout << "get tau daughters" << endl;
 
 	std::vector<GenParticle*> tauDaughters;
 
 	bool foundProduct = false;
 	while(!foundProduct){
+		cout << tauDaughters.size() << endl;
+		cout << "D1: " << tau->D1 << endl;
+		cout << "D2: " << tau->D2 << endl;
+		
+		printParticleDaughters(branchAll, tau);
+
 		if(tau->D1 == tau->D2) { // tau -> tau
+			cout << "D1 = D2" << endl;
 			tau = (GenParticle*) branchAll->At(tau->D1);
-		} else if (tau->D2-tau->D1 == 1) { //tau->tau+gamma
+		} else if ((tau->D2)-(tau->D1) == 1) { //tau->tau+gamma
+			
+			cout << "Tau -> tau + gamma" <<endl;
+			
 			if ( fabs(((GenParticle*) branchAll->At(tau->D1))->PID) == 22) {
+			
+				cout << "Tau is " << tau->D2 << " check " << ((GenParticle*) branchAll->At(tau->D2))->PID << endl;
 				tau = (GenParticle*) branchAll->At(tau->D2);
+			
 			} else{
+			
+				cout << "Tau is " << tau->D1 << " check " << ((GenParticle*) branchAll->At(tau->D1))->PID << endl;
 				tau = (GenParticle*) branchAll->At(tau->D1);
 			}
+		
 		} else {
 			for(int i = tau->D1; i <= tau->D2; i++){
 				tauDaughters.push_back((GenParticle*) branchAll->At(i));
 				// tauDaughters.push_back(i);
 			}
 			if (tauDaughters.size() ==3){
-				// cout << "3 products" << endl;
+				cout << "3 products" << endl;
 				foundProduct = true;
 				return tauDaughters;
 			}
@@ -150,26 +181,27 @@ std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *
 /**
  * From tau, get the final, stable, charged decay product
  * @param  branchAll The branch of ALL gen particles, to loop through decay chain
- * @param  tau       Tau to get decay product form
+ * @param  tau       Tau to get decay product from
  * @return           Returns charged, stable, decay product of param tau
  */
 GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { 
-
+	cout << "Get charged objects" << endl;
 	std::vector<GenParticle*> history; // hold all unique particles in the decay chain (stores event posiiton number)
 	std::vector<GenParticle*> current = getTauDaughters(branchAll, tau);
+	cout << "current.size: " << current.size() << endl;
 	std::vector<GenParticle*> next; // holds decay products, not nec. all unique
 	GenParticle *prong(0); // holds final charged product
 	int nCharged = 0; // count charged particles - shouldn't have more than 1!
 	bool foundOne = false;
 
 	while (current.size()>0){ // if current > 0 we haven't exhausted all the particles
-		for (unsigned a = 0; a < current.size(); a++){
+		for (unsigned currentElem1 = 0; currentElem1 < current.size(); currentElem1++){
 			// Check 1 - is this already in current?
 			// Could probably do more efficiently using the unique function on std::vector
 			bool alreadyDone = false;
 
-			for (unsigned b = 0; b < a; b++){
-				if ((current[a] == current[b]) && (a != 0)) {
+			for (unsigned currentElem2 = 0; currentElem2 < currentElem1; currentElem2++){
+				if ((current[currentElem1] == current[currentElem2]) && (currentElem1 != 0)) {
 					// cout << "--Found a duplicate" << endl;
 					alreadyDone = true;
 				}
@@ -178,8 +210,8 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 			// Check 2 - is this already in history?
 			if (!alreadyDone){
 				// cout << "-not in current" << endl;
-				for (unsigned c = 0; c < history.size(); c++){
-					if ((current[a] == history[c]) && (c!=0)){
+				for (unsigned historyElem = 0; historyElem < history.size(); historyElem++){
+					if ((current[currentElem1] == history[historyElem]) && (historyElem!=0)){
 						// cout << "--Found a dupicate in history" << endl;
 						alreadyDone = true;
 					}
@@ -192,27 +224,27 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 				// cout << "-not in history" << endl;
 
 				// Check if final state. Either status 1, or D1 == D2 == -1
-				if (current[a]->Status == 1) {
+				if (current[currentElem1]->Status == 1) {
 
 					// Check if charged
-					if (current[a]->Charge != 0) {
-						// cout << "FINAL PRONG " << current[a]->PID << endl;
-						prong = current[a];
+					if (current[currentElem1]->Charge != 0) {
+						// cout << "FINAL PRONG " << current[currentElem1]->PID << endl;
+						prong = current[currentElem1];
 						foundOne = true;
 						nCharged++;
 					}
 
-					history.push_back(current[a]);
+					history.push_back(current[currentElem1]);
 					// cout << "pushed into history" << endl;
 				} else {
 					// Load its daughters no. into next
-					for (int d = current[a]->D1; d <= current[a]->D2; d++) {
+					for (int daughter = current[currentElem1]->D1; daughter <= current[currentElem1]->D2; daughter++) {
 						// cout << "pushing" << endl;
-						next.push_back((GenParticle*) branchAll->At(d));
+						next.push_back((GenParticle*) branchAll->At(daughter));
 					}
 
 					// Load it into history
-					history.push_back(current[a]);
+					history.push_back(current[currentElem1]);
 				}
 
 			}// end of alreadyDone
