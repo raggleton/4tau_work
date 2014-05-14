@@ -93,7 +93,8 @@ void lookAtTauProducts(Event& event, int &nProngs, int &nMu, std::vector<int> cu
 int main(int argc, char* argv[]) {
 
 	// bool outputEvent  = true; // output entire event listing to STDOUT (long!), for debugging only
-	bool writeToHEPMC = true; // output to HEPMC
+	bool writeHLTToHEPMC = true; // output to HEPMC for HLT events
+	bool writeNoHLTToHEPMC = false; // output to HEPMC for NoHLT events
 
 	// argv[1] = LHE name
 	// argv[2] = hepmc name (no .hepmc)
@@ -125,7 +126,7 @@ int main(int argc, char* argv[]) {
 	int nPrintLHA  = 1;             
 	int nPrintRest = 0;             
 	int nAbort     = 10;
-	int nMaxEvent  = 3; // Number of events to process. Set large enough if you want to process everything in the LHE file
+	int nMaxEvent  = 4000; // Number of events to process. Set large enough if you want to process everything in the LHE file
 	
 	// Generator           
 	Pythia pythia;                            
@@ -171,111 +172,118 @@ int main(int argc, char* argv[]) {
 		bool wantedHLT = false;
 		bool wantedNoHLT = false;
 		
-		// Get pythia to hadronise/process the event
-		if (!pythia.next() || iEvent > nMaxEvent) {
-			if (++iAbort < nAbort) continue;
-			break;
-		}
+		// This ensures that *every* event passes HLT by redoing the pythia hadronisation
+		// Make sit very slow!
+		while (!wantedHLT) {
 
-		// cout << "****Event" << endl;
-	
-		// List first few Les Houches and other events.
-		if (pythia.info.isLHA() && iPrintLHA < nPrintLHA) {     
-			pythia.LHAeventList();               
-			pythia.info.list();          
-			pythia.process.list();          
-			pythia.event.list();  
-			++iPrintLHA;         
-		} else if (!pythia.info.isLHA() && iPrintRest < nPrintRest) {     
-			pythia.info.list();          
-			pythia.process.list();          
-			pythia.event.list();           
-			++iPrintRest;         
-		}                 
+			// Get pythia to hadronise/process the event
+			if (!pythia.next() || iEvent > nMaxEvent) {
+				if (++iAbort < nAbort) continue;
+				break;
+			}
 
-		// Look for 1 prong taus only
-		int n1Prong(0), n3Prong(0), nMus(0); //xProng includes muons
-		int nMus1(0), nMus2(0); // # mus from each a
+			// cout << "****Event" << endl;
 		
-		// Look for muons among decay products (also from charm/tau/...).
-		std::vector<double> muPtVec;
+			// List first few Les Houches and other events.
+			if (pythia.info.isLHA() && iPrintLHA < nPrintLHA) {     
+				pythia.LHAeventList();               
+				pythia.info.list();          
+				pythia.process.list();          
+				pythia.event.list();  
+				++iPrintLHA;         
+			} else if (!pythia.info.isLHA() && iPrintRest < nPrintRest) {     
+				pythia.info.list();          
+				pythia.process.list();          
+				pythia.event.list();           
+				++iPrintRest;         
+			}                 
 
-		// To store mother of tau (to do figure out which pair of taus the mu are from)
-		int motherA(0);
-
-		// Loop over all particles in event
-		// Immediately exits if ANY of the taus is 3 prong - don't waste extra time!
-		for (int i = 0; (i < event.size()) && (n3Prong==0); ++i) {
+			// Look for 1 prong taus only
+			int n1Prong(0), n3Prong(0), nMus(0); //xProng includes muons
+			int nMus1(0), nMus2(0); // # mus from each a
 			
-			// NOTE: if calchep *doesn't* do the tau decays, they come out as status -23 in Pythia.
-			// BUT if calchep *does* do the tau decay, then they appear as status -22 in Pythia. NOTE THE DIFFERENCE!!!
-			if ((event[i].idAbs() == 15 ) && (event[i].status() == -23)){ // loop over all taus from a_0
+			// Look for muons among decay products (also from charm/tau/...).
+			std::vector<double> muPtVec;
 
-				int nProngs(0), nMu(0);
-				std::vector<int> daughters;
-				for (int d = event[i].daughter1(); d <= event[i].daughter2() && d>0; d++){
-					daughters.push_back(d);
-				}
-				lookAtTauProducts(event, nProngs, nMu, daughters);
-				// cout << "Tau: " << i << ". There were " << nMu << " muons from this tau, and " << nProngs << " charged tracks from this tau" << endl;
-				if (nProngs == 1) n1Prong++;
-				else if (nProngs > 1) n3Prong++;
+			// To store mother of tau (to do figure out which pair of taus the mu are from)
+			int motherA(0);
 
-				if ((event[i].mother1() == motherA) || (motherA == 0)) {
-					nMus1 += nMu;
-					motherA = event[i].mother1();
-				} else {
-					nMus2 += nMu;
+			// Loop over all particles in event
+			// Immediately exits if ANY of the taus is 3 prong - don't waste extra time!
+			for (int i = 0; (i < event.size()) && (n3Prong==0); ++i) {
+				
+				// NOTE: if calchep *doesn't* do the tau decays, they come out as status -23 in Pythia.
+				// BUT if calchep *does* do the tau decay, then they appear as status -22 in Pythia. NOTE THE DIFFERENCE!!!
+				if ((event[i].idAbs() == 15 ) && (event[i].status() == -23)){ // loop over all taus from a_0
+
+					int nProngs(0), nMu(0);
+					std::vector<int> daughters;
+					for (int d = event[i].daughter1(); d <= event[i].daughter2() && d>0; d++){
+						daughters.push_back(d);
+					}
+					lookAtTauProducts(event, nProngs, nMu, daughters);
+					// cout << "Tau: " << i << ". There were " << nMu << " muons from this tau, and " << nProngs << " charged tracks from this tau" << endl;
+					if (nProngs == 1) n1Prong++;
+					else if (nProngs > 1) n3Prong++;
+
+					if ((event[i].mother1() == motherA) || (motherA == 0)) {
+						nMus1 += nMu;
+						motherA = event[i].mother1();
+					} else {
+						nMus2 += nMu;
+					}
 				}
+
+				// Add to muon pt to muPt vector
+				// ONLY if it's stable and within detector
+				int id = event[i].id();  
+				if ((abs(id) == 13) 
+				&& (event[i].status() > 0) 
+				&& (hypot(event[i].xProd(),event[i].yProd())<1.29) 
+				&& (fabs(event[i].zProd())<3.0)) { 
+						muPtVec.push_back(event[i].pT());
+				}
+
+			} // end loop over particles in event
+
+			// After looking at all taus, have we got 2 muons (at least 1 from each a1) and 4 1-prong decays (including muons)? 
+			// The size() test is because we need 2 muons inside the detector (Delphes checks this as well)
+			// The muons that go into the muPtVec are checked for this,
+			// nMus1 & 2 aren't
+			if ((n1Prong == 4) && (nMus1>=1) && (nMus2>=1) && (muPtVec.size()>=2)){
+
+				wantedNoHLT = true;
+				
+				// order mu pt vector
+				std::sort(muPtVec.begin(),muPtVec.end(), std::greater<int>());
+
+				// Emulate HLT - HLT_Mu17_Mu8
+				if (muPtVec[0]>17 && muPtVec[1]>8 ) {
+					wantedHLT = true;
+					nWanted++;
+					for (unsigned a = 0; a < muPtVec.size(); a++){
+						muPt.fill(muPtVec.at(a));
+					}
+					nMuInEvent.fill(muPtVec.size());
+					muPt1.fill(muPtVec[0]);
+				// cout << "+++++++++++++++++ YAYYYY +++++++++++++" <<endl;
+				}
+			} else {
+				wantedHLT = false;
+				wantedNoHLT = false;
 			}
 
-			// Add to muon pt to muPt vector
-			// ONLY if it's stable and within detector
-			int id = event[i].id();  
-			if ((abs(id) == 13) 
-			&& (event[i].status() > 0) 
-			&& (hypot(event[i].xProd(),event[i].yProd())<1.29) 
-			&& (fabs(event[i].zProd())<3.0)) { 
-					muPtVec.push_back(event[i].pT());
+			// cout << "This event had " << n1Prong << " 1-prong taus, " << n3Prong << " 3-prong taus and " << nMus << " tau to mu decays." << endl;
+			if (n3Prong+n1Prong > 4) {
+				cout << "*********** ARGH > 4 --------------------------------------" <<endl;
+				// pythia.event.list();  
 			}
-
-		} // end loop over particles in event
-
-		// After looking at all taus, have we got 2 muons (at least 1 from each a1) and 4 1-prong decays (including muons)? 
-		// The size() test is because we need 2 muons inside the detector (Delphes checks this as well)
-		// The muons that go into the muPtVec are checked for this,
-		// nMus1 & 2 aren't
-		if ((n1Prong == 4) && (nMus1>=1) && (nMus2>=1) && (muPtVec.size()>=2)){
-
-			wantedNoHLT = true;
 			
-			// order mu pt vector
-			std::sort(muPtVec.begin(),muPtVec.end(), std::greater<int>());
-
-			// Emulate HLT - HLT_Mu17_Mu8
-			if (muPtVec[0]>17 && muPtVec[1]>8 ) {
-				wantedHLT = true;
-				nWanted++;
-				for (unsigned a = 0; a < muPtVec.size(); a++){
-					muPt.fill(muPtVec.at(a));
-				}
-				nMuInEvent.fill(muPtVec.size());
-				muPt1.fill(muPtVec[0]);
-			// cout << "+++++++++++++++++ YAYYYY +++++++++++++" <<endl;
-			}
-		} else {
-			wantedHLT = false;
-			wantedNoHLT = false;
+			muPtVec.clear();
 		}
 
-		// cout << "This event had " << n1Prong << " 1-prong taus, " << n3Prong << " 3-prong taus and " << nMus << " tau to mu decays." << endl;
-		if (n3Prong+n1Prong > 4) {
-			cout << "*********** ARGH > 4 --------------------------------------" <<endl;
-			// pythia.event.list();  
-		}
-		
 		// Write out events that pass HLT cuts
-		if (wantedHLT && writeToHEPMC){
+		if (wantedHLT && writeHLTToHEPMC){
 			// Construct new empty HepMC event and fill it.
 			// Units will be as chosen for HepMC build, but can be changed
 			// by arguments, e.g. GenEvt( HepMC::Units::GEV, HepMC::Units::MM)  
@@ -288,7 +296,7 @@ int main(int argc, char* argv[]) {
 		}
 		
 		// Write out events regardless of HLT status. But must have 4 1-prong taus & 2+ muons
-		if (wantedNoHLT && writeToHEPMC){
+		if (wantedNoHLT && writeNoHLTToHEPMC){
 			// Construct new empty HepMC event and fill it.
 			// Units will be as chosen for HepMC build, but can be changed
 			// by arguments, e.g. GenEvt( HepMC::Units::GEV, HepMC::Units::MM)  
@@ -300,7 +308,7 @@ int main(int argc, char* argv[]) {
 			delete hepmcevt;
 		}
 
-		muPtVec.clear();
+		// muPtVec.clear();
 	
 	} // End of event loop.        
 	cout << " Number of useful events passing HLT: " << nWanted << "/" << nMaxEvent << endl;
