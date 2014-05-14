@@ -132,70 +132,80 @@ void printParticleDaughters(TClonesArray *branchAll, GenParticle* cand){
  * @param tau        Tau to get decay product from
  * @return           Vector of the tau's 3 immediate daughters
  */
-std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *tau) { 
 
-	cout << "get tau daughters" << endl;
+// CURRENTLY DEPRECIATED
 
-	std::vector<GenParticle*> tauDaughters;
+// std::vector<GenParticle*> getTauDaughters(TClonesArray *branchAll, GenParticle *tau) { 
 
-	bool foundProduct = false;
-	while(!foundProduct){
-		cout << tauDaughters.size() << endl;
-		cout << "D1: " << tau->D1 << endl;
-		cout << "D2: " << tau->D2 << endl;
+// 	cout << "get tau daughters" << endl;
+
+// 	std::vector<GenParticle*> tauDaughters;
+
+// 	bool foundProduct = false;
+// 	while(!foundProduct){
+// 		cout << tauDaughters.size() << endl;
+// 		cout << "D1: " << tau->D1 << endl;
+// 		cout << "D2: " << tau->D2 << endl;
 		
-		printParticleDaughters(branchAll, tau);
+// 		printParticleDaughters(branchAll, tau);
 
-		if(tau->D1 == tau->D2) { // tau -> tau
-			cout << "D1 = D2" << endl;
-			tau = (GenParticle*) branchAll->At(tau->D1);
-		} else if ((tau->D2)-(tau->D1) == 1) { //tau->tau+gamma
+// 		if(tau->D1 == tau->D2) { // tau -> tau
+// 			cout << "D1 = D2" << endl;
+// 			tau = (GenParticle*) branchAll->At(tau->D1);
+// 		} else if ((tau->D2)-(tau->D1) == 1) { //tau->tau+gamma
 			
-			cout << "Tau -> tau + gamma" <<endl;
+// 			cout << "Tau -> tau + gamma" <<endl;
 			
-			if ( fabs(((GenParticle*) branchAll->At(tau->D1))->PID) == 22) {
+// 			if ( fabs(((GenParticle*) branchAll->At(tau->D1))->PID) == 22) {
 			
-				cout << "Tau is " << tau->D2 << " check " << ((GenParticle*) branchAll->At(tau->D2))->PID << endl;
-				tau = (GenParticle*) branchAll->At(tau->D2);
+// 				cout << "Tau is " << tau->D2 << " check " << ((GenParticle*) branchAll->At(tau->D2))->PID << endl;
+// 				tau = (GenParticle*) branchAll->At(tau->D2);
 			
-			} else{
+// 			} else{
 			
-				cout << "Tau is " << tau->D1 << " check " << ((GenParticle*) branchAll->At(tau->D1))->PID << endl;
-				tau = (GenParticle*) branchAll->At(tau->D1);
-			}
+// 				cout << "Tau is " << tau->D1 << " check " << ((GenParticle*) branchAll->At(tau->D1))->PID << endl;
+// 				tau = (GenParticle*) branchAll->At(tau->D1);
+// 			}
 		
-		} else {
-			for(int i = tau->D1; i <= tau->D2; i++){
-				tauDaughters.push_back((GenParticle*) branchAll->At(i));
-				// tauDaughters.push_back(i);
-			}
-			if (tauDaughters.size() ==3){
-				cout << "3 products" << endl;
-				foundProduct = true;
-				return tauDaughters;
-			}
-		}
-	}
-}
+// 		} else {
+// 			for(int i = tau->D1; i <= tau->D2; i++){
+// 				tauDaughters.push_back((GenParticle*) branchAll->At(i));
+// 				// tauDaughters.push_back(i);
+// 			}
+// 			if (tauDaughters.size() ==3){
+// 				cout << "3 products" << endl;
+// 				foundProduct = true;
+// 				return tauDaughters;
+// 			}
+// 		}
+// 	}
+// }
 
 /**
- * From tau, get the final, stable, charged decay product
+ * From tau, get the final, stable, charged decay product.
+ * Does this by stepping through "generations" - looking at daughters of all the particles in "current" vector
+ * Eliminates any duplicates, (either in previoius or current generations),
+ * and if the particle is final state, we return it.
+ * Checks at the end to ensure only 1 charged final state particle.
+ * 
  * @param  branchAll The branch of ALL gen particles, to loop through decay chain
  * @param  tau       Tau to get decay product from
  * @return           Returns charged, stable, decay product of param tau
  */
 GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) { 
-	cout << "Get charged objects" << endl;
-	std::vector<GenParticle*> history; // hold all unique particles in the decay chain (stores event posiiton number)
-	std::vector<GenParticle*> current = getTauDaughters(branchAll, tau);
-	cout << "current.size: " << current.size() << endl;
+
+	std::vector<GenParticle*> history; // hold all *unique* particles in the decay chain (stores position number of particle in event listing)
+	std::vector<GenParticle*> current = { tau };
 	std::vector<GenParticle*> next; // holds decay products, not nec. all unique
+	
 	GenParticle *prong(0); // holds final charged product
+	
 	int nCharged = 0; // count charged particles - shouldn't have more than 1!
 	bool foundOne = false;
 
-	while (current.size()>0){ // if current > 0 we haven't exhausted all the particles
+	while (current.size()>0){ // if current > 0 we haven't gone through all the particles
 		for (unsigned currentElem1 = 0; currentElem1 < current.size(); currentElem1++){
+			
 			// Check 1 - is this already in current?
 			// Could probably do more efficiently using the unique function on std::vector
 			bool alreadyDone = false;
@@ -224,7 +234,7 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 				// cout << "-not in history" << endl;
 
 				// Check if final state. Either status 1, or D1 == D2 == -1
-				if (current[currentElem1]->Status == 1) {
+				if (current[currentElem1]->Status == 1 || (current[currentElem1]->D1 == -1 && current[currentElem1]->D2 == -1) ) {
 
 					// Check if charged
 					if (current[currentElem1]->Charge != 0) {
@@ -263,21 +273,22 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 	current.clear();
 	next.clear();
 
-	if (!foundOne) 
+	if (!foundOne) {
 		cout << "No prongs!!!" << endl;
+	}
 
 	if (nCharged == 1){
-		// cout << "PRONG: " << prong->PID << endl;
+		cout << "PRONG: " << prong->PID << endl;
 		return prong;
 	} else {
-		// cout << "Damn, more than 1 prong!!!! Got " << nCharged << endl;
+		cout << "Damn, more than 1 prong!!!! Got " << nCharged << endl;
 		return NULL;
 	}
 
 }
 
 /**
- * Draw a histogram (1D or 2D!) and save it to PDF, saves file as directory/filename_<delphes setup from directory>_app.pdf
+ * Draw a histogram (1D or 2D!) and save it to PDF, as <directory>/<filename>_<delphes setup from <directory>>_<app>.pdf
  * @param h         Hist to draw (TObject* to handle THStacks, which don't inherit from TH1)
  * @param drawOpt   Options for drawing hist
  * @param filename  Main filename (e.g. Mu1Pt)
