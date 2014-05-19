@@ -309,9 +309,9 @@ module TreeWriter TreeWriter {
   add Branch Delphes/allParticles AllParticle GenParticle
   add Branch Delphes/stableParticles StableParticle GenParticle
   add Branch TrackMerger/tracks Track Track
-  add Branch Calorimeter/towers Tower Tower
-  add Branch Calorimeter/eflowTracks EFlowTrack Track
-  add Branch Calorimeter/eflowTowers EFlowTower Tower
+  # add Branch Calorimeter/towers Tower Tower
+  # add Branch Calorimeter/eflowTracks EFlowTrack Track
+  # add Branch Calorimeter/eflowTowers EFlowTower Tower
   # add Branch ParticlePropagator/muons EFlowMuon Muon
   add Branch GenJetFinder/jets GenJet Jet
   add Branch UniqueObjectFinder/jets Jet Jet
