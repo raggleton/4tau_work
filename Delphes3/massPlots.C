@@ -473,10 +473,12 @@ void massPlots(int argc, char* argv[])
 			// ANOTHER SIDEBAND REGION
 			// where at least one muon has an additional track with 1< pT < 2.5,
 			// within dR < 0.5. No sign requirement.
-			// if (tk1_2p5.size() == 1 && tk2_2p5.size() == 1 // main tk with pT > 2.5
-				// && ((tk1_1to2p5.size() == 1 && tk1_1to2p5.size() == 1) || (tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 1) || (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 0))){ // additional soft track
-			if (tk1_2p5.size() == 1 && tk2_2p5.size() == 1 // main tk with pT > 2.5
-				&& ((tk1_1to2p5.size() == 1 && tk1_1to2p5.size() == 1) || (tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 1) || (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 0))){ // additional soft track
+			if (tk1_1.size() >= 1 && tk2_1.size() >= 1 // at least 1 tk with pT > 1 about each muon
+				&& tk1_2p5.size() == 1 && tk2_2p5.size() == 1 // main tk with pT > 2.5
+				&& (   (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 1) // additional soft track about mu1 and/or mu2
+					|| (tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 1) 
+					|| (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 0))
+				){ 
 				
 				double m1(0), m2(0);		
 				if (tk1_1to2p5.size() == 1)
@@ -516,8 +518,12 @@ void massPlots(int argc, char* argv[])
 			// ANOTHER SIDEBAND REGION
 			// where at least one muon has an additional track with 1< pT < 1.5,
 			// within dR < 0.5. No sign requirement.
-			if (tk1_2p5.size() == 1 && tk2_2p5.size() == 1 // main tk with pT > 2.5
-				&& ((tk1_1to1p5.size() == 1 && tk1_1to1p5.size() == 1) || (tk1_1to1p5.size() == 0 && tk2_1to1p5.size() == 1) || (tk1_1to1p5.size() == 1 && tk2_1to1p5.size() == 0))){ // additional soft track
+			if (tk1_1.size() >= 1 && tk2_1.size() >= 1 // at least 1 tk with pT > 1 about each muon
+				&& tk1_2p5.size() == 1 && tk2_2p5.size() == 1 // main tk with pT > 2.5
+				&& (   (tk1_1to1p5.size() == 1 && tk2_1to1p5.size() == 1) // additional soft track about mu1 and/or mu2
+					|| (tk1_1to1p5.size() == 0 && tk2_1to1p5.size() == 1) 
+					|| (tk1_1to1p5.size() == 1 && tk2_1to1p5.size() == 0)) 
+				){ 
 				
 				double m1(0), m2(0);				
 				if (tk1_1to1p5.size() == 1)

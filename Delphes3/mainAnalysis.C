@@ -562,9 +562,15 @@ void mainAnalysis(int argc, char* argv[])
 			// ANOTHER SIDEBAND REGION
 			// where at least one muon has an additional track with 1< pT < 2.5,
 			// within dR < 0.5. No sign requirement.
-			if (tk1_2p5.size() == 1 && tk2_2p5.size() == 1 
-				&& ((tk1_1to2p5.size() == 1 && tk1_1to2p5.size() == 1) || (tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 1) || (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 0)))
-			{
+			// ANOTHER SIDEBAND REGION
+			// where at least one muon has an additional track with 1< pT < 2.5,
+			// within dR < 0.5. No sign requirement.
+			if (tk1_1.size() >= 1 && tk2_1.size() >= 1 // at least 1 tk with pT > 1 about each muon
+				&& tk1_2p5.size() == 1 && tk2_2p5.size() == 1 // main tk with pT > 2.5
+				&& (   (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 1) // additional soft track about mu1 and/or mu2
+					|| (tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 1) 
+					|| (tk1_1to2p5.size() == 1 && tk2_1to2p5.size() == 0))
+				){ 
 				
 				double m1(0), m2(0);				
 				if (tk1_1to2p5.size() == 1)
@@ -599,7 +605,9 @@ void mainAnalysis(int argc, char* argv[])
 
 			// Slightly different region - for additional track investigations
 			// For soft track distributions
+			// ATM it uses signal region. Not put in the signal region bit above, as subject to future modification
 			if (tk1_1.size() == 1 && tk2_1.size() == 1 && tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1){
+				
 				nOnly2p5OS++;
 				if (tk1_1to2p5_alldR.size() > 0){
 					for( auto softTk : tk1_1to2p5_alldR ){
