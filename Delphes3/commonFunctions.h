@@ -61,8 +61,28 @@ std::string getDelph(std::string directory){
 	return elems2[elems2.size()-1];
 }
 
-// For sorting track vectors by pT
-// Ideally we'd use the templated methods in classes/SortableObject.h ...
+/**
+ * Dermine number of events to run over, based on user input.
+ * Note that if the user doesn't specify anything, by default it runs over all events
+ * @param  treeReader [description]
+ * @param  pOpts      [description]
+ * @return            [description]
+ */
+Long64_t getNumberEvents(ExRootTreeReader *treeReader, ProgramOpts* pOpts){
+	if (pOpts->getNEvents() == -1){
+		return treeReader->GetEntries();
+	} else {
+		return pOpts->getNEvents();
+	}
+}
+
+/**
+ * Compare two tracks by their pT. Used for sorting Track vectors.
+ * Ideally we'd use the templated methods in classes/SortableObject.h ...
+ * @param  a First track to compare
+ * @param  b Other track to compare
+ * @return   Returns TRUE if pT of Track a > pT Track b, FALSE otherwise
+ */
 bool sortTracksByPT(Track* a, Track* b){ 
 	return (a->PT) > (b->PT); 
 }

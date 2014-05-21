@@ -33,7 +33,6 @@ void massPlots(int argc, char* argv[])
 
 	// Create object of class ExRootTreeReader
 	ExRootTreeReader *treeReader = new ExRootTreeReader(&chain);
-	Long64_t numberOfEntries = treeReader->GetEntries();
 
 	// Get pointers to branches used in this analysis
 	// Use the data_flow.png and tcl file to figure out what branches are available, and what class they are
@@ -141,9 +140,9 @@ void massPlots(int argc, char* argv[])
 	///////////////////////////
 	// Loop over all events  //
 	///////////////////////////
-	// numberOfEntries = 50000; // for testing only!
-	//-------------------------
-	cout << "Nevts : " << numberOfEntries << endl;
+	Long64_t numberOfEntries = getNumberEvents(treeReader, &pOpts);
+	cout << "Running over " << numberOfEntries << " events" << endl;
+
 	bool stop = false; // used to stop the loop, for debugging/testing
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
 
