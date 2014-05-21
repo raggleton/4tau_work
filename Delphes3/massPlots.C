@@ -20,9 +20,9 @@ void massPlots(int argc, char* argv[])
 
 	ProgramOpts pOpts(argc, argv);
 
-	MCsource source     = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
+	// MCsource source     = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
 	bool doSignal       = pOpts.getSignal(); // for signal or not
-	bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
+	// bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 
