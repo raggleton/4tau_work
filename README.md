@@ -4,9 +4,53 @@
 For Robin's work on NMSSM H1 -> 2a1 -> 4tau
 
 Monte Carlo stuff is in `pythia8` and `Delphes3` folders.
+You'll need Boost for the Delphes analysis scripts.
+
+Sorry in advance if this is a bit rubbish - it's constantly in a state of fluz, and no-one but me uses it. (Standard weak HEP excuse)
+
+
+## Workflow
+
+**Signal**:
+- Make signal MC using CalcHEP. Outputs as LHE file.
+- Hadronise it using Pythia: 
 ```
-LD_LIBRARY_PATH=/cm/shared/apps/gcc/4.7.0/lib:/cm/shared/apps/gcc/4.7.0/lib64:/cm/shared/languages/Python-2.7.6/lib:/cm/shared/apps/torque/4.2.4.1/lib:/cm/shared/apps/moab/7.2.2/lib:/cm/shared/tools/git-1.8.4.2/lib:/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib/:/panfs/panasas01/phys/ra12451/root/root/lib/
+make mainLHEhadronise
+./mainLHEhadronise.exe # to show usage
+./mainLHEhadronise.exe <LHEfilename & path> <output HEPMC filename>
 ```
+This outputs a HEPMC file.
+
+**QCD[b/c]**:
+- Make it all in Pythia
+(following uses QCDb, also QCDc available)
+```
+make mainQCDb
+./mainQCDb.exe # to show usage
+./mainQCDb.exe <output HEPMC filename>
+```
+Once you have a HEPMC file, you now run it through Delphes to produce a ROOT file:
+- Run `./DelphesHepMC` for relevant options.
+- Use `Scripts/submitDelphesLots.sh` or `Scripts/submitDelphesSingle.sh` for use on PBS batch system.
+
+## Delphes Analysis Programs:
+- `basicScript`: template script for making a new program (see below)
+- `mainAnalysis`: does lots of plots, like pT, track eta Vs phi, soft track distributions. Used for QCDb rejection studies
+- `massPlots`: makes plots of invariant masses of mu+tk, and calcualtes & plots correlation coefficients for backgrounds
+- `IP`: plots impact parameters of things. Not really kept up to date.
+
+## Making a new Delphes analysis program:
+- Look at `Scripts/createNewScript.sh` - you'll need to edit the relevant paths
+- Run `createNewScript.sh <myscriptName>`. Make sure it puts the new scripts in your `Delphes/examples` folder
+- Go to your Delphes directory, run `./configure` to pick up new script
+- Look at `Scripts/createMakefile.sh`, modify paths as necessary
+- Run `Scripts/createMakefile.sh` to modify the Delphes makefile to add support for C++11 and Boost.
+- Now run `make`
+- To run your program, do `./runMyCoolNewProgram` in the main Delphes installation folder.
+
+You can now edit your new analysis code. To re-make it, just run `makeScripts`. This will re-make ALL the analysis programs. See `makeMain` and `makeMass` for examples on how to write a script to re-make just one program.
+
+
 Installing & compiling against Boost
 ====================================
 
@@ -47,3 +91,7 @@ http://www.boost.org/doc/libs/1_55_0/more/getting_started/unix-variants.html
 		```
 8. Note that if you use another boost library (like Filesystem) you'll need to add `-lboost_XXX` to `DELPHES_LIBS`
 9. For Boost Program Options, you can now follow the tutorial. 
+
+```
+LD_LIBRARY_PATH=/cm/shared/apps/gcc/4.7.0/lib:/cm/shared/apps/gcc/4.7.0/lib64:/cm/shared/languages/Python-2.7.6/lib:/cm/shared/apps/torque/4.2.4.1/lib:/cm/shared/apps/moab/7.2.2/lib:/cm/shared/tools/git-1.8.4.2/lib:/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib/:/panfs/panasas01/phys/ra12451/root/root/lib/
+```
