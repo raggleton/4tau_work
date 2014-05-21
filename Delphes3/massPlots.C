@@ -713,6 +713,7 @@ void massPlots(int argc, char* argv[])
 	// Mass plots
 	histM1->Write("",TObject::kOverwrite);
 	histM2->Write("",TObject::kOverwrite);
+	histM->Write("",TObject::kOverwrite);
 	if (doSignal){
 		histM1_truth_0to1->Write("",TObject::kOverwrite);
 		histM1_truth_1to2->Write("",TObject::kOverwrite);
@@ -757,10 +758,14 @@ void massPlots(int argc, char* argv[])
 	histMu1Pt_side_1to1p5_3toInf->Write("",TObject::kOverwrite);
 	
 	histM1_side_1to2p5->Write("",TObject::kOverwrite);
+	histM2_side_1to2p5->Write("",TObject::kOverwrite);
+	histM_side_1to2p5->Write("",TObject::kOverwrite);
 	histM1vsM2_side_1to2p5->Write("",TObject::kOverwrite);
 	histM1vsM2_correlations_side_1to2p5->Write("",TObject::kOverwrite);
 
 	histM1_side_1to1p5->Write("",TObject::kOverwrite);
+	histM2_side_1to1p5->Write("",TObject::kOverwrite);
+	histM_side_1to1p5->Write("",TObject::kOverwrite);
 	histM1vsM2_side_1to1p5->Write("",TObject::kOverwrite);
 	histM1vsM2_correlations_side_1to1p5->Write("",TObject::kOverwrite);
 	
