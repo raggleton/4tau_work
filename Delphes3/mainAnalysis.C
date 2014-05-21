@@ -18,9 +18,9 @@ void mainAnalysis(int argc, char* argv[])
 
 	ProgramOpts pOpts(argc, argv);
 
-	MCsource source     = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
+	// MCsource source     = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
 	bool doSignal       = pOpts.getSignal(); // for signal or not
-	bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
+	// bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 
@@ -38,7 +38,7 @@ void mainAnalysis(int argc, char* argv[])
 	// TClonesArray *branchMuon = treeReader->UseBranch("Muon");
 	TClonesArray *branchTracks   = treeReader->UseBranch("Track");
 	TClonesArray *branchGenMuons = treeReader->UseBranch("OnlyGenMuons");
-	TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
+	// TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
 	//////////////////////
@@ -150,9 +150,9 @@ void mainAnalysis(int argc, char* argv[])
 
 	// 2D plots of m1 Vs m2 - sideband
 	TH2D* histM1vsM2_side        = new TH2D("hM1vsM2_side","m(#mu_{1}-tk) vs m(#mu_{2}-tk);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
-	TH2D* histM1timesM1_side     = new TH2D("hM1timesM2_side","m(sideband) #times m(sideband);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
+	// TH2D* histM1timesM1_side     = new TH2D("hM1timesM2_side","m(sideband) #times m(sideband);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",5,massBins,5,massBins);
 
-	int nMu(0);
+	// int nMu(0);
 	int n2p5(0), n2p5OS(0); // count # muons with 1+ tracks with pT > 2.5 for SS+OS, and OS
 	int nOnly2p5(0), nOnly2p5OS(0); // count # muons with 1 tracks with  pT > 2.5 for SS+OS, and OS
 	int nMuPass(0);

@@ -29,9 +29,9 @@ void IP(int argc, char* argv[])
 
 	ProgramOpts pOpts(argc, argv);
 
-	MCsource source = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
+	// MCsource source = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
 	bool doSignal = pOpts.getSignal(); // for signal or not
-	bool doMu = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
+	// bool doMu = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 	
@@ -49,7 +49,7 @@ void IP(int argc, char* argv[])
 	// TClonesArray *branchMuon = treeReader->UseBranch("Muon");
 	TClonesArray *branchTracks   = treeReader->UseBranch("Track");
 	TClonesArray *branchGenMuons = treeReader->UseBranch("OnlyGenMuons");
-	TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
+	// TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
 	//////////////////////
