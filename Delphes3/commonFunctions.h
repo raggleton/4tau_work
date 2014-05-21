@@ -63,10 +63,11 @@ std::string getDelph(std::string directory){
 
 /**
  * Dermine number of events to run over, based on user input.
- * Note that if the user doesn't specify anything, by default it runs over all events
- * @param  treeReader [description]
- * @param  pOpts      [description]
- * @return            [description]
+ * If user inputs "-1", it will return all events in tree.
+ * Note that if the user doesn't specify anything, by default it returns all events in tree.
+ * @param  treeReader The Delphes tree, used to determine total # events
+ * @param  pOpts      ProgramOpts object that contains user's options
+ * @return            Returns either total numbers of events in the tree, or the number of events the user specified.
  */
 Long64_t getNumberEvents(ExRootTreeReader *treeReader, ProgramOpts* pOpts){
 	if (pOpts->getNEvents() == -1){
@@ -325,7 +326,9 @@ void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std:
 	if (drawLogY) c.SetLogy();
 	h->Draw(drawOpt.c_str());
 
+	// To get the delphes config used, which is always the last part of the directory name
 	std::string delph = getDelph(directory);
+	// Save to PDF
 	c.SaveAs((directory+"/"+filename+"_"+delph+"_"+app+".pdf").c_str());
 }
 
@@ -457,7 +460,9 @@ void drawMassPlot(std::string title, TH1* histM1_0to1, TH1* histM1_1to2, TH1* hi
 	// To get the delphes config used, which is always the last part of the directory name
 	std::string delph = getDelph(directory);
 	
+	// Save to PDF
 	c.SaveAs((directory+"/"+filename+"_"+delph+"_"+app+".pdf").c_str());
+	
 	delete pad1;
 	delete pad2;
 }
