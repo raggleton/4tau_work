@@ -404,7 +404,7 @@ void massPlots(int argc, char* argv[])
 							}
 						}
 					}
-				} // End of track selection
+				} // End of track selection criteria
 			} // End of track loop
 
 			/////////////////////////
@@ -594,48 +594,50 @@ void massPlots(int argc, char* argv[])
 		
 	} // end of event loop
 
-	// Make m1 sideband plot (soft pT 1-2.5)
-	// TH1D* histM1_side_1to2p5 = new TH1D("hM1_side_1to2p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",massBins.size()-1,&massBins[0]);
-	// histM1_side_1to2p5->Add(histM1_side_1to2p5_0to1);
-	// histM1_side_1to2p5->Add(histM1_side_1to2p5_1to2);
-	// histM1_side_1to2p5->Add(histM1_side_1to2p5_2to3);
-	// histM1_side_1to2p5->Add(histM1_side_1to2p5_3toInf);
+	// Create sum of m1 and m2 1D hists
+	TH1D* histM_side_1to2p5 = new TH1D("hM_side_1to2p5","m(#mu-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu-tk) [GeV];A.U.",massBins.size()-1,&massBins[0]);
+	histM_side_1to2p5->Add(histM1_side_1to2p5);
+	histM_side_1to2p5->Add(histM2_side_1to2p5);
 	
-	// Make m1 sideband plot (soft pT 1-1.5)
-	// TH1D* histM1_side_1to1p5 = new TH1D("hM1_side_1to1p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",massBins.size()-1,&massBins[0]);
-	// histM1_side_1to1p5->Add(histM1_side_1to1p5_0to1);
-	// histM1_side_1to1p5->Add(histM1_side_1to1p5_1to2);
-	// histM1_side_1to1p5->Add(histM1_side_1to1p5_2to3);
-	// histM1_side_1to1p5->Add(histM1_side_1to1p5_3toInf);
+	TH1D* histM_side_1to1p5 = new TH1D("hM_side_1to1p5","m(#mu-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu-tk) [GeV];A.U.",massBins.size()-1,&massBins[0]);
+	histM_side_1to1p5->Add(histM1_side_1to1p5);
+	histM_side_1to1p5->Add(histM2_side_1to1p5);
+
+	TH1D* histM = new TH1D("hM", "Inv. Mass of system, full selection; m(#mu-tk) [GeV];A.U.",massBins.size()-1,&massBins[0]);
+	histM->Add(histM1);
+	histM->Add(histM2);
 
 	// Do some normalizing
 	normaliseHist(histM1_side_1to2p5);
 	normaliseHist(histM2_side_1to2p5);
+	normaliseHist(histM_side_1to2p5);
 	normaliseHist(histM1vsM2_side_1to2p5);
 
 	normaliseHist(histM1_side_1to1p5);
 	normaliseHist(histM2_side_1to1p5);
+	normaliseHist(histM_side_1to1p5);
 	normaliseHist(histM1vsM2_side_1to1p5);
 
 	normaliseHist(histM1);
 	normaliseHist(histM2);
+	normaliseHist(histM);
 	normaliseHist(histM1vsM2);
 	
 	// Do corrections plot by making m1*m1 first, then dividing m1vsm2 by m1*m1
 	// Don't need to normalise m1timesm1, as histM1_side already normalised
 	for(unsigned a = 1; a <= massBins.size()-1; a++){
 		for (unsigned b = 1; b <=massBins.size()-1; b++){
-			histM1timesM1_side_1to2p5->SetBinContent(a,b,histM1_side_1to2p5->GetBinContent(a)*histM1_side_1to2p5->GetBinContent(b));
-			histM1timesM1_side_1to2p5->SetBinError(a,b,sqrt(pow(histM1_side_1to2p5->GetBinContent(b)*histM1_side_1to2p5->GetBinError(a),2)
-															+pow(histM1_side_1to2p5->GetBinContent(a)*histM1_side_1to2p5->GetBinError(b),2)));
+			histM1timesM1_side_1to2p5->SetBinContent(a,b,histM_side_1to2p5->GetBinContent(a)*histM_side_1to2p5->GetBinContent(b));
+			histM1timesM1_side_1to2p5->SetBinError(a,b,sqrt(pow(histM_side_1to2p5->GetBinContent(b)*histM_side_1to2p5->GetBinError(a),2)
+															+pow(histM_side_1to2p5->GetBinContent(a)*histM_side_1to2p5->GetBinError(b),2)));
 
-			histM1timesM1_side_1to1p5->SetBinContent(a,b,histM1_side_1to1p5->GetBinContent(a)*histM1_side_1to1p5->GetBinContent(b));
-			histM1timesM1_side_1to1p5->SetBinError(a,b,sqrt(pow(histM1_side_1to1p5->GetBinContent(b)*histM1_side_1to1p5->GetBinError(a),2)
-															+pow(histM1_side_1to1p5->GetBinContent(a)*histM1_side_1to1p5->GetBinError(b),2)));
+			histM1timesM1_side_1to1p5->SetBinContent(a,b,histM_side_1to1p5->GetBinContent(a)*histM_side_1to1p5->GetBinContent(b));
+			histM1timesM1_side_1to1p5->SetBinError(a,b,sqrt(pow(histM_side_1to1p5->GetBinContent(b)*histM_side_1to1p5->GetBinError(a),2)
+															+pow(histM_side_1to1p5->GetBinContent(a)*histM_side_1to1p5->GetBinError(b),2)));
 
-			histM1timesM1->SetBinContent(a,b,histM1->GetBinContent(a)*histM1->GetBinContent(b));
-			histM1timesM1->SetBinError(a,b,sqrt(pow(histM1->GetBinContent(b)*histM1->GetBinError(a),2)
-												+pow(histM1->GetBinContent(a)*histM1->GetBinError(b),2)));
+			histM1timesM1->SetBinContent(a,b,histM->GetBinContent(a)*histM->GetBinContent(b));
+			histM1timesM1->SetBinError(a,b,sqrt(pow(histM->GetBinContent(b)*histM->GetBinError(a),2)
+												+pow(histM->GetBinContent(a)*histM->GetBinError(b),2)));
 		}
 	}
 	TH2D* histM1vsM2_corrections_side_1to2p5 = (TH2D*)histM1vsM2_side_1to2p5->Clone("hM1vsM2_corrections_side_1to2p5");
