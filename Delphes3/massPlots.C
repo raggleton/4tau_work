@@ -137,9 +137,9 @@ void massPlots(int argc, char* argv[])
 	// int nMu(0);
 	// int n1(0), n2(0), nMuPass(0);
 
-	///////////////////////////
-	// Loop over all events  //
-	///////////////////////////
+	///////////////////////
+	// Loop over events  //
+	///////////////////////
 	Long64_t numberOfEntries = getNumberEvents(treeReader, &pOpts);
 	cout << "Running over " << numberOfEntries << " events" << endl;
 

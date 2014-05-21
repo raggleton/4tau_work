@@ -157,13 +157,13 @@ void mainAnalysis(int argc, char* argv[])
 	int nOnly2p5(0), nOnly2p5OS(0); // count # muons with 1 tracks with  pT > 2.5 for SS+OS, and OS
 	int nMuPass(0);
 
-	///////////////////////////
-	// Loop over all events //
-	///////////////////////////
-	Long64_t numberOfEntries = treeReader->GetEntries();
-	// numberOfEntries = 200;
-	cout << "Nevts : " << numberOfEntries <<endl;
-	bool stop = false;
+	//////////////////////
+	// Loop over events //
+	//////////////////////
+	Long64_t numberOfEntries = getNumberEvents(treeReader, &pOpts);
+	cout << "Running over " << numberOfEntries << " events" << endl;
+
+	bool stop = false; // used to stop the loop, for debugging/testing
 
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
 

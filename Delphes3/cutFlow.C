@@ -45,12 +45,15 @@ void cutFlow(int argc, char* argv[])
 	// TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
 	// TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
-	// Loop over all events
-	Long64_t numberOfEntries = treeReader->GetEntries();
-	cout << "Nevts : " << numberOfEntries <<endl;
-	bool stop = false;
+	//////////////////////
+	// Loop over events //
+	//////////////////////
+	Long64_t numberOfEntries = getNumberEvents(treeReader, &pOpts);
+	cout << "Running over " << numberOfEntries << " events" << endl;
 
-	std::vector<int> cutCount(9);
+	bool stop = false; // used to stop the loop, for debugging/testing
+
+	std::vector<int> cutCount(9); // hold # evts passing cut
 	std::vector<int>::iterator it = cutCount.begin();
 
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
@@ -166,7 +169,7 @@ void cutFlow(int argc, char* argv[])
 			// 			// 	histM1_truth_3toInf->Fill(m1);
 			// 		}
 			// 	} 
-			// } // end if(doSignal)
+			// } // end if(doSignal)// MC truth stuff - not used
 		}
 
 		//////////////////////////////////////////////////////////////////////

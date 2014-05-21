@@ -46,10 +46,13 @@ void basicScript(int argc, char* argv[])
 	// TH1D *histNTracks2OS       = new TH1D("hNTracks2OS" ,"Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
 	// TH1D *histNTracks2         = new TH1D("hNTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
 
-	// Loop over all events
-	Long64_t numberOfEntries = treeReader->GetEntries();
-	cout << "Nevts : " << numberOfEntries <<endl;
-	bool stop = false;
+	///////////////////////
+	// Loop over events //
+	///////////////////////
+	Long64_t numberOfEntries = getNumberEvents(treeReader, &pOpts);
+	cout << "Running over " << numberOfEntries << " events" << endl;
+	
+	bool stop = false;// used to stop the loop, for debugging/testing
 
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
 

@@ -52,16 +52,21 @@ void IP(int argc, char* argv[])
 	TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
-	// Book histograms
+	//////////////////////
+	// Book histograms //
+	//////////////////////
 	TH1D *histIPTracks        = new TH1D("hIPTracks" ,"Track IP, p_{T}(trk)>2.5 GeV, muon selection;Track IP [mm]; A.U.", 50,0,0.5);
 	TH1D *histIPTracksOS      = new TH1D("hIPTracksOS" ,"Track IP, OS to #mu, p_{T}(trk)>2.5 GeV, muon selection;Track IP [mm]; A.U.", 50,0,0.5);
 	TH1D *histIPTracksTruth   = new TH1D("hIPTracksTruth" ,"Track IP for #tau decay products, MC truth, p_{T}(trk)>2.5 GeV, no muon selection;Track IP [mm]; A.U.", 50,0,0.5);
 	TH1D *histIPTracksTruthOS = new TH1D("hIPTracksTruthOS" ,"Track IP for #tau decay products, MC truth, OS to #mu, p_{T}(trk)>2.5 GeV, no muon selection;Track IP [mm]; A.U.", 50,0,0.5);
 
-	// Loop over all events
-	Long64_t numberOfEntries = treeReader->GetEntries();
-	cout << "Nevts : " << numberOfEntries <<endl;
-	bool stop = false;
+	///////////////////////
+	// Loop over events //
+	///////////////////////
+	Long64_t numberOfEntries = getNumberEvents(treeReader, &pOpts);
+	cout << "Running over " << numberOfEntries << " events" << endl;
+
+	bool stop = false; // used to stop the loop, for debugging/testing
 
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
 
