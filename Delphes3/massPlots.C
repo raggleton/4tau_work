@@ -689,18 +689,21 @@ void massPlots(int argc, char* argv[])
 
 	drawHistAndSave(histM1_side_1to2p5, "HISTE", "M1_side_1to2p5", directory, app);
 	drawHistAndSave(histM2_side_1to2p5, "HISTE", "M2_side_1to2p5", directory, app);
+	drawHistAndSave(histM_side_1to2p5, "HISTE", "M_side_1to2p5", directory, app);
 	drawHistAndSave(histM1vsM2_side_1to2p5, "colz","M1vsM2_side_1to2p5", directory, app);
 	drawHistAndSave(histM1timesM1_side_1to2p5, "colz","M1timesM1_side_1to2p5", directory, app);
 	drawHistAndSave(histM1vsM2_correlations_side_1to2p5, "colzTEXTE","M1vsM2_correlations_side_1to2p5", directory, app);
 
 	drawHistAndSave(histM1_side_1to1p5, "HISTE", "M1_side_1to1p5", directory, app);
 	drawHistAndSave(histM2_side_1to1p5, "HISTE", "M2_side_1to1p5", directory, app);
+	drawHistAndSave(histM_side_1to1p5, "HISTE", "M_side_1to1p5", directory, app);
 	drawHistAndSave(histM1vsM2_side_1to1p5, "colz","M1vsM2_side_1to1p5", directory, app);
 	drawHistAndSave(histM1timesM1_side_1to1p5, "colz","M1timesM1_side_1to1p5", directory, app);
 	drawHistAndSave(histM1vsM2_correlations_side_1to1p5, "colzTEXTE","M1vsM2_correlations_side_1to1p5", directory, app);
 
 	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
 	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
+	drawHistAndSave(histM, "HISTE", "M", directory, app);
 	drawHistAndSave(histM1vsM2, "colz","M1vsM2", directory, app);
 	drawHistAndSave(histM1timesM1, "colz","M1timesM1", directory, app);
 	drawHistAndSave(histM1vsM2_correlations, "colzTEXTE","M1vsM2_correlations", directory, app);
