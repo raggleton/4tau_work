@@ -623,7 +623,7 @@ void massPlots(int argc, char* argv[])
 	normaliseHist(histM);
 	normaliseHist(histM1vsM2);
 	
-	// Do corrections plot by making m1*m1 first, then dividing m1vsm2 by m1*m1
+	// Do correlations plot by making m1*m1 first, then dividing m1vsm2 by m1*m1
 	// Don't need to normalise m1timesm1, as histM1_side already normalised
 	for(unsigned a = 1; a <= massBins.size()-1; a++){
 		for (unsigned b = 1; b <=massBins.size()-1; b++){
@@ -640,17 +640,17 @@ void massPlots(int argc, char* argv[])
 												+pow(histM->GetBinContent(a)*histM->GetBinError(b),2)));
 		}
 	}
-	TH2D* histM1vsM2_corrections_side_1to2p5 = (TH2D*)histM1vsM2_side_1to2p5->Clone("hM1vsM2_corrections_side_1to2p5");
-	histM1vsM2_corrections_side_1to2p5->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
-	histM1vsM2_corrections_side_1to2p5->Divide(histM1timesM1_side_1to2p5);
+	TH2D* histM1vsM2_correlations_side_1to2p5 = (TH2D*)histM1vsM2_side_1to2p5->Clone("hM1vsM2_correlations_side_1to2p5");
+	histM1vsM2_correlations_side_1to2p5->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
+	histM1vsM2_correlations_side_1to2p5->Divide(histM1timesM1_side_1to2p5);
 
-	TH2D* histM1vsM2_corrections_side_1to1p5 = (TH2D*)histM1vsM2_side_1to1p5->Clone("hM1vsM2_corrections_side_1to1p5");
-	histM1vsM2_corrections_side_1to1p5->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
-	histM1vsM2_corrections_side_1to1p5->Divide(histM1timesM1_side_1to1p5);
+	TH2D* histM1vsM2_correlations_side_1to1p5 = (TH2D*)histM1vsM2_side_1to1p5->Clone("hM1vsM2_correlations_side_1to1p5");
+	histM1vsM2_correlations_side_1to1p5->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
+	histM1vsM2_correlations_side_1to1p5->Divide(histM1timesM1_side_1to1p5);
 
-	TH2D* histM1vsM2_corrections = (TH2D*)histM1vsM2->Clone("hM1vsM2_corrections");
-	histM1vsM2_corrections->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m_{1} #times m_{1};m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
-	histM1vsM2_corrections->Divide(histM1timesM1);
+	TH2D* histM1vsM2_correlations = (TH2D*)histM1vsM2->Clone("hM1vsM2_correlations");
+	histM1vsM2_correlations->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m_{1} #times m_{1};m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
+	histM1vsM2_correlations->Divide(histM1timesM1);
 
 	TCanvas c;
 	std::string app(""); // text to append on end of plot filenames
@@ -692,19 +692,19 @@ void massPlots(int argc, char* argv[])
 	drawHistAndSave(histM2_side_1to2p5, "HISTE", "M2_side_1to2p5", directory, app);
 	drawHistAndSave(histM1vsM2_side_1to2p5, "colz","M1vsM2_side_1to2p5", directory, app);
 	drawHistAndSave(histM1timesM1_side_1to2p5, "colz","M1timesM1_side_1to2p5", directory, app);
-	drawHistAndSave(histM1vsM2_corrections_side_1to2p5, "colzTEXTE","M1vsM2_corrections_side_1to2p5", directory, app);
+	drawHistAndSave(histM1vsM2_correlations_side_1to2p5, "colzTEXTE","M1vsM2_correlations_side_1to2p5", directory, app);
 
 	drawHistAndSave(histM1_side_1to1p5, "HISTE", "M1_side_1to1p5", directory, app);
 	drawHistAndSave(histM2_side_1to1p5, "HISTE", "M2_side_1to1p5", directory, app);
 	drawHistAndSave(histM1vsM2_side_1to1p5, "colz","M1vsM2_side_1to1p5", directory, app);
 	drawHistAndSave(histM1timesM1_side_1to1p5, "colz","M1timesM1_side_1to1p5", directory, app);
-	drawHistAndSave(histM1vsM2_corrections_side_1to1p5, "colzTEXTE","M1vsM2_corrections_side_1to1p5", directory, app);
+	drawHistAndSave(histM1vsM2_correlations_side_1to1p5, "colzTEXTE","M1vsM2_correlations_side_1to1p5", directory, app);
 
 	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
 	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
 	drawHistAndSave(histM1vsM2, "colz","M1vsM2", directory, app);
 	drawHistAndSave(histM1timesM1, "colz","M1timesM1", directory, app);
-	drawHistAndSave(histM1vsM2_corrections, "colzTEXTE","M1vsM2_corrections", directory, app);
+	drawHistAndSave(histM1vsM2_correlations, "colzTEXTE","M1vsM2_correlations", directory, app);
 
 	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
@@ -756,14 +756,14 @@ void massPlots(int argc, char* argv[])
 	
 	histM1_side_1to2p5->Write("",TObject::kOverwrite);
 	histM1vsM2_side_1to2p5->Write("",TObject::kOverwrite);
-	histM1vsM2_corrections_side_1to2p5->Write("",TObject::kOverwrite);
+	histM1vsM2_correlations_side_1to2p5->Write("",TObject::kOverwrite);
 
 	histM1_side_1to1p5->Write("",TObject::kOverwrite);
 	histM1vsM2_side_1to1p5->Write("",TObject::kOverwrite);
-	histM1vsM2_corrections_side_1to1p5->Write("",TObject::kOverwrite);
+	histM1vsM2_correlations_side_1to1p5->Write("",TObject::kOverwrite);
 	
 	histM1vsM2->Write("",TObject::kOverwrite);
-	histM1vsM2_corrections->Write("",TObject::kOverwrite);
+	histM1vsM2_correlations->Write("",TObject::kOverwrite);
 
 	outFile->Close();
 
