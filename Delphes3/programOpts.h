@@ -71,10 +71,11 @@ class ProgramOpts
 {
 	private:
 		MCsource source; // do signal or qcd(b)(c)
-		bool doSignal; // do signal, not QCD
+		bool doSignal; // do signal, or not signal (some analysis parts are signal only)
 		bool doMu; // for QCDb - either inclusive decays or mu only decays - DEPRECIATED
 		bool swapMuRandomly; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 		bool doHLT; // whether to use MC that has HLT cuts already applied or not.
+		int  nEvents; // how many events to run over, -1 = all events
 
 	public: 
 		// constructor, parses input
@@ -84,7 +85,8 @@ class ProgramOpts
 			doSignal(true),
 			doMu(true),
 			swapMuRandomly(true),
-			doHLT(true)
+			doHLT(true),
+			nEvents(-1)
 		{
 			po::options_description desc("Allowed options");
 			desc.add_options()
@@ -92,6 +94,7 @@ class ProgramOpts
 				("source", po::value<MCsource>(&source), "Process to run: signal [default], qcdb, qcdc")
 				("swapMuRandomly", po::value<bool>(&swapMuRandomly), "TRUE [default] - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
 				("doHLT", po::value<bool>(&doHLT), "TRUE [default] - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
+				("n", po::value<int>(&nEvents), "Number of events to run over. -1 for all [defualt]")
 			;
 
 			po::variables_map vm;
@@ -148,11 +151,13 @@ class ProgramOpts
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		} // end of constructor
 
-		MCsource getSource(){ return source; }
-		bool getSignal(){ return doSignal; }
-		bool getQCDMu(){ return doMu; }
-		bool getMuOrdering(){ return swapMuRandomly; }
-		bool getHLT(){ return doHLT; }
+		// Getters
+		MCsource getSource() { return source; }
+		bool getSignal() { return doSignal; }
+		bool getQCDMu() { return doMu; }
+		bool getMuOrdering() { return swapMuRandomly; }
+		bool getHLT() { return doHLT; }
+		int  getNEvents() { return nEvents; }
 		
 		// This should really be in a separate .cc file...
 		void printProgramOptions(){
@@ -182,9 +187,8 @@ class ProgramOpts
 /**
  * Add Delphes ntuples to TChain so we can process them in one go
  * @param chain    Pointer to TChain to add files to
- * @param source   enum to determine which process to use (signal, qcdb, qcdc)
- * @param doMu     Flag TRUE to use sample that force B hadrons to decay to mu 
- * @param doHLT    Flag TRUE to use signal sample that emulates HLT conditions (Mu17_Mu8)
+ * @param pOpts    Pointer to ProgramOpts object that holds all user determined flags 
+ * (makes it easy to change avaiable flags without updating all programs individually!)
  */
 void addInputFiles(TChain* chain, ProgramOpts* pOpts){
 	// Create chain of root trees
@@ -193,8 +197,8 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts){
 	std::string file = ""; // folder & file stem, expect files to be named like myFile_i.root, where i = 1 -> nFiles
 	
 	MCsource source = pOpts->getSource();
-	bool doMu = pOpts->getQCDMu();
-	bool doHLT = pOpts->getHLT();
+	bool doMu       = pOpts->getQCDMu();
+	bool doHLT      = pOpts->getHLT();
 
 	if (source == signal){
 		if (doHLT){
@@ -209,9 +213,12 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts){
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_8_HLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_HLT_bare.root");
 			cout << "Doing signal with HLT cuts" << endl;
+			// folder = "Signal_1prong_500K_TauPythia_bare/";
+			// file = "signal_1prong_500K_TauPythia_HLT_";
 			folder = "Signal_1prong_500K_bare/";
 			file = "signal_1prong_500K_HLT_";
 			nFiles = 20;
+			// nFiles = 1;
 		} else { 
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_10_NoHLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_NoHLT_bare.root");
@@ -255,13 +262,8 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts){
 			cout << "Doing QCDc_mu with HLT cuts" << endl;
 			folder = "QCDc_mu_pthatmin20_Mu17_Mu8_bare/";
 			file = "QCDc_mu_pthatmin20_Mu17_Mu8_";
-			nFiles = 50;
+			nFiles = 150;
 		}
-	// } else if (source == signalTauPythia){
-	// 	cout << "Doing signal with HLT cuts, Taus decay in Pythia" << endl;
-	// 	folder = "Signal_1prong_500K_TauPythia_bare/";
-	// 	file = "signal_1prong_500K_TauPythia_HLT_";
-	// 	nFiles = 1;
 	}
 
 	// Auto-loop over ROOT files in folder using Boost::Filesystem
