@@ -496,28 +496,27 @@ void massPlots(int argc, char* argv[])
 			// Both regions share same hard track requirements, 
 			// but differ in soft track requirements 
 			// (1D plot includes case where both have 0 soft tracks, 2D doesn't)
-			if (   tk1_1.size() >= 1 && tk1_1.size() < 2 
-				&& tk2_1.size() >= 1 && tk2_1.size() < 2 
+			if (   tk1_1.size() >= 1 && tk1_1.size() <= 2 
+				&& tk2_1.size() >= 1 && tk2_1.size() <= 2 
 				&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
 				&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
 				&& tk1_1to2p5.size() <= 1 && tk2_1to2p5.size() <= 1 
+				&& !(tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 0)
 				){
 					double m1(0), m2(0);		
 					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 					m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
 					// Fill 2D m1 vs m2 plot only if at least one muon has a soft track
-					if(!(tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 0)){ 
-						// Fill symmetrically to increase stats
-						histM1vsM2_side_1to2p5->Fill(m1,m2);
-						// if (getMassBin(m1) != getMassBin(m2)){
-						histM1vsM2_side_1to2p5->Fill(m2,m1);
-						// }
-					}
+					// Fill symmetrically to increase stats
+					histM1vsM2_side_1to2p5->Fill(m1,m2);
+					// if (getMassBin(m1) != getMassBin(m2)){
+					histM1vsM2_side_1to2p5->Fill(m2,m1);
+					// }
 
 					// Fill 1D plot for the various m2 bins
-					histM1_side_1to2p5->Fill(m1);
-					histM2_side_1to2p5->Fill(m2);
+					// histM1_side_1to2p5->Fill(m1);
+					// histM2_side_1to2p5->Fill(m2);
 					if(m2 < 1.) {
 						histM1_side_1to2p5_0to1->Fill(m1);
 						histMu1Pt_side_1to2p5_0to1->Fill(mu1->PT);
@@ -533,6 +532,28 @@ void massPlots(int argc, char* argv[])
 					}
 
 			} // end of sideband 1to2p5 
+
+			// SIDEBAND - 1D plot for mu1 
+			// mu1 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
+			// Also has 0 or 1 soft track, 1 < pT < 2.5, within ∆R < 0.5.
+			// No sign requirement.
+			// No track requirements on mu2, all it has to do is pass the mu selection above
+			if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to2p5.size() <= 1){
+				double m1(0);		
+				m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+				histM1_side_1to2p5->Fill(m1);
+			}
+
+			// SIDEBAND - 1D plot for mu2
+			// mu2 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
+			// Also has 0 or 1 soft track, 1 < pT < 2.5, within ∆R < 0.5.
+			// No sign requirement.
+			// No track requirements on mu1, all it has to do is pass the mu selection above
+			if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to2p5.size() <= 1){
+				double m2(0);		
+				m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
+				histM2_side_1to2p5->Fill(m2);
+			}
 
 			////////////////////////////////////////////////////
 			// SIDEBAND REGION - for soft tracks 1 < pT < 1.5 //
@@ -551,28 +572,27 @@ void massPlots(int argc, char* argv[])
 			// Both regions share same hard track requirements, 
 			// but differ in soft track requirements 
 			// (1D plot includes case where both have 0 soft tracks, 2D doesn't)
-			if (   tk1_1.size() >= 1 && tk1_1.size() < 2 
-				&& tk2_1.size() >= 1 && tk2_1.size() < 2 
+			if (   tk1_1.size() >= 1 && tk1_1.size() <= 2 
+				&& tk2_1.size() >= 1 && tk2_1.size() <= 2 
 				&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
 				&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
 				&& tk1_1to1p5.size() <= 1 && tk2_1to1p5.size() <= 1 
+				&& !(tk1_1to1p5.size() == 0 && tk2_1to1p5.size() == 0)
 				){
 					double m1(0), m2(0);		
 					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 					m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
 					// Fill 2D m1 vs m2 plot only if at least one muon has a soft track
-					if(!(tk1_1to1p5.size() == 0 && tk2_1to1p5.size() == 0)){ 
-						// Fill symmetrically to increase stats
-						histM1vsM2_side_1to1p5->Fill(m1,m2);
-						// if (getMassBin(m1) != getMassBin(m2)){
-						histM1vsM2_side_1to1p5->Fill(m2,m1);
-						// }
-					}
+					// Fill symmetrically to increase stats
+					histM1vsM2_side_1to1p5->Fill(m1,m2);
+					// if (getMassBin(m1) != getMassBin(m2)){
+					histM1vsM2_side_1to1p5->Fill(m2,m1);
+					// }
 
 					// Fill 1D plot for the various m2 bins
-					histM1_side_1to1p5->Fill(m1);
-					histM2_side_1to1p5->Fill(m2);
+					// histM1_side_1to1p5->Fill(m1);
+					// histM2_side_1to1p5->Fill(m2);
 					if(m2 < 1.) {
 						histM1_side_1to1p5_0to1->Fill(m1);
 						histMu1Pt_side_1to1p5_0to1->Fill(mu1->PT);
@@ -587,7 +607,29 @@ void massPlots(int argc, char* argv[])
 						histMu1Pt_side_1to1p5_3toInf->Fill(mu1->PT);
 					}
 
-			} // end of sideband 1to2p5 
+			} // end of sideband 1to1p5 for 2D plot
+			
+			// SIDEBAND - 1D plot for mu1 
+			// mu1 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
+			// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
+			// No sign requirement.
+			// No track requirements on mu2, all it has to do is pass the mu selection above
+			if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to1p5.size() <= 1){
+				double m1(0);		
+				m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+				histM1_side_1to1p5->Fill(m1);
+			}
+
+			// SIDEBAND - 1D plot for mu1
+			// mu2 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
+			// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
+			// No sign requirement.
+			// No track requirements on mu1, all it has to do is pass the mu selection above
+			if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to1p5.size() <= 1){
+				double m2(0);		
+				m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
+				histM2_side_1to1p5->Fill(m2);
+			}
 
 		} // end of muon selection
 		
@@ -603,8 +645,8 @@ void massPlots(int argc, char* argv[])
 	histM_side_1to1p5->Add(histM2_side_1to1p5);
 
 	TH1D* histM = new TH1D("hM", "Inv. Mass of system, full selection; m(#mu-tk) [GeV];A.U.",massBins.size()-1,&massBins[0]);
-	histM->Add(histM1);
-	histM->Add(histM2);
+	// histM->Add(histM1);
+	// histM->Add(histM2);
 
 	// Do some normalizing
 	normaliseHist(histM1_side_1to2p5);
@@ -640,15 +682,18 @@ void massPlots(int argc, char* argv[])
 		}
 	}
 	TH2D* histM1vsM2_correlations_side_1to2p5 = (TH2D*)histM1vsM2_side_1to2p5->Clone("hM1vsM2_correlations_side_1to2p5");
-	histM1vsM2_correlations_side_1to2p5->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
+	histM1vsM2_correlations_side_1to2p5->SetTitle(
+		"m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
 	histM1vsM2_correlations_side_1to2p5->Divide(histM1timesM1_side_1to2p5);
 
 	TH2D* histM1vsM2_correlations_side_1to1p5 = (TH2D*)histM1vsM2_side_1to1p5->Clone("hM1vsM2_correlations_side_1to1p5");
-	histM1vsM2_correlations_side_1to1p5->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
+	histM1vsM2_correlations_side_1to1p5->SetTitle(
+		"m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
 	histM1vsM2_correlations_side_1to1p5->Divide(histM1timesM1_side_1to1p5);
 
 	TH2D* histM1vsM2_correlations = (TH2D*)histM1vsM2->Clone("hM1vsM2_correlations");
-	histM1vsM2_correlations->SetTitle("m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m_{1} #times m_{1};m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
+	histM1vsM2_correlations->SetTitle(
+		"m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m_{1} #times m_{1};m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
 	histM1vsM2_correlations->Divide(histM1timesM1);
 
 	TCanvas c;
@@ -674,18 +719,26 @@ void massPlots(int argc, char* argv[])
 	std::string delph = getDelph(directory);
 
 	// Mass plots
-	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
-	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (soft tk with p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_1to2p5_0to1, histM1_side_1to2p5_1to2, histM1_side_1to2p5_2to3, histM1_side_1to2p5_3toInf, "M1_M2_side_1to2p5_1to1p5", directory, app);
-	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (soft tk with p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV]; A.U.", histM1_side_1to1p5_0to1, histM1_side_1to1p5_1to2, histM1_side_1to1p5_2to3, histM1_side_1to1p5_3toInf, "M1_M2_side_1to1p5_1to1p5", directory, app);
+	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", 
+		histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
+	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (soft tk with p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV]; A.U.",
+		histM1_side_1to2p5_0to1, histM1_side_1to2p5_1to2, histM1_side_1to2p5_2to3, histM1_side_1to2p5_3toInf, "M1_M2_side_1to2p5", directory, app);
+	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (soft tk with p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV]; A.U.", 
+		histM1_side_1to1p5_0to1, histM1_side_1to1p5_1to2, histM1_side_1to1p5_2to3, histM1_side_1to1p5_3toInf, "M1_M2_side_1to1p5", directory, app);
 	
 	if(doSignal){
-		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
-		drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - MC truth;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_truth_0to1, histMu1Pt_truth_1to2, histMu1Pt_truth_2to3, histMu1Pt_truth_3toInf, "Mu1Pt_M2_truth", directory, app);
+		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", 
+			histM1_truth_0to1, histM1_truth_1to2, histM1_truth_2to3, histM1_truth_3toInf, "M1_M2_truth", directory, app);
+		drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - MC truth;#mu_{1} p_{T} [GeV]; A.U.", 
+			histMu1Pt_truth_0to1, histMu1Pt_truth_1to2, histMu1Pt_truth_2to3, histMu1Pt_truth_3toInf, "Mu1Pt_M2_truth", directory, app);
 	}
 
-	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - signal region;#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_0to1, histMu1Pt_1to2, histMu1Pt_2to3, histMu1Pt_3toInf, "Mu1Pt_M2", directory, app);
-	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - sideband (soft tk p_{T} = 1 - 2.5 GeV);#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_side_1to2p5_0to1, histMu1Pt_side_1to2p5_1to2, histMu1Pt_side_1to2p5_2to3, histMu1Pt_side_1to2p5_3toInf, "Mu1Pt_M2_side_1to2p5_1to1p5", directory, app);
-	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - sideband (soft tk p_{T} = 1 - 1.5 GeV);#mu_{1} p_{T} [GeV]; A.U.", histMu1Pt_side_1to1p5_0to1, histMu1Pt_side_1to1p5_1to2, histMu1Pt_side_1to1p5_2to3, histMu1Pt_side_1to1p5_3toInf, "Mu1Pt_M2_side_1to1p5_1to1p5", directory, app);
+	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - signal region;#mu_{1} p_{T} [GeV]; A.U.", 
+		histMu1Pt_0to1, histMu1Pt_1to2, histMu1Pt_2to3, histMu1Pt_3toInf, "Mu1Pt_M2", directory, app);
+	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - sideband (soft tk p_{T} = 1 - 2.5 GeV);#mu_{1} p_{T} [GeV]; A.U.", 
+		histMu1Pt_side_1to2p5_0to1, histMu1Pt_side_1to2p5_1to2, histMu1Pt_side_1to2p5_2to3, histMu1Pt_side_1to2p5_3toInf, "Mu1Pt_M2_side_1to2p5", directory, app);
+	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - sideband (soft tk p_{T} = 1 - 1.5 GeV);#mu_{1} p_{T} [GeV]; A.U.", 
+		histMu1Pt_side_1to1p5_0to1, histMu1Pt_side_1to1p5_1to2, histMu1Pt_side_1to1p5_2to3, histMu1Pt_side_1to1p5_3toInf, "Mu1Pt_M2_side_1to1p5", directory, app);
 
 	drawHistAndSave(histM1_side_1to2p5, "HISTE", "M1_side_1to2p5", directory, app);
 	drawHistAndSave(histM2_side_1to2p5, "HISTE", "M2_side_1to2p5", directory, app);
