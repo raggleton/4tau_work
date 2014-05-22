@@ -95,3 +95,18 @@ http://www.boost.org/doc/libs/1_55_0/more/getting_started/unix-variants.html
 ```
 LD_LIBRARY_PATH=/cm/shared/apps/gcc/4.7.0/lib:/cm/shared/apps/gcc/4.7.0/lib64:/cm/shared/languages/Python-2.7.6/lib:/cm/shared/apps/torque/4.2.4.1/lib:/cm/shared/apps/moab/7.2.2/lib:/cm/shared/tools/git-1.8.4.2/lib:/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib/:/panfs/panasas01/phys/ra12451/root/root/lib/
 ```
+
+## Analysis Note
+
+```
+svn co -N svn+ssh://svn.cern.ch/reps/tdr2 myDir
+# svn co -N svn+ssh://raggleto@svn.cern.ch/reps/tdr2 myDir
+cd myDir
+svn update utils
+svn update -N notes
+svn update notes/AN-14-007
+eval `notes/tdr runtime -sh` # (for bash. use -csh for tcsh.)
+cd notes/AN-14-007/trunk/
+tdr --style=an b AN-14-007
+```
+See https://twiki.cern.ch/twiki/bin/view/CMS/Internal/TdrProcessing
