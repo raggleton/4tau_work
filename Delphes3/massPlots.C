@@ -630,11 +630,11 @@ void massPlots(int argc, char* argv[])
 	histM_side_1to1p5->Add(histM2_side_1to1p5);
 
 	TH1D* histM = new TH1D("hM", "Inv. Mass of system, full selection; m(#mu-tk) [GeV];A.U.",nBinsX,&massBins[0]);
-	
 	// Rebin the M1 and M2 plots
-	
-	// histM->Add(histM1);
-	// histM->Add(histM2);
+	TH1D* histM1_rebin = (TH1D*) histM1->Rebin(nBinsX,"hM1_rebin",&massBins[0]);
+	TH1D* histM2_rebin = (TH1D*) histM2->Rebin(nBinsX,"hM2_rebin",&massBins[0]);
+	histM->Add(histM1_rebin);
+	histM->Add(histM2_rebin);
 
 	// Do some normalizing
 	normaliseHist(histM1_side_1to2p5);
@@ -648,7 +648,9 @@ void massPlots(int argc, char* argv[])
 	normaliseHist(histM1vsM2_side_1to1p5);
 
 	normaliseHist(histM1);
+	normaliseHist(histM1_rebin);
 	normaliseHist(histM2);
+	normaliseHist(histM2_rebin);
 	normaliseHist(histM);
 	normaliseHist(histM1vsM2);
 	
@@ -686,9 +688,9 @@ void massPlots(int argc, char* argv[])
 
 	// Make 1D plots of unique bins from 2D correlation plot
 	int nUniqueBins = (nBinsX+1)*nBinsX/2.;
-	TH1D* histCorr1D_side_1to2p5 = new TH1D("hCorr1D_side_1to2p5",";Correlation coefficiant;Bin",nUniqueBins,0,nUniqueBins);
-	TH1D* histCorr1D_side_1to1p5 = new TH1D("hCorr1D_side_1to1p5",";Correlation coefficiant;Bin",nUniqueBins,0,nUniqueBins);
-	TH1D* histCorr1D             = new TH1D("hCorr1D",";Correlation coefficiant;Bin",nUniqueBins,0,nUniqueBins);
+	TH1D* histCorr1D_side_1to2p5 = new TH1D("hCorr1D_side_1to2p5",";Bin;Correlation coefficient",nUniqueBins,0,nUniqueBins);
+	TH1D* histCorr1D_side_1to1p5 = new TH1D("hCorr1D_side_1to1p5",";Bin;Correlation coefficient",nUniqueBins,0,nUniqueBins);
+	TH1D* histCorr1D             = new TH1D("hCorr1D",";Bin;Correlation coefficient",nUniqueBins,0,nUniqueBins);
 	
 	int counter = 1;
 	for (int i = 1; i <= nBinsX; i++) {
@@ -705,9 +707,14 @@ void massPlots(int argc, char* argv[])
 			histCorr1D->SetBinContent(counter,histM1vsM2_correlations->GetBinContent(i,j));
 			histCorr1D->SetBinError(counter,histM1vsM2_correlations->GetBinError(i,j));
 			histCorr1D->GetXaxis()->SetBinLabel(counter,binLabel.c_str());
+
+			counter++;
 		}
 	}
 
+	/////////////////
+	// PLOT THINGS //
+	/////////////////
 	TCanvas c;
 	std::string app(""); // text to append on end of plot filenames
 	if (doSignal) {
@@ -732,7 +739,8 @@ void massPlots(int argc, char* argv[])
 	// Get Delphes file config used - last part of directory name
 	std::string delph = getDelph(directory);
 
-	// Mass plots
+	// m1, mu1 pT in bins of m2
+	// -------------------------------
 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - signal region;m(#mu_{1}-tk) [GeV]; A.U.", 
 		histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (soft tk with p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV]; A.U.",
@@ -754,6 +762,9 @@ void massPlots(int argc, char* argv[])
 	drawMassPlot("#mu_{1} p_{T} in bins of m(#mu_{2}-tk) - sideband (soft tk p_{T} = 1 - 1.5 GeV);#mu_{1} p_{T} [GeV]; A.U.", 
 		histMu1Pt_side_1to1p5_0to1, histMu1Pt_side_1to1p5_1to2, histMu1Pt_side_1to1p5_2to3, histMu1Pt_side_1to1p5_3toInf, "Mu1Pt_M2_side_1to1p5", directory, app);
 
+	// 1D and 2D plots of masses & correlation coefficents:
+	// ----------------------------------------------------
+	// SIDEBAND - 1 < tk pT < 2.5
 	drawHistAndSave(histM1_side_1to2p5, "HISTE", "M1_side_1to2p5", directory, app);
 	drawHistAndSave(histM2_side_1to2p5, "HISTE", "M2_side_1to2p5", directory, app);
 	drawHistAndSave(histM_side_1to2p5, "HISTE", "M_side_1to2p5", directory, app);
@@ -762,6 +773,7 @@ void massPlots(int argc, char* argv[])
 	drawHistAndSave(histM1vsM2_correlations_side_1to2p5, "colzTEXTE","M1vsM2_correlations_side_1to2p5", directory, app);
 	drawHistAndSave(histCorr1D_side_1to2p5, "e1", "Correlations1D_side_1to2p5", directory, app);
 
+	// SIDEBAND - 1 < tk pT < 1.5
 	drawHistAndSave(histM1_side_1to1p5, "HISTE", "M1_side_1to1p5", directory, app);
 	drawHistAndSave(histM2_side_1to1p5, "HISTE", "M2_side_1to1p5", directory, app);
 	drawHistAndSave(histM_side_1to1p5, "HISTE", "M_side_1to1p5", directory, app);
@@ -770,17 +782,23 @@ void massPlots(int argc, char* argv[])
 	drawHistAndSave(histM1vsM2_correlations_side_1to1p5, "colzTEXTE","M1vsM2_correlations_side_1to1p5", directory, app);
 	drawHistAndSave(histCorr1D_side_1to1p5, "e1", "Correlations1D_side_1to1p5", directory, app);
 
+	// SIGNAL region
 	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
+	drawHistAndSave(histM1_rebin, "HISTE", "M1_rebin", directory, app);
 	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
+	drawHistAndSave(histM2_rebin, "HISTE", "M2_rebin", directory, app);
 	drawHistAndSave(histM, "HISTE", "M", directory, app);
 	drawHistAndSave(histM1vsM2, "colz","M1vsM2", directory, app);
 	drawHistAndSave(histM1timesM1, "colz","M1timesM1", directory, app);
 	drawHistAndSave(histM1vsM2_correlations, "colzTEXTE","M1vsM2_correlations", directory, app);
 	drawHistAndSave(histCorr1D, "e1", "Correlations1D", directory, app);
 
+
+	//////////////////////////
+	// Write hists to file //
+	//////////////////////////
 	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
-	// Mass plots
 	histM1->Write("",TObject::kOverwrite);
 	histM2->Write("",TObject::kOverwrite);
 	histM->Write("",TObject::kOverwrite);
