@@ -1,4 +1,5 @@
 #include "commonFunctions.h"
+#include "classes/SortableObject.h"
 
 using std::cout;
 using std::endl;
@@ -11,6 +12,18 @@ using std::endl;
 // 	}
 // 	return 5;
 // }
+
+bool checkMuons(GenParticle* muA, GenParticle* muB){
+	if ((muA->Charge == muB->Charge)
+		&& (fabs(muA->Eta) < 2.1)
+		&& (fabs(muB->Eta) < 2.4)
+		&& ((muA->P4().DeltaR(muB->P4())) > 2.)
+		){
+		return true;
+	} else {
+		return false;
+	}
+}
 
 void massPlots(int argc, char* argv[])
 {
@@ -153,33 +166,76 @@ void massPlots(int argc, char* argv[])
 
 		// cout << "*** Event" << endl;
 
-		if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons!
+		if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons! (alhtough pointless for HLT samples)
 
 		//////////////////////////////////////////////////////////////////////
 		// Now, get the two highest pT muons in the event, store their pT //
 		// and pointers to the GenParticles                                 //
 		//////////////////////////////////////////////////////////////////////
 		
-		GenParticle *cand(nullptr),*mu1(nullptr), *mu2(nullptr);
 		// Track *candTk(nullptr);
 
-		double muLeadingPT = 0.;
-		double muSubLeadingPT = 0.; 
+		// Fill vectors with muons, based on pT
+		std::vector<GenParticle*> muons10to17;
+		std::vector<GenParticle*> muons17toInf;
 		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
-			cand = (GenParticle*) branchGenMuons->At(i);
-			if (cand->PT > muLeadingPT) {
-				mu1 = cand;
-				muLeadingPT = cand->PT;
+			GenParticle* cand = (GenParticle*) branchGenMuons->At(i);
+			if (cand->PT > 17) {
+				muons17toInf.push_back(cand);
+			} else if (cand->PT > 10) {
+				muons10to17.push_back(cand);
 			}
 		}
 
-		for(int j = 0; j < branchGenMuons->GetEntries(); j++){
-			cand = (GenParticle*) branchGenMuons->At(j);
-			if ((cand->PT > muSubLeadingPT) && (cand->PT != mu1->PT)) {
-				mu2 = cand;
-				muSubLeadingPT = cand->PT;
+		// Check to see if we can skip the event if not enough muons
+		if (!(muons17toInf.size() >= 1 && (muons17toInf.size() + muons10to17.size()) >= 2)) continue;
+
+		// Sort both vectors by descending pT
+		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<GenParticle>);
+		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<GenParticle>);
+
+
+		// Make pairs, see if they pass all cuts (SS, eta, deltaR)
+		// If they do, store in mu1 and mu2 (mu1 has higher pT)
+		GenParticle *mu1(nullptr), *mu2(nullptr);
+		bool foundMuonPair = false;
+
+		// for (auto muA : muons17toInf) {
+		std::vector<GenParticle*>::iterator muA = muons17toInf.begin();
+		while(!foundMuonPair && muA != muons17toInf.end()){
+			
+			// Need to make pairs among the 17toInf vector as well, if size >= 2
+			auto muB = muA;
+			muB++;
+			for (; muB != muA, muB != muons17toInf.end(); muB++) {
+				if (*muA != *muB){
+					if (checkMuons(*muA, *muB)) {
+						mu1 = *muA;
+						mu2 = *muB;
+						foundMuonPair = true;
+						break;
+					}
+				}
 			}
+
+			if(!foundMuonPair) {
+				for (auto muB : muons10to17) {
+					if (checkMuons(*muA, muB)) {
+						mu1 = *muA;
+						mu2 = muB;
+						foundMuonPair = true;
+						break;
+					}
+				}
+			}
+			muA++;
 		}
+		if (!foundMuonPair) continue;
+
+		// cout << " >>>>> Muon pair details: " << endl;
+		// cout << " >>>>> Mu1 pT " << mu1->PT << " charge: " << mu1->Charge << " eta " << mu1->Eta << endl;
+		// cout << " >>>>> Mu2 pT " << mu2->PT << " charge: " << mu2->Charge << " eta " << mu2->Eta << endl;
+		// cout << " >>>>> deltaR " << mu1->P4().DeltaR(mu2->P4()) << endl;
 
 		// Now randomly swap mu1 - mu2
 		GenParticle *origMu1(nullptr), *origMu2(nullptr);
@@ -192,7 +248,6 @@ void massPlots(int argc, char* argv[])
 				mu2 = origMu1;
 			}
 		}
-
 
 		TLorentzVector mu1Mom, mu2Mom;
 		mu1Mom = mu1->P4();
@@ -212,7 +267,7 @@ void massPlots(int argc, char* argv[])
 			GenParticle *a1(nullptr), *a2(nullptr);
 			// Get a0s
 			for(int j = 0; j < branchAll->GetEntries(); j++){
-				cand = (GenParticle*) branchAll->At(j);
+				GenParticle* cand = (GenParticle*) branchAll->At(j);
 				// cout << j << " ID: " << cand->PID << " status: " << cand->Status << endl;
 			
 				if ((fabs(cand->PID)==36) && (fabs(cand->Status)==62)){
@@ -315,22 +370,12 @@ void massPlots(int argc, char* argv[])
 			} // end if(charged1a...) 
 		} // end if(doSignal)
 
-		////////////////////
-		// Muon selection //
-		////////////////////
-		
-		if ((muLeadingPT > 17.)
-		&& (muSubLeadingPT > 10.)
-		&& ((mu1->Charge) == (mu2->Charge))
-		&& (fabs(origMu1->Eta) < 2.1)
-		// && (fabs(origMu2->Eta) < 2.1)
-		&& (fabs(origMu2->Eta) < 2.4)
-		&& ((mu1Mom.DeltaR(mu2Mom)) > 1.)
-		// && ((mu1Mom.DeltaR(mu2Mom)) > 2.)
-		){
-			/////////////////////////////////
-			// Look at tracks around muons //
-			/////////////////////////////////
+
+		/////////////////////////////////
+		// Look at tracks around muons //
+		/////////////////////////////////
+			
+		if (foundMuonPair){
 
 			// Vectors of tracks with pT > 1, within dR < 0.5 of respective muons + other cuts
 			// so tk1 is the track nearest to muon1, (may or may not be highest pT, depends if random swapping is on)
@@ -731,7 +776,7 @@ void massPlots(int argc, char* argv[])
 		app += "_NoHLT";
 	}
 
-	app += "_dR1";
+	app += "_dR2";
 
 	// Get directory that input file was in - put plots in there
 	std::string directory = getDirectory(chain.GetFile());
