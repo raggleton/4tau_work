@@ -78,19 +78,13 @@ Long64_t getNumberEvents(ExRootTreeReader *treeReader, ProgramOpts* pOpts){
 }
 
 /**
- * Compare two object, derived from SortableObject, by their pT. 
+ * Compare two object by their pT. 
  * @param  a First obj  to compare
  * @param  b Other obj to compare
  * @return   Returns TRUE if pT of obj a > pT obj b, FALSE otherwise
  */
-// bool sortTracksByPT(Track* a, Track* b){ 
-	// return (a->PT) > (b->PT); 
-// }
-
 template <typename T>
 bool sortByPT(T* a, T* b){
-	// CompPT<T> comparer();
-	// if(comparer.Compare(a,b) <= 0) {
 	if(a->PT > b->PT) {
 		return true; 
 	} else {
