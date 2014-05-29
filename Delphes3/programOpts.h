@@ -30,7 +30,7 @@ namespace po = boost::program_options;
 
 // Global enum for the MC source
 // Note convention of all lower case
-enum MCsource { signal, qcdb, qcdc };
+enum MCsource { signal, qcdb, qcdc, qcdscatter };
 
 // Have to define <<, and >> ops to get enum to work with boost::lexical_cast and program_options,
 // and also so we can cout the enum easily
@@ -42,6 +42,7 @@ std::ostream& operator<<(std::ostream& out, const MCsource value){
         PROCESS_VAL(signal);     
         PROCESS_VAL(qcdb);     
         PROCESS_VAL(qcdc);
+        PROCESS_VAL(qcdscatter);
     }
 #undef PROCESS_VAL
 
@@ -58,6 +59,8 @@ std::istream & operator>>(std::istream & in, MCsource & value) {
   		value = qcdb;
   	else if (token == "qcdc")
   		value = qcdc;
+  	else if (token == "qcdscatter")
+  		value = qcdscatter;
   	else
   		throw runtime_error("Invalid string cast to enum");
   }
@@ -91,7 +94,7 @@ class ProgramOpts
 			po::options_description desc("Allowed options");
 			desc.add_options()
 				("help", "produce help message")
-				("source", po::value<MCsource>(&source), "Process to run: signal [default], qcdb, qcdc")
+				("source", po::value<MCsource>(&source), "Process to run: signal [default], qcdb, qcdc, qcdscatter")
 				("swapMuRandomly", po::value<bool>(&swapMuRandomly), "TRUE [default] - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
 				("doHLT", po::value<bool>(&doHLT), "TRUE [default] - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
 				("n", po::value<int>(&nEvents), "Number of events to run over. -1 for all [defualt]")
@@ -262,7 +265,14 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts){
 			cout << "Doing QCDc_mu with HLT cuts" << endl;
 			folder = "QCDc_mu_pthatmin20_Mu17_Mu8_bare/";
 			file = "QCDc_mu_pthatmin20_Mu17_Mu8_";
-			nFiles = 150;
+			nFiles = 200;
+		}
+	} else if (source == qcdscatter){
+		if(doHLT){
+			cout << "Doing QCDScatter with HLT cuts" << endl;
+			folder = "QCDScatter_mu_pthatmin20_Mu17_Mu8_bare/";
+			file = "QCDScatter_mu_pthatmin20_Mu17_Mu8_";
+			nFiles = 11;
 		}
 	}
 
