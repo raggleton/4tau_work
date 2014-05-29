@@ -25,8 +25,8 @@ namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 
 /**
- * This header contains all the code relating to the program options for Delphes analysis scripts
- * (ie adding of ROOT files for analysis)
+ * This header contains all the code relating to the program options 
+ * for Delphes analysis scripts (ie adding of ROOT files for analysis)
  *
  * Robin Aggleton 2014
  */
@@ -35,13 +35,13 @@ namespace po = boost::program_options;
 // Note convention of all lower case
 enum MCsource { signal, qcdb, qcdc, qcdscatter };
 
-// Have to define <<, and >> ops to get enum to work with boost::lexical_cast and program_options,
-// and also so we can cout the enum easily
-std::ostream& operator<<(std::ostream& out, const MCsource value){
+// Have to define << and >> ops to get enum to work with boost::lexical_cast 
+// and program_options, and also so we can cout the enum easily
+std::ostream& operator<<(std::ostream& out, const MCsource value) {
 
     const char* s = 0;
 #define PROCESS_VAL(p) case(p): s = #p; break;
-    switch(value){
+    switch(value) {
         PROCESS_VAL(signal);     
         PROCESS_VAL(qcdb);     
         PROCESS_VAL(qcdc);
@@ -55,7 +55,7 @@ std::ostream& operator<<(std::ostream& out, const MCsource value){
 // Must be a way to improve this using static_cast
 std::istream & operator>>(std::istream & in, MCsource & value) {
   std::string token;
-  if (in >> token){
+  if (in >> token) {
   	if (token == "signal")
   		value = signal;
   	else if (token == "qcdb")
@@ -77,10 +77,10 @@ class ProgramOpts
 {
 	private:
 		MCsource source; // do signal or qcd(b)(c)(scatter)
-		bool doSignal; // do signal, or not signal (some analysis parts are signal only)
+		bool doSignal; // do signal, or not signal (some parts are signal only)
 		bool doMu; // for QCDb - either inclusive decays or mu only decays - DEPRECIATED
 		bool swapMuRandomly; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-		bool doHLT; // whether to use MC that has HLT cuts already applied or not.
+		bool doHLT; // whether to use MC that has HLT cuts already applied.
 		int  nEvents; // how many events to run over, -1 = all events
 
 	public: 
@@ -97,10 +97,14 @@ class ProgramOpts
 			po::options_description desc("Allowed options");
 			desc.add_options()
 				("help", "produce help message")
-				("source", po::value<MCsource>(&source), "Process to run: signal [default], qcdb, qcdc, qcdscatter")
-				("swapMuRandomly", po::value<bool>(&swapMuRandomly), "TRUE [default] - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
-				("doHLT", po::value<bool>(&doHLT), "TRUE [default] - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
-				("n", po::value<int>(&nEvents), "Number of events to run over. -1 for all [defualt]")
+				("source", po::value<MCsource>(&source), 
+					"Process to run: signal [default], qcdb, qcdc, qcdscatter")
+				("swapMuRandomly", po::value<bool>(&swapMuRandomly), 
+					"TRUE [default] - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
+				("doHLT", po::value<bool>(&doHLT), 
+					"TRUE [default] - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
+				("nnumber,N", po::value<int>(&nEvents), 
+					"Number of events to run over. -1 for all [defualt]")
 			;
 
 			po::variables_map vm;
@@ -133,7 +137,7 @@ class ProgramOpts
 			// Defaults are set above
 			if (vm.count("source")) {
 			    source = vm["source"].as<MCsource>();
-			    if (source == signal){ 
+			    if (source == signal) { 
 			    	doSignal = true;
 			    } else {
 			    	doSignal = false;
@@ -166,7 +170,7 @@ class ProgramOpts
 		int  getNEvents() { return nEvents; }
 		
 		// This should really be in a separate .cc file...
-		void printProgramOptions(){
+		void printProgramOptions() {
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 			cout << "PROGRAM OPTIONS" << endl;
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
@@ -193,31 +197,23 @@ class ProgramOpts
 /**
  * Add Delphes ntuples to TChain so we can process them in one go
  * @param chain    Pointer to TChain to add files to
- * @param pOpts    Pointer to ProgramOpts object that holds all user determined flags 
+ * @param pOpts    Pointer to ProgramOpts object that holds all user flags 
  * (makes it easy to change avaiable flags without updating all programs individually!)
  */
-void addInputFiles(TChain* chain, ProgramOpts* pOpts){
+void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	// Create chain of root trees
 	int nFiles = 0; // number of files to be added
-	std::string folder = ""; // folder & file stem, expect files to be named like myFile_i.root, where i = 1 -> nFiles
-	std::string file = ""; // folder & file stem, expect files to be named like myFile_i.root, where i = 1 -> nFiles
+	std::string folder = ""; // folder & file stem 
+	std::string file = ""; // folder & file stem 
+	// expect files to be named like myFile_i.root, where i = 1 -> nFiles
 	
 	MCsource source = pOpts->getSource();
 	bool doMu       = pOpts->getQCDMu();
 	bool doHLT      = pOpts->getHLT();
 
-	if (source == signal){
-		if (doHLT){
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_10_HLT_bare.root");
+	if (source == signal) {
+		if (doHLT) {
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_HLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_2_HLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_3_HLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_4_HLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_5_HLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_6_HLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_7_HLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_8_HLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_HLT_bare.root");
 			cout << "Doing signal with HLT cuts" << endl;
 			// folder = "Signal_1prong_500K_TauPythia_bare/";
 			// file = "signal_1prong_500K_TauPythia_HLT_";
@@ -226,24 +222,15 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts){
 			nFiles = 20;
 			// nFiles = 1;
 		} else { 
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_10_NoHLT_bare.root");
 			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_NoHLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_2_NoHLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_3_NoHLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_4_NoHLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_5_NoHLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_6_NoHLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_7_NoHLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_8_NoHLT_bare.root");
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_9_NoHLT_bare.root");
 			cout << "Doing signal without HLT cuts" << endl;
 			folder = "Signal_1prong_500K_bare/";
 			file = "signal_1prong_500K_NoHLT_";
 			nFiles = 20;
 		}
 	} else if (source == qcdb) {
-		if (doMu){
-			if(doHLT){
+		if (doMu) {
+			if(doHLT) {
 				cout << "Doing QCDb_mu with HLT cuts" << endl;
 				folder = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/";
 				file = "QCDb_mu_pthatmin20_Mu17_Mu8_";
@@ -252,8 +239,6 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts){
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
 				folder = "QCDb_mu_pthatmin20_bare/";
 				file = "QCDb_mu_pthatmin20_";
-				// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_94.root");
-				// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_93.root");
 				// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_92.root");
 				nFiles = 94;
 			}
@@ -263,15 +248,15 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts){
 			file = "QCDb_";
 			nFiles = 10;
 		}
-	} else if (source == qcdc){
-		if(doHLT){
+	} else if (source == qcdc) {
+		if(doHLT) {
 			cout << "Doing QCDc_mu with HLT cuts" << endl;
 			folder = "QCDc_mu_pthatmin20_Mu17_Mu8_bare/";
 			file = "QCDc_mu_pthatmin20_Mu17_Mu8_";
 			nFiles = 200;
 		}
-	} else if (source == qcdscatter){
-		if(doHLT){
+	} else if (source == qcdscatter) {
+		if(doHLT) {
 			cout << "Doing QCDScatter with HLT cuts" << endl;
 			folder = "QCDScatter_mu_pthatmin20_Mu17_Mu8_bare/";
 			file = "QCDScatter_mu_pthatmin20_Mu17_Mu8_";
@@ -281,12 +266,13 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts){
 
 	// Auto-loop over ROOT files in folder using Boost::Filesystem
 	
-
+	// TODO
 
 
 	// For manually looping over files in a folder from 1 to nFiles (inclusive)	
-	for (int i = 1; i <= nFiles; i ++){
-		cout << "Adding " << folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
+	for (int i = 1; i <= nFiles; i ++) {
+		cout << "Adding " << 
+			folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
 		chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
 	}
 }
