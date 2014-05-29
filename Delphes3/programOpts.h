@@ -1,3 +1,6 @@
+#ifndef PROGRAMOPTS_H
+#define PROGRAMOPTS_H
+
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -73,7 +76,7 @@ std::istream & operator>>(std::istream & in, MCsource & value) {
 class ProgramOpts
 {
 	private:
-		MCsource source; // do signal or qcd(b)(c)
+		MCsource source; // do signal or qcd(b)(c)(scatter)
 		bool doSignal; // do signal, or not signal (some analysis parts are signal only)
 		bool doMu; // for QCDb - either inclusive decays or mu only decays - DEPRECIATED
 		bool swapMuRandomly; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
@@ -287,3 +290,5 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts){
 		chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
 	}
 }
+
+#endif

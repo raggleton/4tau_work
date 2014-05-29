@@ -1,3 +1,6 @@
+#ifndef COMMONFUNCTIONS_H
+#define COMMONFUNCTIONS_H
+
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -456,3 +459,5 @@ void drawMassPlot(std::string title,
 	delete pad1;
 	delete pad2;
 }
+
+#endif
