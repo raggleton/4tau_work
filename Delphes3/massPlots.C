@@ -13,11 +13,18 @@ using std::endl;
 // 	return 5;
 // }
 
+/**
+ * These checks to see if muA and muB satisfy all muon condtions
+ * apart from pT. 
+ * @param  muA Higher pT muon
+ * @param  muB Lesser pT muon
+ * @return    TRUE if muA and muB pass cuts, FALSE otherwise
+ */
 bool checkMuons(GenParticle* muA, GenParticle* muB){
 	if ((muA->Charge == muB->Charge)
 		&& (fabs(muA->Eta) < 2.1)
 		&& (fabs(muB->Eta) < 2.4)
-		&& ((muA->P4().DeltaR(muB->P4())) > 2.)
+		&& ((muA->P4().DeltaR(muB->P4())) > 1.)
 		){
 		return true;
 	} else {
@@ -168,10 +175,10 @@ void massPlots(int argc, char* argv[])
 
 		if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons! (alhtough pointless for HLT samples)
 
-		//////////////////////////////////////////////////////////////////////
-		// Now, get the two highest pT muons in the event, store their pT //
-		// and pointers to the GenParticles                                 //
-		//////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////
+		// Now, get the two highest pT muons in the event that pass selection, // 
+		// store pointers to the GenParticles and 4-momenta                    //
+		/////////////////////////////////////////////////////////////////////////
 		
 		// Track *candTk(nullptr);
 
@@ -776,7 +783,7 @@ void massPlots(int argc, char* argv[])
 		app += "_NoHLT";
 	}
 
-	app += "_dR2";
+	app += "_dR1";
 
 	// Get directory that input file was in - put plots in there
 	std::string directory = getDirectory(chain.GetFile());
