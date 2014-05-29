@@ -27,8 +27,15 @@ alias ll='ls -l --color=auto'
 alias ls='ls --color=auto'
 alias lt='ls -lrth'
 alias mc='. /usr/libexec/mc/mc-wrapper.sh'
-alias qstatme='qstat -u ra12451'
+alias qstatme='qstat -u ra12451; getNumberInQueue '
+
 alias vi='vim'
-alias vsqueue='qstat | grep veryshort && echo '\''TOTAL: '\'' 545'
+#alias vsqueue='qstat | grep veryshort && echo '\''TOTAL: '\'' DAMMIT'
+alias vsqueue='qstat | grep veryshort | tee  >(wc -l)'
 alias which='alias | /usr/bin/which --tty-only --read-alias --show-dot --show-tilde'
 
+
+getNumberInQueue(){
+	# Put as function, not alias, because bash is a pile of wank and won't parse it correctly without much work
+	qstat -u ra12451 | awk 'BEGIN{nR=0; nQ=0; nC=0;}{if($10=="R") nR++; else if($10=="Q") nQ++; else if($10=="C") nC++;}END{print "Jobs queueing: ",nQ; print "Jobs running: ",nR; print "Jobs completed: ", nC;}'
+}
