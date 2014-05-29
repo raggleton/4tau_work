@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <type_traits>
 
 // ROOT headers
 #include "TStyle.h"
@@ -314,13 +315,14 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 
 /**
  * Draw a histogram (1D or 2D!) and save it to PDF, as <directory>/<filename>_<delphes setup from <directory>>_<app>.pdf
- * @param h         Hist to draw (TObject* to handle THStacks, which don't inherit from TH1)
+ * @param h         Hist to draw. Since THStack and TH1 don't share SetMarkerSize method, need to check object type. Suppose I should use specialisation here instead...
  * @param drawOpt   Options for drawing hist
  * @param filename  Main filename (e.g. Mu1Pt)
  * @param directory Directory for output PDF
  * @param app       Appendage eg muRand, sig
  */
-void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std::string directory, std::string app, bool drawLogY = false){
+template<typename T>
+void drawHistAndSave(T* h, std::string drawOpt, std::string filename, std::string directory, std::string app, bool drawLogY = false){
 	gStyle->SetOptStat("ne"); // display name and # entries only
 	gStyle->SetPaintTextFormat(".3g"); // set text format to be printed
 	
@@ -330,9 +332,11 @@ void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std:
 	if (drawLogY) c.SetLogy();
 	
 	// For plots drawing text values of bins, make text bigger
-	// if (drawOpt.find("TEXT") != std::string::npos){
-		// h->SetMarkerSize(1.5*h->GetMarkerSize);
-	// }
+	if (!std::is_same<T, THStack>::value){
+		if (drawOpt.find("TEXT") != std::string::npos){
+			h->SetMarkerSize(1.5*h->GetMarkerSize());
+		}
+	}
 
 	h->Draw(drawOpt.c_str());
 
