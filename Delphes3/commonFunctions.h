@@ -328,6 +328,12 @@ void drawHistAndSave(TObject* h, std::string drawOpt, std::string filename, std:
 
 	TCanvas c;
 	if (drawLogY) c.SetLogy();
+	
+	// For plots drawing text values of bins, make text bigger
+	// if (drawOpt.find("TEXT") != std::string::npos){
+		// h->SetMarkerSize(1.5*h->GetMarkerSize);
+	// }
+
 	h->Draw(drawOpt.c_str());
 
 	// To get the delphes config used, which is always the last part of the directory name
