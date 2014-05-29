@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
   int nCodes = cCodes.size();
 
   if (muOnly){
-    // For B hadrons to decay weakly to muons or taus
+    // For D hadrons to decay weakly to muons or taus
     for (int iC = 0; iC < nCodes; ++iC) {
       // Check PDGID is in PYTHIA
       if(! pythia.particleData.isParticle(cCodes[iC])) continue;
