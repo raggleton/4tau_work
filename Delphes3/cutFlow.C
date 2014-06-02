@@ -10,7 +10,7 @@ using std::endl;
 
 // For sorting track vectors by pT
 void sortTrackVector(std::vector<Track*>& tk){
-	std::sort(tk.begin(), tk.end(), sortTracksByPT);
+	std::sort(tk.begin(), tk.end(), sortByPT<Track>);
 }
 
 
