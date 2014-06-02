@@ -24,7 +24,7 @@ bool checkMuons(GenParticle* muA, GenParticle* muB){
 	if ((muA->Charge == muB->Charge)
 		&& (fabs(muA->Eta) < 2.1)
 		&& (fabs(muB->Eta) < 2.4)
-		&& ((muA->P4().DeltaR(muB->P4())) > 1.)
+		&& ((muA->P4().DeltaR(muB->P4())) > 2.)
 		){
 		return true;
 	} else {
@@ -211,7 +211,7 @@ void massPlots(int argc, char* argv[])
 		std::vector<GenParticle*>::iterator muA = muons17toInf.begin();
 		while(!foundMuonPair && muA != muons17toInf.end()){
 			
-			// Need to make pairs among the 17toInf vector as well, if size >= 2
+			// Need to make pairs among the 17toInf vector also, if size >= 2
 			auto muB = muA;
 			muB++;
 			for (; muB != muA, muB != muons17toInf.end(); muB++) {
@@ -767,8 +767,8 @@ void massPlots(int argc, char* argv[])
 	/////////////////
 	// PLOT THINGS //
 	/////////////////
-	TCanvas c;
 	std::string app(""); // text to append on end of plot filenames
+
 	if (doSignal) {
 		app = "sig";
 	} else {
@@ -783,7 +783,7 @@ void massPlots(int argc, char* argv[])
 		app += "_NoHLT";
 	}
 
-	app += "_dR1";
+	app += "_dR2";
 
 	// Get directory that input file was in - put plots in there
 	std::string directory = getDirectory(chain.GetFile());
@@ -820,8 +820,8 @@ void massPlots(int argc, char* argv[])
 	drawHistAndSave(histM1_side_1to2p5, "HISTE", "M1_side_1to2p5", directory, app);
 	drawHistAndSave(histM2_side_1to2p5, "HISTE", "M2_side_1to2p5", directory, app);
 	drawHistAndSave(histM_side_1to2p5, "HISTE", "M_side_1to2p5", directory, app);
-	drawHistAndSave(histM1vsM2_side_1to2p5, "colz","M1vsM2_side_1to2p5", directory, app);
-	drawHistAndSave(histM1timesM1_side_1to2p5, "colz","M1timesM1_side_1to2p5", directory, app);
+	drawHistAndSave(histM1vsM2_side_1to2p5, "colzTEXTE","M1vsM2_side_1to2p5", directory, app);
+	drawHistAndSave(histM1timesM1_side_1to2p5, "colzTEXTE","M1timesM1_side_1to2p5", directory, app);
 	drawHistAndSave(histM1vsM2_correlations_side_1to2p5, "colzTEXTE","M1vsM2_correlations_side_1to2p5", directory, app);
 	drawHistAndSave(histCorr1D_side_1to2p5, "e1", "Correlations1D_side_1to2p5", directory, app);
 
@@ -829,8 +829,8 @@ void massPlots(int argc, char* argv[])
 	drawHistAndSave(histM1_side_1to1p5, "HISTE", "M1_side_1to1p5", directory, app);
 	drawHistAndSave(histM2_side_1to1p5, "HISTE", "M2_side_1to1p5", directory, app);
 	drawHistAndSave(histM_side_1to1p5, "HISTE", "M_side_1to1p5", directory, app);
-	drawHistAndSave(histM1vsM2_side_1to1p5, "colz","M1vsM2_side_1to1p5", directory, app);
-	drawHistAndSave(histM1timesM1_side_1to1p5, "colz","M1timesM1_side_1to1p5", directory, app);
+	drawHistAndSave(histM1vsM2_side_1to1p5, "colzTEXTE","M1vsM2_side_1to1p5", directory, app);
+	drawHistAndSave(histM1timesM1_side_1to1p5, "colzTEXTE","M1timesM1_side_1to1p5", directory, app);
 	drawHistAndSave(histM1vsM2_correlations_side_1to1p5, "colzTEXTE","M1vsM2_correlations_side_1to1p5", directory, app);
 	drawHistAndSave(histCorr1D_side_1to1p5, "e1", "Correlations1D_side_1to1p5", directory, app);
 
@@ -840,8 +840,8 @@ void massPlots(int argc, char* argv[])
 	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
 	drawHistAndSave(histM2_rebin, "HISTE", "M2_rebin", directory, app);
 	drawHistAndSave(histM, "HISTE", "M", directory, app);
-	drawHistAndSave(histM1vsM2, "colz","M1vsM2", directory, app);
-	drawHistAndSave(histM1timesM1, "colz","M1timesM1", directory, app);
+	drawHistAndSave(histM1vsM2, "colzTEXTE","M1vsM2", directory, app);
+	drawHistAndSave(histM1timesM1, "colzTEXTE","M1timesM1", directory, app);
 	drawHistAndSave(histM1vsM2_correlations, "colzTEXTE","M1vsM2_correlations", directory, app);
 	drawHistAndSave(histCorr1D, "e1", "Correlations1D", directory, app);
 

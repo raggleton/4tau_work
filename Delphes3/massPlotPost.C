@@ -1,6 +1,7 @@
-// // ROOT headers
-#include "TStyle.h"
-
+/**
+ * This just post-processes the output from massPlots program, to combine with Alexei's reuslts
+ * and other stuff
+ */
 void massPlotPost() {
 	gStyle->SetOptStat(""); // DOES NOTHING AS HIST ALREADY HAS OPT STATS!!!!
 	gStyle->SetLegendBorderSize(0);
