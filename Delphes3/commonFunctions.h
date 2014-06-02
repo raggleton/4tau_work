@@ -196,6 +196,7 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 	bool foundOne = false;
 
 	while (curr.size()>0) { // if 0 we haven't gone through all the particles
+		// for (unsigned currElem1 = 0; currElem1 < curr.size(); currElem1++) {
 		for (unsigned currElem1 = 0; currElem1 < curr.size(); currElem1++) {
 			
 			// Check 1 - is this already in curr?
@@ -210,8 +211,9 @@ GenParticle* getChargedObject(TClonesArray* branchAll, GenParticle* tau) {
 
 			// Check 2 - is this already in history?
 			if (!alreadyDone) {
-				for (unsigned historyElem = 0; historyElem < history.size(); historyElem++) {
-					if ((curr[currElem1] == history[historyElem]) && (historyElem!=0)) {
+				// for (unsigned historyElem = 0; historyElem < history.size(); historyElem++) {
+				for (auto historyElem : history) {
+					if ((curr[currElem1] == historyElem) && (historyElem!=history[0])) {
 						alreadyDone = true;
 					}
 				}
@@ -405,7 +407,7 @@ void drawMassPlot(std::string title,
 
 	// Essential to ensure that pad2 isn't drawn INSIDE pad1	
 	c.cd();
-
+	// Now do the ratio plot below
 	TPad* pad2 = new TPad("pad2","",0,0,1,0.30);
 	pad2->SetBottomMargin(0.25);
 	pad2->SetLeftMargin(pad1->GetLeftMargin());
@@ -415,30 +417,31 @@ void drawMassPlot(std::string title,
 	pad2->Draw();
 	pad2->cd();
 
-	TH1D* histM1_1to2_copy   = (TH1D*)histM1_1to2->Clone();
-	TH1D* histM1_2to3_copy   = (TH1D*)histM1_2to3->Clone();
+	TH1D* histM1_1to2_copy = (TH1D*)histM1_1to2->Clone();
+	TH1D* histM1_2to3_copy = (TH1D*)histM1_2to3->Clone();
 	TH1D* histM1_3toInf_copy = (TH1D*)histM1_3toInf->Clone();
 
 	histM1_1to2_copy->Divide(histM1_0to1);
 	histM1_2to3_copy->Divide(histM1_0to1);
 	histM1_3toInf_copy->Divide(histM1_0to1);
 
-	histM1_1to2_copy->SetTitle("");
-	histM1_1to2_copy->SetXTitle(histM1_1to2->GetXaxis()->GetTitle());
-	histM1_1to2_copy->SetYTitle("#frac{i^{th} m_{2} bin}{1^{st} m_{2} bin}");
-	histM1_1to2_copy->GetXaxis()->SetTitleSize(0.1);
-	histM1_1to2_copy->GetXaxis()->SetTitleOffset(0.9);
-	histM1_1to2_copy->GetXaxis()->SetLabelSize(0.08);
+	THStack hist_ratios("hRatios","");
+	hist_ratios.Add(histM1_1to2_copy);
+	hist_ratios.Add(histM1_2to3_copy);
+	hist_ratios.Add(histM1_3toInf_copy);
+	hist_ratios.Draw("ep"); // Need to draw *before* using GetHistogram()
 
-	histM1_1to2_copy->GetYaxis()->CenterTitle(kTRUE);
-	histM1_1to2_copy->GetYaxis()->SetTitleSize(0.1);
-	histM1_1to2_copy->GetYaxis()->SetTitleOffset(0.6);
-	// histM1_1to2_copy->GetYaxis()->SetNdivisions(3,5,0);
-	histM1_1to2_copy->GetYaxis()->SetLabelSize(0.08);
+	(hist_ratios.GetHistogram())->SetXTitle(histM1_1to2->GetXaxis()->GetTitle());
+	(hist_ratios.GetHistogram())->GetXaxis()->SetTitleSize(0.1);
+	(hist_ratios.GetHistogram())->GetXaxis()->SetTitleOffset(0.9);
+	(hist_ratios.GetHistogram())->GetXaxis()->SetLabelSize(0.08);
 
-	histM1_1to2_copy->Draw("ep");
-	histM1_2to3_copy->Draw("epSAME");
-	histM1_3toInf_copy->Draw("epSAME");
+	(hist_ratios.GetHistogram())->SetYTitle("#frac{i^{th} m_{2} bin}{1^{st} m_{2} bin}");
+	(hist_ratios.GetHistogram())->GetYaxis()->CenterTitle(kTRUE);
+	(hist_ratios.GetHistogram())->GetYaxis()->SetTitleSize(0.1);
+	(hist_ratios.GetHistogram())->GetYaxis()->SetTitleOffset(0.6);
+	(hist_ratios.GetHistogram())->GetYaxis()->SetLabelSize(0.08);
+	hist_ratios.Draw("ep");
 
 	// Draw dotted line at 1 on ratio plot
 	double min = histM1_0to1->GetBinLowEdge(1);
