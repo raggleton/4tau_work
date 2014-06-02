@@ -103,8 +103,8 @@ class ProgramOpts
 					"TRUE [default] - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
 				("doHLT", po::value<bool>(&doHLT), 
 					"TRUE [default] - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
-				("nnumber,N", po::value<int>(&nEvents), 
-					"Number of events to run over. -1 for all [defualt]")
+				("number,n", po::value<int>(&nEvents), 
+					"Number of events to run over. -1 for all [default]")
 			;
 
 			po::variables_map vm;
