@@ -82,6 +82,7 @@ class ProgramOpts
 		bool swapMuRandomly; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 		bool doHLT; // whether to use MC that has HLT cuts already applied.
 		int  nEvents; // how many events to run over, -1 = all events
+		bool verbose; // output debugging info to screen
 
 	public: 
 		// constructor, parses input
@@ -92,7 +93,8 @@ class ProgramOpts
 			doMu(true),
 			swapMuRandomly(true),
 			doHLT(true),
-			nEvents(-1)
+			nEvents(-1),
+			verbose(false)
 		{
 			po::options_description desc("Allowed options");
 			desc.add_options()
@@ -105,6 +107,7 @@ class ProgramOpts
 					"TRUE [default] - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
 				("number,n", po::value<int>(&nEvents), 
 					"Number of events to run over. -1 for all [default]")
+				("verbose,v", "output debugging statements")
 			;
 
 			po::variables_map vm;
@@ -127,6 +130,10 @@ class ProgramOpts
 			if (vm.count("help")) {
 			    cout << desc << endl;
 			    exit(1); // NOT ELEGANT - DO BETTER!
+			}
+
+			if (vm.count("verbose")) {
+				verbose = true;
 			}
 
 			// Process program options
@@ -168,7 +175,8 @@ class ProgramOpts
 		bool getMuOrdering() { return swapMuRandomly; }
 		bool getHLT() { return doHLT; }
 		int  getNEvents() { return nEvents; }
-		
+		bool getVerbose() { return verbose; }
+
 		// This should really be in a separate .cc file...
 		void printProgramOptions() {
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
