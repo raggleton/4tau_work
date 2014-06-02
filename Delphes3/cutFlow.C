@@ -1,4 +1,5 @@
 #include "commonFunctions.h"
+#include "cuts.h"
 
 using std::cout;
 using std::endl;
@@ -13,7 +14,6 @@ void sortTrackVector(std::vector<Track*>& tk){
 	std::sort(tk.begin(), tk.end(), sortByPT<Track>);
 }
 
-
 void cutFlow(int argc, char* argv[])
 {
 	TH1::SetDefaultSumw2();
@@ -27,7 +27,8 @@ void cutFlow(int argc, char* argv[])
 	// bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	// bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
-	
+	bool DEBUG = pOpts.getVerbose();
+
 	// Create chain of root trees
 	TChain chain("Delphes");
 	addInputFiles(&chain, &pOpts);
@@ -53,7 +54,7 @@ void cutFlow(int argc, char* argv[])
 
 	bool stop = false; // used to stop the loop, for debugging/testing
 
-	std::vector<int> cutCount(9); // hold # evts passing cut
+	std::vector<int> cutCount(8); // hold # evts passing cut
 	std::vector<int>::iterator it = cutCount.begin();
 
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
@@ -61,10 +62,13 @@ void cutFlow(int argc, char* argv[])
 		// Load selected branches with data from specified event
 		treeReader->ReadEntry(entry);
 
-		// cout << "*** Event" << endl;
+		if (DEBUG) cout << "*** Event" << endl;
 		it = cutCount.begin();
 
-		if (branchGenMuons->GetEntries() >= 2) (*it)++; else continue; // skip if <2 muons!
+		if (DEBUG) cout << "Testing if >=2 muons" << endl;
+		if (branchGenMuons->GetEntries() >= 2) {
+			(*it)++; 
+		} else continue; // skip if <2 muons!
 		it++;
 
 		{
@@ -178,64 +182,93 @@ void cutFlow(int argc, char* argv[])
 		// and pointers to the GenParticles                                 //
 		//////////////////////////////////////////////////////////////////////
 		
-		GenParticle *cand(nullptr),*mu1(nullptr), *mu2(nullptr);
-
-		double mu1PT(0.), mu2PT(0.);
-		// Get highest pT muon
+		// Fill vectors with muons, based on pT
+		std::vector<GenParticle*> muons10to17;
+		std::vector<GenParticle*> muons17toInf;
 		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
-			cand = (GenParticle*) branchGenMuons->At(i);
-			if (cand->PT > mu1PT) {
-				mu1 = cand;
-				mu1PT = cand->PT;
-			}
-		}
-		// Get 2nd highest pT muon
-		for(int j = 0; j < branchGenMuons->GetEntries(); j++){
-			cand = (GenParticle*) branchGenMuons->At(j);
-			if ((cand->PT > mu2PT) && (cand->PT != mu1->PT)) {
-				mu2 = cand;
-				mu2PT = cand->PT;
+			GenParticle* cand = (GenParticle*) branchGenMuons->At(i);
+			if (cand->PT > 17) {
+				muons17toInf.push_back(cand);
+			} else if (cand->PT > 10) {
+				muons10to17.push_back(cand);
 			}
 		}
 
-		// Now randomly swap mu1 - mu2 if desired
-		GenParticle *origMu1(nullptr), *origMu2(nullptr);
-		origMu1 = mu1;
-		origMu2 = mu2;
-		if (swapMuRandomly){
-			double randNum = (double)rand() / RAND_MAX;
-			// histRand->Fill(randNum);
-			if (randNum > 0.5){
-				mu1 = origMu2;
-				mu2 = origMu1;
-			}
-		}
+		// Check to see if we can skip the event if not enough muons
+		// if (!(muons17toInf.size() >= 1 && (muons17toInf.size() + muons10to17.size()) >= 2)) continue;
 
-		TLorentzVector mu1Mom, mu2Mom;
-		mu1Mom = mu1->P4();
-		mu2Mom = mu2->P4();
+		// Sort both vectors by descending pT
+		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<GenParticle>);
+		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<GenParticle>);
+
+		// // Now randomly swap mu1 - mu2 if desired
+		// GenParticle *origMu1(nullptr), *origMu2(nullptr);
+		// origMu1 = mu1;
+		// origMu2 = mu2;
+		// if (swapMuRandomly){
+		// 	double randNum = (double)rand() / RAND_MAX;
+		// 	// histRand->Fill(randNum);
+		// 	if (randNum > 0.5){
+		// 		mu1 = origMu2;
+		// 		mu2 = origMu1;
+		// 	}
+		// }
 
 		////////////////////
 		// Muon selection //
 		////////////////////
-
-		if (mu1PT > 17.) (*it)++; else continue;
+		if (DEBUG) cout << "Testing if mu w pT > 17" << endl;
+		if (muons17toInf.size() > 0) (*it)++; else continue;
 		it++;
 
-		if (mu2PT > 10.) (*it)++; else continue;
+		if (DEBUG) cout << "Testing if mu w pT > 10" << endl;
+		if (muons10to17.size() > 0 || muons17toInf.size() > 1) (*it)++; else continue;
 		it++;
 
-		if ((mu1->Charge) == (mu2->Charge)) (*it)++; else continue;
+		// Need to be a bit clever here. It could be that there are more than 
+		// 2 muons that satisfy the pT conditions, that aren't the 2 most 
+		// energetic muons, mu1 and mu2 above. We really need to loop through 
+		// all pairs to find a suitable pair that meet the criteria
+
+
+		if (DEBUG) cout << "Testing if SS" << endl;
+		std::pair<GenParticle*, GenParticle*> p = testMuons(muons17toInf,
+															muons10to17,
+															&checkMuonsPTSS);
+		if (p.first && p.second) {
+			if (DEBUG) cout << "p.first not null" << endl;
+			(*it)++;
+		} else continue;
 		it++;
 
-		if (fabs(origMu1->Eta) < 2.1) (*it)++; else continue;
+		if (DEBUG) cout << "Testing if eta OK" << endl;
+		p = testMuons(muons17toInf,
+					  muons10to17,
+					  &checkMuonsPTSSEta);
+
+		if (p.first && p.second) {
+			if (DEBUG) cout << "p.first not null" << endl;
+			(*it)++; 
+		} else continue;
 		it++;
 
-		if (fabs(origMu2->Eta) < 2.4) (*it)++; else continue;
+		if (DEBUG) cout << "Testing if dR OK" << endl;
+		p = testMuons(muons17toInf,
+					  muons10to17,
+					  &checkMuonsAllSignal);
+
+		if (p.first && p.second) {
+			if (DEBUG) cout << "p.first not null" << endl;
+			(*it)++; 
+		} else continue;
 		it++;
 
-		if ((mu1Mom.DeltaR(mu2Mom)) > 2.) (*it)++; else continue;
-		it++;
+		GenParticle* mu1 = p.first;
+		GenParticle* mu2 = p.second;
+
+		TLorentzVector mu1Mom, mu2Mom;
+		mu1Mom = mu1->P4();
+		mu2Mom = mu2->P4();
 
 		/////////////////////////////////
 		// Look at tracks around muons //
@@ -315,8 +348,8 @@ void cutFlow(int argc, char* argv[])
 	} // end of event loop
 
 	// Print out cuts
-	for (unsigned a = 0; a < cutCount.size(); a++){
-		std::cout << a << ": " << cutCount[a] << std::endl;
+	for (auto a : cutCount){
+		std::cout << a << std::endl;
 	}
 	
 }
