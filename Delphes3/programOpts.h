@@ -96,10 +96,10 @@ class ProgramOpts
 			nEvents(-1),
 			verbose(false)
 		{
-			po::options_description desc("Allowed options");
+			po::options_description desc("\nAllowed options");
 			desc.add_options()
-				("help", "produce help message")
-				("source", po::value<MCsource>(&source), 
+				("help,h", "Produce help message")
+				("source,s", po::value<MCsource>(&source), 
 					"Process to run: signal [default], qcdb, qcdc, qcdscatter")
 				("swapMuRandomly", po::value<bool>(&swapMuRandomly), 
 					"TRUE [default] - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
@@ -107,7 +107,7 @@ class ProgramOpts
 					"TRUE [default] - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
 				("number,n", po::value<int>(&nEvents), 
 					"Number of events to run over. -1 for all [default]")
-				("verbose,v", "output debugging statements")
+				("verbose,v", "Output debugging statements")
 			;
 
 			po::variables_map vm;
