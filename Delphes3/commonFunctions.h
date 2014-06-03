@@ -309,7 +309,7 @@ void drawHistAndSave(T* h,
 			h->SetMarkerSize(1.5*h->GetMarkerSize());
 		} else {
 			h->SetMarkerStyle(20);
-			h->SetMarkerColor(kBlue);
+			h->SetMarkerColor(h->GetLineColor());
 		}
 	}
 
