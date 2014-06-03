@@ -50,7 +50,7 @@ void massPlots(int argc, char* argv[])
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 
-	double deltaR = 1; // dR(mu-mu) value to use
+	double deltaR = 2; // dR(mu-mu) value to use
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -685,7 +685,7 @@ void massPlots(int argc, char* argv[])
 										histM1_side_1to2p5->GetXaxis()->GetBinLowEdge(histM1_side_1to2p5->GetNbinsX()+1));
 	histM_side_1to2p5->Add(histM1_side_1to2p5);
 	histM_side_1to2p5->Add(histM2_side_1to2p5);
-	histM_side_1to2p5->Rebin(nBinsX, "hM_side_1to2p5", &massBins[0]);
+	histM_side_1to2p5 = (TH1D*) histM_side_1to2p5->Rebin(nBinsX, "hM_side_1to2p5", &massBins[0]);
 	
 	TH1D* histM_side_1to1p5 = new TH1D("hM_side_1to1p5","m(#mu-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu-tk) [GeV];A.U.",										
 										histM1_side_1to1p5->GetNbinsX(), 
@@ -694,11 +694,10 @@ void massPlots(int argc, char* argv[])
 
 	histM_side_1to1p5->Add(histM1_side_1to1p5);
 	histM_side_1to1p5->Add(histM2_side_1to1p5);
-	histM_side_1to1p5->Rebin(nBinsX, "hM_side_1to1p5", &massBins[0]);
-
-	TH1D* histM = new TH1D("hM", "Inv. Mass of system, full selection; m(#mu-tk) [GeV];A.U.",nBinsX,&massBins[0]);
+	histM_side_1to1p5 = (TH1D*) histM_side_1to1p5->Rebin(nBinsX, "hM_side_1to1p5", &massBins[0]);
 	
-	// Rebin the M1 and M2 plots
+	// Rebin the M1 and M2 plots, add together
+	TH1D* histM = new TH1D("hM", "Inv. Mass of system, full selection; m(#mu-tk) [GeV];A.U.",nBinsX,&massBins[0]);
 	TH1D* histM1_rebin = (TH1D*) histM1->Rebin(nBinsX,"hM1_rebin",&massBins[0]);
 	TH1D* histM2_rebin = (TH1D*) histM2->Rebin(nBinsX,"hM2_rebin",&massBins[0]);
 	histM->Add(histM1_rebin);
