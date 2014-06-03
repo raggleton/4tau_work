@@ -1,5 +1,6 @@
 #include "commonFunctions.h"
 #include "classes/SortableObject.h"
+// #include "tdrstyle.C"
 
 using std::cout;
 using std::endl;
@@ -20,11 +21,11 @@ using std::endl;
  * @param  muB Lesser pT muon
  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
  */
-bool checkMuons(GenParticle* muA, GenParticle* muB){
+bool checkMuons(GenParticle* muA, GenParticle* muB, double deltaR){
 	if ((muA->Charge == muB->Charge)
 		&& (fabs(muA->Eta) < 2.1)
 		&& (fabs(muB->Eta) < 2.4)
-		&& ((muA->P4().DeltaR(muB->P4())) > 2.)
+		&& ((muA->P4().DeltaR(muB->P4())) > deltaR)
 		){
 		return true;
 	} else {
@@ -34,10 +35,13 @@ bool checkMuons(GenParticle* muA, GenParticle* muB){
 
 void massPlots(int argc, char* argv[])
 {
+	// setTDRStyle();
+
 	TH1::SetDefaultSumw2();
 
 	gSystem->Load("libDelphes");
 
+	// Get program options from user and store
 	ProgramOpts pOpts(argc, argv);
 
 	// MCsource source     = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
@@ -45,6 +49,8 @@ void massPlots(int argc, char* argv[])
 	// bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
+
+	double deltaR = 1; // dR(mu-mu) value to use
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -78,11 +84,11 @@ void massPlots(int argc, char* argv[])
 	TH1D* histM1                       = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}",10,0,10);
 	TH1D* histM2                       = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}",10,0,10);
 
-	TH1D* histM1_side_1to2p5           = new TH1D("hM1_side_1to2p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",nBinsX,&massBins[0]);
-	TH1D* histM2_side_1to2p5           = new TH1D("hM2_side_1to2p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",nBinsX,&massBins[0]);
+	TH1D* histM1_side_1to2p5           = new TH1D("hM1_side_1to2p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
+	TH1D* histM2_side_1to2p5           = new TH1D("hM2_side_1to2p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
 	
-	TH1D* histM1_side_1to1p5           = new TH1D("hM1_side_1to1p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",nBinsX,&massBins[0]);
-	TH1D* histM2_side_1to1p5           = new TH1D("hM2_side_1to1p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",nBinsX,&massBins[0]);
+	TH1D* histM1_side_1to1p5           = new TH1D("hM1_side_1to1p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
+	TH1D* histM2_side_1to1p5           = new TH1D("hM2_side_1to1p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
 
 	//------------------
 	// m1 in bins of m2
@@ -216,7 +222,7 @@ void massPlots(int argc, char* argv[])
 			muB++;
 			for (; muB != muA, muB != muons17toInf.end(); muB++) {
 				if (*muA != *muB){
-					if (checkMuons(*muA, *muB)) {
+					if (checkMuons(*muA, *muB, deltaR)) {
 						mu1 = *muA;
 						mu2 = *muB;
 						foundMuonPair = true;
@@ -227,7 +233,7 @@ void massPlots(int argc, char* argv[])
 
 			if(!foundMuonPair) {
 				for (auto muB : muons10to17) {
-					if (checkMuons(*muA, muB)) {
+					if (checkMuons(*muA, muB, deltaR)) {
 						mu1 = *muA;
 						mu2 = muB;
 						foundMuonPair = true;
@@ -672,16 +678,26 @@ void massPlots(int argc, char* argv[])
 		
 	} // end of event loop
 
-	// Create sum of m1 and m2 1D hists
-	TH1D* histM_side_1to2p5 = new TH1D("hM_side_1to2p5","m(#mu-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu-tk) [GeV];A.U.",nBinsX,&massBins[0]);
+	// Create sum of m1 and m2 1D hists and rebin
+	TH1D* histM_side_1to2p5 = new TH1D("hM_side_1to2p5","m(#mu-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu-tk) [GeV];A.U.",
+										histM1_side_1to2p5->GetNbinsX(), 
+										histM1_side_1to2p5->GetXaxis()->GetBinLowEdge(1), 
+										histM1_side_1to2p5->GetXaxis()->GetBinLowEdge(histM1_side_1to2p5->GetNbinsX()+1));
 	histM_side_1to2p5->Add(histM1_side_1to2p5);
 	histM_side_1to2p5->Add(histM2_side_1to2p5);
+	histM_side_1to2p5->Rebin(nBinsX, "hM_side_1to2p5", &massBins[0]);
 	
-	TH1D* histM_side_1to1p5 = new TH1D("hM_side_1to1p5","m(#mu-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu-tk) [GeV];A.U.",nBinsX,&massBins[0]);
+	TH1D* histM_side_1to1p5 = new TH1D("hM_side_1to1p5","m(#mu-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu-tk) [GeV];A.U.",										
+										histM1_side_1to1p5->GetNbinsX(), 
+										histM1_side_1to1p5->GetXaxis()->GetBinLowEdge(1), 
+										histM1_side_1to1p5->GetXaxis()->GetBinLowEdge(histM1_side_1to1p5->GetNbinsX()+1));
+
 	histM_side_1to1p5->Add(histM1_side_1to1p5);
 	histM_side_1to1p5->Add(histM2_side_1to1p5);
+	histM_side_1to1p5->Rebin(nBinsX, "hM_side_1to1p5", &massBins[0]);
 
 	TH1D* histM = new TH1D("hM", "Inv. Mass of system, full selection; m(#mu-tk) [GeV];A.U.",nBinsX,&massBins[0]);
+	
 	// Rebin the M1 and M2 plots
 	TH1D* histM1_rebin = (TH1D*) histM1->Rebin(nBinsX,"hM1_rebin",&massBins[0]);
 	TH1D* histM2_rebin = (TH1D*) histM2->Rebin(nBinsX,"hM2_rebin",&massBins[0]);
@@ -783,7 +799,8 @@ void massPlots(int argc, char* argv[])
 		app += "_NoHLT";
 	}
 
-	app += "_dR2";
+	app += "_dR";
+	app += boost::lexical_cast<std::string>(deltaR);
 
 	// Get directory that input file was in - put plots in there
 	std::string directory = getDirectory(chain.GetFile());
