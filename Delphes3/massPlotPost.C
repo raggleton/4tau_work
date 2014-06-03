@@ -18,6 +18,15 @@
  */
 
 // template<typename T>
+/**
+ * Rescale histogram so integral = unity
+ * @param h Pointer to histogram to be rescaled
+ */
+void normaliseHist(TH1* h) {
+	if (h->Integral() != 0) {
+		h->Scale(1./h->Integral());
+	}
+}
 
 std::string intToString(int n) {
 	ostringstream convert;
@@ -179,6 +188,9 @@ void massPlotPost() {
 		plots1D.push_back((TH1D*)files[i]->Get("hM_side_1to2p5"));
 	}
 
+	///////////////////////////////
+	// SET SCALING FACTORS HERE //
+	///////////////////////////////
 	std::vector<double> scalingFactors;
 	scalingFactors.push_back(1.); // QCDb
 	scalingFactors.push_back(1.); // QCDc
@@ -188,10 +200,12 @@ void massPlotPost() {
 	if (plots2D.size() != scalingFactors.size()) exit(-1);
 
 	// Create combination 2D plot (numerator)
-	TH2D* histM1vsM2_side_1to2p5 = (TH2D*)combinePlots(plots2D, scalingFactors);
+	TH2D* histM1vsM2_side_1to2p5 = (TH2D*) combinePlots(plots2D, scalingFactors);
+	normaliseHist(histM1vsM2_side_1to2p5);
 
 	// Create combination 1D sideband plot (denominator)
-	TH1D* histM_side_1to2p5 = (TH1D*)combinePlots(plots1D, scalingFactors);
+	TH1D* histM_side_1to2p5 = (TH1D*) combinePlots(plots1D, scalingFactors);
+	normaliseHist(histM_side_1to2p5);
 	
 	std::vector<double> massBins;
 	massBins.push_back(0);
