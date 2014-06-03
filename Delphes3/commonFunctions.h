@@ -21,6 +21,7 @@
 
 // My headers
 #include "programOpts.h"
+#include "tdrstyle.C"
 
 using std::cout;
 using std::endl;
@@ -292,9 +293,11 @@ void drawHistAndSave(T* h,
 					 std::string app, 
 					 bool drawLogY = false) {
 
-	gStyle->SetOptStat("ne"); // display name and # entries only
+	gStyle->SetOptStat(""); // display name and # entries only
 	gStyle->SetPaintTextFormat(".3g"); // set text format to be printed
 	
+	// setTDRStyle();
+
 	TH1::SetDefaultSumw2();
 
 	TCanvas c;
@@ -304,6 +307,9 @@ void drawHistAndSave(T* h,
 	if (!std::is_same<T, THStack>::value) {
 		if (drawOpt.find("TEXT") != std::string::npos) {
 			h->SetMarkerSize(1.5*h->GetMarkerSize());
+		} else {
+			h->SetMarkerStyle(20);
+			h->SetMarkerColor(kBlue);
 		}
 	}
 
@@ -352,6 +358,7 @@ void drawMassPlot(std::string title,
 	gStyle->SetOptStat("");
 	gStyle->SetLegendBorderSize(0);
 	gStyle->SetLegendFillColor(kWhite);
+	// setTDRStyle();
 
 	TH1::SetDefaultSumw2();
 
@@ -429,7 +436,7 @@ void drawMassPlot(std::string title,
 	hist_ratios.Add(histM1_1to2_copy);
 	hist_ratios.Add(histM1_2to3_copy);
 	hist_ratios.Add(histM1_3toInf_copy);
-	hist_ratios.Draw("ep"); // Need to draw *before* using GetHistogram()
+	hist_ratios.Draw("epNOSTACK"); // Need to draw *before* using GetHistogram()
 
 	(hist_ratios.GetHistogram())->SetXTitle(histM1_1to2->GetXaxis()->GetTitle());
 	(hist_ratios.GetHistogram())->GetXaxis()->SetTitleSize(0.1);
@@ -441,7 +448,7 @@ void drawMassPlot(std::string title,
 	(hist_ratios.GetHistogram())->GetYaxis()->SetTitleSize(0.1);
 	(hist_ratios.GetHistogram())->GetYaxis()->SetTitleOffset(0.6);
 	(hist_ratios.GetHistogram())->GetYaxis()->SetLabelSize(0.08);
-	hist_ratios.Draw("ep");
+	hist_ratios.Draw("epNOSTACK");
 
 	// Draw dotted line at 1 on ratio plot
 	double min = histM1_0to1->GetBinLowEdge(1);
