@@ -268,7 +268,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			cout << "Doing QCDScatter with HLT cuts" << endl;
 			folder = "QCDScatter_mu_pthatmin20_Mu17_Mu8_bare/";
 			file = "QCDScatter_mu_pthatmin20_Mu17_Mu8_";
-			nFiles = 400;
+			nFiles = 450;
 		}
 	}
 
