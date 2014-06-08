@@ -314,6 +314,9 @@ void drawHistAndSave(T* h,
 	}
 
 	h->Draw(drawOpt.c_str());
+	if (std::is_same<T, TH1D>::value) {
+		h->SetMinimum(0);
+	}
 
 	// To get the delphes config used, 
 	// which is always the last part of the directory name
