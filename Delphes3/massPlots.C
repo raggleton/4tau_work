@@ -49,6 +49,7 @@ void massPlots(int argc, char* argv[])
 	// bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
+	bool DEBUG          = pOpts.getVerbose(); // output debug statments
 
 	double deltaR = 2; // dR(mu-mu) value to use
 
