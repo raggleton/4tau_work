@@ -98,6 +98,7 @@ LD_LIBRARY_PATH=/cm/shared/apps/gcc/4.7.0/lib:/cm/shared/apps/gcc/4.7.0/lib64:/c
 
 ## Analysis Note
 
+First time setup:
 ```
 svn co -N svn+ssh://svn.cern.ch/reps/tdr2 myDir
 # svn co -N svn+ssh://raggleto@svn.cern.ch/reps/tdr2 myDir
@@ -109,4 +110,14 @@ eval `notes/tdr runtime -sh` # (for bash. use -csh for tcsh.)
 cd notes/AN-14-007/trunk/
 tdr --style=an b AN-14-007
 ```
+
+To update/remake:
+```
+cd myDir
+svn update notes/AN-14-007
+eval `notes/tdr runtime -sh` # (for bash. use -csh for tcsh.)
+cd notes/AN-14-007/trunk/
+tdr --style=an b AN-14-007
+```
+
 See https://twiki.cern.ch/twiki/bin/view/CMS/Internal/TdrProcessing
