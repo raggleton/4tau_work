@@ -1,6 +1,8 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <map>
+#include <cmath>
 
 #include "TLegend.h"
 #include "TCanvas.h" 
@@ -11,11 +13,16 @@
 #include "TStyle.h"
 #include "TLine.h"
 
+using std::cout;
+using std::endl;
 
 /**
  * This just post-processes the output from massPlots program, to combine with Alexei's reuslts
  * and other stuff
  */
+
+const std::vector<double> massBins {0,1,2,3,10};
+const int nBinsX = massBins.size()-1;
 
 // template<typename T>
 /**
@@ -29,7 +36,7 @@ void normaliseHist(TH1* h) {
 }
 
 std::string intToString(int n) {
-	ostringstream convert;
+	std::ostringstream convert;
 	convert << n;
 	return convert.str();
 }
@@ -45,13 +52,6 @@ TH2D* combinePlots(std::vector<TH2D*> plots, std::vector<double> scalingFactors)
 TH1D* combinePlots(std::vector<TH1D*> plots, std::vector<double> scalingFactors) {
 	TH1D* h = (TH1D*)plots[0]->Clone(plots[0]->GetName());
 	h->Scale(scalingFactors[0]);
-	std::vector<double> massBins;
-	massBins.push_back(0);
-	massBins.push_back(1);
-	massBins.push_back(2);
-	massBins.push_back(3);
-	massBins.push_back(10);
-	int nBinsX = massBins.size()-1;
 	for (unsigned i = 1; i < plots.size(); i++) {
 		TH1D* hTmp = (TH1D*)plots[i]->Rebin(nBinsX, plots[0]->GetTitle(), &massBins[0]);
 		h->Add(hTmp, scalingFactors[i]);
@@ -80,7 +80,7 @@ void drawHistAndSave(TH1* h,
 	// For plots drawing text values of bins, make text bigger
 	// if (!std::is_same<T, THStack>::value) {
 		if (drawOpt.find("TEXT") != std::string::npos) {
-			h->SetMarkerSize(1.5*h->GetMarkerSize());
+			// h->SetMarkerSize(1.5*h->GetMarkerSize());
 		} else {
 			h->SetMarkerStyle(20);
 			h->SetMarkerColor(h->GetLineColor());
@@ -98,7 +98,8 @@ void drawHistAndSave(TH1* h,
 	c.SaveAs((directory+sep+filename+sep2+app+".pdf").c_str());
 }
 
-void massPlotPost() {
+// int massPlotPost() {
+int main() {
 	gStyle->SetOptStat(""); // DOES NOTHING AS HIST ALREADY HAS OPT STATS!!!!
 	gStyle->SetLegendBorderSize(0);
 	gStyle->SetLegendFillColor(kWhite);
@@ -192,12 +193,31 @@ void massPlotPost() {
 	// SET SCALING FACTORS HERE //
 	///////////////////////////////
 	std::vector<double> scalingFactors;
-	scalingFactors.push_back(1.); // QCDb
-	scalingFactors.push_back(1.); // QCDc
-	scalingFactors.push_back(1.); // QCD scatter
+	// each of these is the factor that scales to lumi and cross-section
+	// (lumi 19.7 here, but doesn't matter as we normalise everything)
+	// scale factor = lumi * xsec/# generated *before* HLT cuts 
+	// (so NOT the number in the ROOT file)
+	double lumi = 19.7E12;
+	// cross-sections (mb)
+	std::map <std::string, double> xsec;
+	xsec["QCDb"] = 1.593E-03;
+	xsec["QCDc"] = 1.696E-03;
+	xsec["QCDScatter"] = 1.016E-02;
+	// # generated before HLT cuts
+	std::map <std::string, double> nGen;
+	nGen["QCDb"] = 119047619.;
+	nGen["QCDc"] = 0;
+	nGen["QCDScatter"] = 228669692;
+
+	scalingFactors.push_back(lumi*xsec["QCDb"]/nGen["QCDb"]); // QCDb
+	cout << "QCDb scaling: " << lumi*xsec["QCDb"]/nGen["QCDb"] << endl;
+	scalingFactors.push_back(lumi*xsec["QCDScatter"]/nGen["QCDScatter"]); // QCD scatter
+	cout << "QCD scatter scaling: " << lumi*xsec["QCDScatter"]/nGen["QCDScatter"] << endl;
+	// scalingFactors.push_back(lumi*xsec["QCDc"]/nGen["QCDc"]); // QCDc
+	scalingFactors.push_back(0); // QCDc
 
 	// check we haven't fluffed up vectors.
-	if (plots2D.size() != scalingFactors.size()) exit(-1);
+	if (plots2D.size() != scalingFactors.size()) return(-1);
 
 	// Create combination 2D plot (numerator)
 	TH2D* histM1vsM2_side_1to2p5 = (TH2D*) combinePlots(plots2D, scalingFactors);
@@ -206,15 +226,6 @@ void massPlotPost() {
 	// Create combination 1D sideband plot (denominator)
 	TH1D* histM_side_1to2p5 = (TH1D*) combinePlots(plots1D, scalingFactors);
 	normaliseHist(histM_side_1to2p5);
-	
-	std::vector<double> massBins;
-	massBins.push_back(0);
-	massBins.push_back(1);
-	massBins.push_back(2);
-	massBins.push_back(3);
-	massBins.push_back(10);
-
-	int nBinsX = massBins.size()-1;
 
 	// Create 2D from 1D x 1D
 	TH2D* histM1timesM1_side_1to2p5 = new TH2D("hM1timesM2_side_1to2p5","m(sideband) #times m(sideband) (soft tk p_{T} = 1-2.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",nBinsX,&massBins[0],nBinsX,&massBins[0]);
@@ -271,6 +282,8 @@ void massPlotPost() {
 	leg2.AddEntry(histCorr1D_side_1to2p5_Alexei,"Data (Alexei)","lp");
 	leg2.Draw();
 	
+	line->Draw();
+
 	c1->SetTicks(1,1);
 	c1->SaveAs("histCorr1D_side_1to2p5_combo_allQCD.pdf");
 }
