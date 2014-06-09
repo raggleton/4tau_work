@@ -65,7 +65,9 @@ void drawHistAndSave(TH1* h,
 					 std::string filename, 
 					 std::string directory, 
 					 std::string app,
-					 bool drawLogY = false) {
+					 bool drawLogY = false,
+					 double ymax = -1,
+					 double ymin = -1) {
 
 	gStyle->SetOptStat(""); // display name and # entries only
 	gStyle->SetPaintTextFormat(".3g"); // set text format to be printed
@@ -86,6 +88,12 @@ void drawHistAndSave(TH1* h,
 			h->SetMarkerColor(h->GetLineColor());
 		}
 	// }
+	if (ymin != -1)
+		h->SetMinimum(ymin);
+	else
+		h->SetMinimum(0);
+	if (ymax != -1)
+		h->SetMaximum(ymax);
 
 	h->Draw(drawOpt.c_str());
 
@@ -154,6 +162,8 @@ int main() {
 	stack.Draw("EPNOSTACK");
 	(stack.GetHistogram())->SetXTitle("Bin");
 	(stack.GetHistogram())->SetYTitle("Correlation coefficient");
+	stack.SetMaximum(1.7);
+	stack.SetMinimum(0.3);
 
 	// Add a legend
 	TLegend leg(0.65,0.7,0.88,0.88);
@@ -273,6 +283,10 @@ int main() {
 	stack2.Draw("EPNOSTACK");
 	(stack2.GetHistogram())->SetXTitle("Bin");
 	(stack2.GetHistogram())->SetYTitle("Correlation coefficient");
+	cout << (stack2.GetHistogram())->GetMaximum() << endl;
+	(stack2).SetMaximum(1.6);
+	(stack2).SetMinimum(0.5);
+	stack2.Draw("EPNOSTACK");
 
 	// Add a legend
 	TLegend leg2(0.65,0.7,0.88,0.88);
