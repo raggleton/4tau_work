@@ -17,7 +17,7 @@ using std::cout;
 using std::endl;
 
 /**
- * This just post-processes the output from massPlots program, to combine with Alexei's reuslts
+ * This just post-processes the output from massPlots program, to combine with Data reuslts
  * and other stuff
  */
 
@@ -141,14 +141,14 @@ int main() {
 	histCorr1D_side_1to2p5_Robin_QCDc->SetStats(kFALSE);
 	
 	////////////////////////////
-	// Make Alexei's 1D hist //
+	// Make Data 1D hist //
 	////////////////////////////
-	TH1D* histCorr1D_side_1to2p5_Alexei = (TH1D*) histCorr1D_side_1to2p5_Robin_QCDb->Clone("hCorr1D_side_1to2p5_Alexei");
+	TH1D* histCorr1D_side_1to2p5_Data = (TH1D*) histCorr1D_side_1to2p5_Robin_QCDb->Clone("hCorr1D_side_1to2p5_Data");
 	double arrContents[] = {1.00, 1.02, 0.95, 1.21, 0.96, 0.93, 0.97, 1.1, 1.1, 1.03};
 	double arrErrors[] = {0.05, 0.03, 0.05, 0.08, 0.04, 0.05, 0.07, 0.13, 0.12, 0.22};
 	for (unsigned i = 1; i <= histCorr1D_side_1to2p5_Robin_QCDb->GetNbinsX(); i++) {
-		histCorr1D_side_1to2p5_Alexei->SetBinContent(i,arrContents[i-1]);
-		histCorr1D_side_1to2p5_Alexei->SetBinError(i,arrErrors[i-1]);
+		histCorr1D_side_1to2p5_Data->SetBinContent(i,arrContents[i-1]);
+		histCorr1D_side_1to2p5_Data->SetBinError(i,arrErrors[i-1]);
 	}
 
 	//////////////////////////////////////////
@@ -158,13 +158,13 @@ int main() {
 	histCorr1D_side_1to2p5_Robin_QCDScatter->SetMarkerColor(kGreen+2);
 	histCorr1D_side_1to2p5_Robin_QCDc->SetLineColor(kOrange+2);
 	histCorr1D_side_1to2p5_Robin_QCDc->SetMarkerColor(kOrange+2);
-	histCorr1D_side_1to2p5_Alexei->SetLineColor(kRed);
-	histCorr1D_side_1to2p5_Alexei->SetMarkerColor(kRed);
+	histCorr1D_side_1to2p5_Data->SetLineColor(kRed);
+	histCorr1D_side_1to2p5_Data->SetMarkerColor(kRed);
 	THStack stack("stack","");
 	stack.Add(histCorr1D_side_1to2p5_Robin_QCDb);
 	stack.Add(histCorr1D_side_1to2p5_Robin_QCDScatter);
 	// stack.Add(histCorr1D_side_1to2p5_Robin_QCDc);
-	stack.Add(histCorr1D_side_1to2p5_Alexei);
+	stack.Add(histCorr1D_side_1to2p5_Data);
 	stack.Draw("EPNOSTACK");
 	(stack.GetHistogram())->SetXTitle("Bin");
 	(stack.GetHistogram())->SetYTitle("Correlation coefficient");
@@ -172,17 +172,17 @@ int main() {
 	stack.SetMinimum(0.3);
 
 	// Add a legend
-	TLegend leg(0.65,0.7,0.88,0.88);
+	TLegend leg(0.6,0.7,0.88,0.88);
 	leg.SetFillColor(kWhite);
-	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDb,"QCDb","lp");
+	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDb,"QCD MC (b#bar{b})","lp");
 	// leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDc,"QCDc","lp");
-	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDScatter,"QCD q-g Scatter","lp");
-	leg.AddEntry(histCorr1D_side_1to2p5_Alexei,"Data (Alexei)","lp");
+	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDScatter,"QCD MC (q-g scatter)","lp");
+	leg.AddEntry(histCorr1D_side_1to2p5_Data,"Data","lp");
 	leg.Draw();
 
 	// Draw a horizontal line at 1
-	double min = histCorr1D_side_1to2p5_Alexei->GetBinLowEdge(1);
-	double max = histCorr1D_side_1to2p5_Alexei->GetBinLowEdge(histCorr1D_side_1to2p5_Alexei->GetNbinsX()+1);
+	double min = histCorr1D_side_1to2p5_Data->GetBinLowEdge(1);
+	double max = histCorr1D_side_1to2p5_Data->GetBinLowEdge(histCorr1D_side_1to2p5_Data->GetNbinsX()+1);
 	TLine *line = new TLine(min,1,max,1);
 	line->SetLineColor(kBlack);
 	line->SetLineWidth(2);
@@ -191,7 +191,7 @@ int main() {
 
 	// Default canvas has name c1
 	c1->SetTicks(1,1); // Put tick marks on top x and right y axes
-	c1->SaveAs("histCorr1D_side_1to2p5.pdf");
+	c1->SaveAs("../Combined/histCorr1D_side_1to2p5.pdf");
 
 	//////////////////////////////////////////////////////////////////
 	// Now combine QCD plots - need to reweight for cross-sections //
@@ -274,7 +274,7 @@ int main() {
 		}
 	}
 
-	std::string directory = "";
+	std::string directory = "../Combined";
 	std::string app = "";
 	drawHistAndSave(histM1vsM2_side_1to2p5, "colzTEXTE","M1vsM2_side_1to2p5", directory, app);
 	drawHistAndSave(histM1timesM1_side_1to2p5, "colzTEXTE","M1timesM1_side_1to2p5", directory, app);
@@ -282,28 +282,34 @@ int main() {
 	drawHistAndSave(histM1vsM2_correlations_side_1to2p5, "colzTEXTE","M1vsM2_correlations_side_1to2p5", directory, app);
 	drawHistAndSave(histCorr1D_side_1to2p5_combo, "e1", "Correlations1D_side_1to2p5", directory, app);
 
-	// Plot alongside Alexei's
+	// Plot alongside Data
 	THStack stack2("stack2","");
 	stack2.Add(histCorr1D_side_1to2p5_combo);
-	stack2.Add(histCorr1D_side_1to2p5_Alexei);
+	histCorr1D_side_1to2p5_combo->SetLineWidth(2);
+	stack2.Add(histCorr1D_side_1to2p5_Data);
+	histCorr1D_side_1to2p5_Data->SetLineWidth(2);
 	stack2.Draw("EPNOSTACK");
 	(stack2.GetHistogram())->SetXTitle("Bin");
+	(stack2.GetHistogram())->SetTitleSize(0.04,"X");
+	(stack2.GetHistogram())->SetLabelSize(0.06,"X");
+	(stack2.GetHistogram())->SetLabelSize(0.04,"Y");
 	(stack2.GetHistogram())->SetYTitle("Correlation coefficient");
+	(stack2.GetHistogram())->SetTitleSize(0.04,"Y");
 	cout << (stack2.GetHistogram())->GetMaximum() << endl;
 	(stack2).SetMaximum(1.6);
 	(stack2).SetMinimum(0.5);
 	stack2.Draw("EPNOSTACK");
 
 	// Add a legend
-	TLegend leg2(0.65,0.7,0.88,0.88);
+	TLegend leg2(0.55,0.67,0.88,0.88);
 	leg2.SetFillColor(kWhite);
-	leg2.AddEntry(histCorr1D_side_1to2p5_combo,"QCD b + q-g scatter","lp");
+	leg2.AddEntry(histCorr1D_side_1to2p5_combo,"#splitline{Gen. level QCD MC}{(b#bar{b} + q-g scatter)}","lp");
 	// leg2.AddEntry(histCorr1D_side_1to2p5_combo_Robin_QCDc,"QCDc","lp");
-	leg2.AddEntry(histCorr1D_side_1to2p5_Alexei,"Data (Alexei)","lp");
+	leg2.AddEntry(histCorr1D_side_1to2p5_Data,"Data","lp");
 	leg2.Draw();
 	
 	line->Draw();
 
 	c1->SetTicks(1,1);
-	c1->SaveAs("histCorr1D_side_1to2p5_combo_allQCD.pdf");
+	c1->SaveAs("../Combined/histCorr1D_side_1to2p5_combo_allQCD.pdf");
 }
