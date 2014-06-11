@@ -30,6 +30,8 @@ const int nBinsX = massBins.size()-1;
  * @param h Pointer to histogram to be rescaled
  */
 void normaliseHist(TH1* h) {
+	TH1::SetDefaultSumw2();
+
 	if (h->Integral() != 0) {
 		h->Scale(1./h->Integral());
 	}
@@ -42,6 +44,8 @@ std::string intToString(int n) {
 }
 
 TH2D* combinePlots(std::vector<TH2D*> plots, std::vector<double> scalingFactors) {
+	TH1::SetDefaultSumw2();
+
 	TH2D* h = (TH2D*)plots[0]->Clone(plots[0]->GetName());
 	h->Scale(scalingFactors[0]);
 	for (unsigned i = 1; i < plots.size(); i++) {
@@ -50,6 +54,8 @@ TH2D* combinePlots(std::vector<TH2D*> plots, std::vector<double> scalingFactors)
 	return h;
 }
 TH1D* combinePlots(std::vector<TH1D*> plots, std::vector<double> scalingFactors) {
+	TH1::SetDefaultSumw2();
+
 	TH1D* h = (TH1D*)plots[0]->Clone(plots[0]->GetName());
 	h->Scale(scalingFactors[0]);
 	for (unsigned i = 1; i < plots.size(); i++) {
@@ -215,7 +221,7 @@ int main() {
 	xsec["QCDScatter"] = 1.016E-02;
 	// # generated before HLT cuts
 	std::map <std::string, double> nGen;
-	nGen["QCDb"] = 119047619.;
+	nGen["QCDb"] = 122683636.;
 	nGen["QCDc"] = 0;
 	nGen["QCDScatter"] = 228669692;
 
