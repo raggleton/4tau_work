@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
   // Warning, 50K events ~9GB hepmc file and takes ~40 min.
   // pythia.readString("Main:numberOfEvents = 100");
   // int nEvent = pythia.mode("Main:numberOfEvents");
-  int nEvent = 2000;
+  int nEvent = 1000;
   pythia.readString("Next:numberShowEvent = 00");
   // pythia.readString("Next:numberShowProcess = 100");
   
