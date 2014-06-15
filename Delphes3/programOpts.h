@@ -33,7 +33,7 @@ namespace po = boost::program_options;
 
 // Global enum for the MC source
 // Note convention of all lower case
-enum MCsource { signal, qcdb, qcdc, qcdscatter };
+enum MCsource { signal, qcdb, qcdc, qcdscatter, qcdall };
 
 // Have to define << and >> ops to get enum to work with boost::lexical_cast 
 // and program_options, and also so we can cout the enum easily
@@ -46,6 +46,7 @@ std::ostream& operator<<(std::ostream& out, const MCsource value) {
         PROCESS_VAL(qcdb);     
         PROCESS_VAL(qcdc);
         PROCESS_VAL(qcdscatter);
+        PROCESS_VAL(qcdall);
     }
 #undef PROCESS_VAL
 
@@ -64,6 +65,8 @@ std::istream & operator>>(std::istream & in, MCsource & value) {
   		value = qcdc;
   	else if (token == "qcdscatter")
   		value = qcdscatter;
+  	else if (token == "qcdall")
+  		value = qcdall;
   	else
   		throw runtime_error("Invalid string cast to enum");
   }
@@ -269,6 +272,15 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			folder = "QCDScatter_mu_pthatmin20_Mu17_Mu8_bare/";
 			file = "QCDScatter_mu_pthatmin20_Mu17_Mu8_";
 			nFiles = 2000;
+		}
+	} else if (source == qcdall) {
+		if (doHLT) {
+			cout << "Doing QCDAll with HLT cuts" << endl;
+			// folder = "QCDAll_mu_pthatmin20_Mu17_Mu8_bare/";
+			folder = "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_bare/";
+			// file = "QCDAll_mu_pthatmin20_Mu17_Mu8_";
+			file = "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_";
+			nFiles = 10;
 		}
 	}
 
