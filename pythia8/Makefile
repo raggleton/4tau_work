@@ -44,7 +44,7 @@ main00  main01 main02 main03 main04 main05 main06 main07 main08 main09 main10 \
 # Create an executable linked to HepMC (if all goes well).
 # Owing to excessive warning output -Wshadow is not used for HepMC.
 ifneq (x$(HEPMCLOCATION),x)
-  main41 main42 mainQCD mainQCDb mainQCDbScatter mainQCDc mainLHEhadronise mainLHEhadroniseDoTaus: \
+  main41 main42 mainQCD mainQCDb mainQCDbScatter mainQCDc mainQCDScatter mainLHEhadronise mainLHEhadroniseDoTaus: \
 	$(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8.a $(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8tohepmc.a
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) -std=c++11 -Wno-shadow -I$(PYTHIA8LOCATION)/$(INCDIR) -I$(HEPMCLOCATION)/include \
@@ -54,7 +54,7 @@ ifneq (x$(HEPMCLOCATION),x)
 	-L$(HEPMCLOCATION)/lib -lHepMC
 	@ln -fs $(BINDIR)/$@.exe $@.exe
 else
-  main41 main42 mainQCD mainQCDb mainQCDbScatter mainQCDc mainLHEhadronise mainLHEhadroniseDoTaus:
+  main41 main42 mainQCD mainQCDb mainQCDbScatter mainQCDScatter  mainQCDc mainLHEhadronise mainLHEhadroniseDoTaus:
 	@echo ERROR, this target needs HepMC, variable HEPMCLOCATION
 endif
 
