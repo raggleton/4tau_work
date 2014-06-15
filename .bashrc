@@ -29,6 +29,7 @@ alias lt='ls -lrth'
 alias mc='. /usr/libexec/mc/mc-wrapper.sh'
 alias qstatme='qstat -u ra12451; getNumberInQueue '
 alias delEmpty="find . -type f -empty -delete"
+alias loadDelphes="gSystem->Load("libDelphes");"
 
 alias vi='vim'
 #alias vsqueue='qstat | grep veryshort && echo '\''TOTAL: '\'' DAMMIT'
