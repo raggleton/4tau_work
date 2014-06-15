@@ -11,8 +11,8 @@ using namespace Pythia8;
  
 int main(int argc, char* argv[]) {
 
-  bool outputEvent       = true; // output entire event listing to STDOUT (long!), for debugging only
-  bool writeHLTToHEPMC   = false; // output to HEPMC events passing HLT
+  bool outputEvent       = false; // output entire event listing to STDOUT (long!), for debugging only
+  bool writeHLTToHEPMC   = true; // output to HEPMC events passing HLT
   bool writeNoHLTToHEPMC = false; // output to HEPMC events without any HLT cuts
   bool muOnly            = true; // Only allow b hadrons to decay to muons or taus
   bool tauToMuOnly       = true; // Only allow those taus from b hadrons to decay to muons 
@@ -56,8 +56,7 @@ int main(int argc, char* argv[]) {
   // For HLT. NoHLT has about 60X HLT amount (320K NoHLT evt for 5K HLT evnt)
   // Warning, 5K events ~900MB hepmc file and takes ~5 min.
   // Warning, 50K events ~9GB hepmc file and takes ~40 min.
-  pythia.readString("Main:numberOfEvents = 1");
-  int nEvent = pythia.mode("Main:numberOfEvents");
+  int nEvent = 500;
   pythia.readString("Next:numberShowEvent = 00");
   // pythia.readString("Next:numberShowProcess = 100");
   
