@@ -8,6 +8,10 @@ You'll need Boost for the Delphes analysis scripts.
 
 Sorry in advance if this is a bit rubbish - it's constantly in a state of fluz, and no-one but me uses it. (Standard weak HEP excuse)
 
+## Setup PYTHIA8
+
+- Download tarball, extract
+- Follow README.HepMC
 
 ## Workflow
 
