@@ -14,6 +14,9 @@
 // Need to add 
 // -I $(HOME)/boost_1_55_0 -I $(HOME)/boost_1_55_0_install/include 
 // to CXXFLAGS in Delphes/Makefile
+// and
+// -L/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib -lboost_program_options -lboost_filesystem
+// to DELPHES_LIBS in Delphes/Makefile
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
