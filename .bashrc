@@ -9,7 +9,8 @@ fi
 module add shared default-environment
 module add tools/git-1.8.4.2
 module add languages/python-2.7.6
-module add gcc/4.7.0
+module add languages/gcc-4.8.1
+#module add gcc/4.7.0
 
 export CLICOLOR=1
 alias root="root -l"
