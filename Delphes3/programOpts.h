@@ -280,7 +280,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			folder = "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_bare/";
 			// file = "QCDAll_mu_pthatmin20_Mu17_Mu8_";
 			file = "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_";
-			nFiles = 10;
+			nFiles = 200;
 		}
 	}
 
