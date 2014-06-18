@@ -47,11 +47,14 @@ ifneq (x$(HEPMCLOCATION),x)
   main41 main42 mainQCD mainQCDb mainQCDbScatter mainQCDc mainQCDScatter mainLHEhadronise mainLHEhadroniseDoTaus: \
 	$(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8.a $(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8tohepmc.a
 	@mkdir -p $(BINDIR)
-	$(CXX) $(CXXFLAGS) -std=c++11 -Wno-shadow -I$(PYTHIA8LOCATION)/$(INCDIR) -I$(HEPMCLOCATION)/include \
+	$(CXX) $(CXXFLAGS) -Wno-shadow -I$(PYTHIA8LOCATION)/$(INCDIR) -I$(HEPMCLOCATION)/include \
+	 -I $(HOME)/boost_1_55_0 -I $(HOME)/boost_1_55_0_install/include -std=c++11 \
+	-Wno-unused \
 	$@.cc -o $(BINDIR)/$@.exe \
 	-L$(PYTHIA8LOCATION)/$(LIBDIRARCH) -lpythia8 -llhapdfdummy $(LIBGZIP) \
 	-lpythia8tohepmc \
-	-L$(HEPMCLOCATION)/lib -lHepMC
+	-L$(HEPMCLOCATION)/lib -lHepMC \
+	-L/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib -lboost_program_options -lboost_filesystem
 	@ln -fs $(BINDIR)/$@.exe $@.exe
 else
   main41 main42 mainQCD mainQCDb mainQCDbScatter mainQCDScatter  mainQCDc mainLHEhadronise mainLHEhadroniseDoTaus:

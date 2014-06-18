@@ -7,25 +7,23 @@
 #include "HepMC/GenEvent.h"   
 #include "HepMC/IO_GenEvent.h"
 #include "myHooks.h"
+#include "programOpts.h"
 
 using namespace Pythia8;
  
 int main(int argc, char* argv[]) {
 
-  bool outputEvent       = true; // output entire event listing to STDOUT (long!), for debugging only
-  bool writeHLTToHEPMC   = true; // output to HEPMC events passing HLT
-  bool writeNoHLTToHEPMC = false; // output to HEPMC events without any HLT cuts
-  bool muOnly            = false; // Only allow b/c hadrons to decay to muons or taus
-  bool tauToMuOnly       = false; // Only allow those taus from b/c hadrons to decay to muons 
+  ProgramOpts pOpts(argc, argv);
+  pOpts.printProgramOptions();
 
-  // Check that correct number of command-line arguments
-  // Unfortunately required even if writeToHEPMC = false
-  if (argc != 2) {
-    cerr << " Unexpected number of command-line arguments. \n "
-         <<  "You are expected to provide one output file name eg myQCDb \n"
-         << " Program stopped! " << endl;
-    return 1;
-  }
+  bool outputEvent       = pOpts.getOutputEvent(); // output entire event listing to STDOUT (long!), for debugging only
+  bool writeHLTToHEPMC   = pOpts.getWriteHLTToHEPMC(); // output to HEPMC events passing HLT
+  bool writeNoHLTToHEPMC = pOpts.getWriteNoHLTToHEPMC(); // output to HEPMC events without any HLT cuts
+  bool muOnly            = pOpts.getMuOnly(); // Only allow b/c hadrons to decay to muons or taus
+  bool tauToMuOnly       = pOpts.getTauToMuOnly(); // Only allow those taus from b/c hadrons to decay to muons 
+  bool DEBUG             = pOpts.getVerbose();
+
+  std::string filename   = pOpts.getFilename(); // HEPMC filename stem to be used
 
   if (writeHLTToHEPMC) cout << "Writing HLT events to HEPMC" << endl;
   if (writeNoHLTToHEPMC) cout << "Writing all events to HEPMC" << endl;
@@ -35,8 +33,8 @@ int main(int argc, char* argv[]) {
 
   // Specify file where HepMC events will be stored.
   // Do one for with HLT cuts, one wihtout HLT cuts
-  std::string noHLTfile = std::string(argv[1])+"_NoHLT.hepmc";
-  std::string HLTfile = std::string(argv[1])+"_HLT.hepmc";
+  std::string noHLTfile = filename+"_NoHLT.hepmc";
+  std::string HLTfile = filename+"_HLT.hepmc";
   HepMC::IO_GenEvent ascii_io_NoHLT(noHLTfile, std::ios::out);
   HepMC::IO_GenEvent ascii_io_HLT(HLTfile, std::ios::out);
 
@@ -59,7 +57,7 @@ int main(int argc, char* argv[]) {
   // Warning, 50K events ~9GB hepmc file and takes ~40 min.
   // pythia.readString("Main:numberOfEvents = 100");
   // int nEvent = pythia.mode("Main:numberOfEvents");
-  int nEvent = 500;
+  int nEvent = pOpts.getNEvents();
   pythia.readString("Next:numberShowEvent = 00");
   // pythia.readString("Next:numberShowProcess = 100");
   
@@ -95,7 +93,6 @@ int main(int argc, char* argv[]) {
   // pythia.readString("ProcessLevel:all = off");   
   // pythia.readString("PartonLevel:all = off");   
   // pythia.readString("HadronLevel:all = off");   
-  bool DEBUG = false;
   QGScatterHook* scatterHook = new QGScatterHook(DEBUG);
   pythia.setUserHooksPtr( scatterHook);
 
@@ -106,7 +103,7 @@ int main(int argc, char* argv[]) {
   // All C and B hadrons from PDG
   // NOTE: vector only contains the particle IDs *NOT* the anti particle IDs ( = -PDGID )!!
   // Deal with this below
-   std::vector<int> bCodes{ 511,521,10511,10521,513,523,10513,10523,20513,20523,515,525,531,10531,533,10533,
+   std::vector<int> bcCodes{ 511,521,10511,10521,513,523,10513,10523,20513,20523,515,525,531,10531,533,10533,
     20533,535,541,10541,543,10543,20543,545,51,10551,100551,110551,200551,210551,553,10553,20553,30553,
     100553,110553,120553,130553,200553,210553,220553,300553,10860,9000553,11020,9010553,555,10555,20555,
     100555,110555,120555,200555,557,100557,5122,5112,5212,5222,5114,5214,5224,5132,5232,5312,5322,5314,
@@ -114,42 +111,40 @@ int main(int argc, char* argv[]) {
     5542,5544,5554,411,421,10411,10421,413,423,10413,10423,20413,20423,415,425,431,10431,433,
     10433,20433, 435,441,10441,100441,443,10443,20443,100443,30443,9000443,9010443,9020443,445,100445,
     4122,4222,4212,4112,4224,4214,4114,4232,4132,4322,4312,4324,4314,4332,4334,4412,4422,4414,4424,4432,4434,4444};
-  int nCodes = bCodes.size();
+  int nCodes = bcCodes.size();
 
   if (muOnly){
     // Set B hadrons to decay to modes involving a muon or tau
     for (int iC = 0; iC < nCodes; ++iC) {
       // Check PDGID is in PYTHIA
-      if(! pythia.particleData.isParticle(bCodes[iC])) continue;
+      if(! pythia.particleData.isParticle(bcCodes[iC])) continue;
       
       // Get particle name.
       // If excited state, then just skip it, we want it to decay to less excited states.
-      if (pythia.particleData.name(bCodes[iC]).find("*") != std::string::npos) continue;
-      if (pythia.particleData.name(-bCodes[iC]).find("*") != std::string::npos) continue;
+      if (pythia.particleData.name(bcCodes[iC]).find("*") != std::string::npos) continue;
+      if (pythia.particleData.name(-bcCodes[iC]).find("*") != std::string::npos) continue;
       
       // Turn off all decay modes first (for particle & antiparticle)
       std::stringstream sstm;
-      sstm << bCodes[iC] << ":onMode = off";
+      sstm << bcCodes[iC] << ":onMode = off";
       std::string command = sstm.str();
       pythia.readString(command);
       pythia.readString("-"+command);
       sstm.str("");
       
       // Now just turn on tau or mu ones
-      sstm << bCodes[iC] << ":onIfAny = 13 15";
+      sstm << bcCodes[iC] << ":onIfAny = 13 15";
       command = sstm.str();
       pythia.readString(command);
       pythia.readString("-"+command);
     }
-    pythia.particleData.list(511);
-    pythia.particleData.list(-511);
   }
 
   // For tau, turn off decays. We want any tau from B hadrons to decay to muons,
   // but all other taus can decay however they want.
   if(tauToMuOnly)
     pythia.readString("15:onMode = off");
-    pythia.readString("-15:onMode = off");
+    // pythia.readString("-15:onMode = off");
   
   std::vector<int> tausFromB;
   std::vector<int> tausNotFromB;
@@ -211,7 +206,7 @@ int main(int argc, char* argv[]) {
           bool daughterOfB = false;
           // motherN() gets the particle # not the PDGID number
           for (int iC = 0; iC < nCodes; ++iC) {
-            if (event[event[i].mother1()].idAbs() == bCodes[iC] || event[event[i].mother2()].idAbs() == bCodes[iC]){
+            if (event[event[i].mother1()].idAbs() == bcCodes[iC] || event[event[i].mother2()].idAbs() == bcCodes[iC]){
               daughterOfB = true;
               event[i].statusNeg();
               break;
