@@ -24,18 +24,52 @@ using std::endl;
 // namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 
+// Global enum for QCD process to be simulated
+enum process { qcdb, qcdc, qcdscatter };
+// Have to define << and >> ops to get enum to work with boost::lexical_cast 
+// and program_options, and also so we can cout the enum easily
+std::ostream& operator<<(std::ostream& out, const process value) {
+
+    const char* s = 0;
+#define PROCESS_VAL(p) case(p): s = #p; break;
+    switch(value) {
+        PROCESS_VAL(qcdb);     
+        PROCESS_VAL(qcdc);
+        PROCESS_VAL(qcdscatter);
+    }
+#undef PROCESS_VAL
+
+    return out << s;
+}
+
+// Must be a way to improve this using static_cast
+std::istream & operator>>(std::istream & in, process & value) {
+  std::string token;
+  if (in >> token) {
+  	if (token == "qcdb")
+  		value = qcdb;
+  	else if (token == "qcdc")
+  		value = qcdc;
+  	else if (token == "qcdscatter")
+  		value = qcdscatter;
+  	else
+  		throw runtime_error("Invalid string cast to enum");
+  }
+  return in;
+}
+
 class ProgramOpts
 {
 	private:
 		bool outputEvent; 
 		bool writeHLTToHEPMC; 
 		bool writeNoHLTToHEPMC; 
-		bool muOnly;
-		bool tauToMuOnly;
+		process userProcess;
+		bool notMuOnly;
 		int nEvents;
 		std::string filename;
 		bool verbose;
-		bool enableScatterHook;
+		bool disableScatterHook;
 
 	public: 
 		// constructor, parses input
@@ -43,12 +77,12 @@ class ProgramOpts
 			outputEvent(false), 
 			writeHLTToHEPMC(false), 
 			writeNoHLTToHEPMC(false), 
-			muOnly(false),
-			tauToMuOnly(false),
-			nEvents(500),
+			userProcess(qcdb),
+			notMuOnly(false),
+			nEvents(1),
 			filename("testChangeMe"),
 			verbose(false),
-			enableScatterHook(false)
+			disableScatterHook(false)
 		{
 			po::options_description desc("\nAllowed options");
 			desc.add_options()
@@ -59,12 +93,12 @@ class ProgramOpts
 					"write events passing HLT mu cuts to file")
 				("writeNoHLT",
 					"write events with >= 2 muons to file")
-				("muOnly", 
-					"Allow b/c hadrons to only decay to final state which contains a muon")
-				("tauToMuOnly", 
-					"Enforce Taus from b/c hadrons decays to decay to muons")
-				("scatterBC",
-					"Make scatter process only do (b|c)g -> (b|c)(bbbcar|ccbar)")
+				("process,p", po::value<process>(&userProcess),
+					"Process to run: qcdb [default], qcdc, qcdscatter")
+				("notMuOnly", 
+					"Each event is kept regardless of # muons (default keeps hadronising event until 2+ muons)")
+				("noScatterBC",
+					"Make qcdscatter process use all flavours of q/qbar (defualt is b/c only)")
 				("number,n", po::value<int>(&nEvents), 
 					"Number of events to run over [default = 500]")
 				("name", po::value<std::string>(&filename),
@@ -109,14 +143,14 @@ class ProgramOpts
 			if (vm.count("writeNoHLT")) {
 			    writeNoHLTToHEPMC = true;
 			}
-			if (vm.count("muOnly")) {
-			    muOnly = true;
+			if (vm.count("notMuOnly")) {
+			    notMuOnly = true;
 			}
-			if (vm.count("tauToMuOnly")) {
-			    tauToMuOnly = true;
+			if (vm.count("process")) {
+			    userProcess = vm["process"].as<process>();
 			}			
-			if (vm.count("scatterBC")) {
-			    enableScatterHook = true;
+			if (vm.count("noScatterBC")) {
+			    disableScatterHook = true;
 			}
 
 		} // end of constructor
@@ -125,12 +159,12 @@ class ProgramOpts
 		bool getOutputEvent() { return outputEvent; } 
 		bool getWriteHLTToHEPMC() { return writeHLTToHEPMC; } 
 		bool getWriteNoHLTToHEPMC() { return writeNoHLTToHEPMC; } 
-		bool getMuOnly() { return muOnly; }
-		bool getTauToMuOnly() { return tauToMuOnly; }
+		bool getNotMuOnly() { return notMuOnly; }
+		process getProcess() { return userProcess; }
 		int getNEvents() { return nEvents; }
 		std::string getFilename() { return filename; }
 		bool getVerbose() { return verbose; }
-		bool getScatterHook() { return enableScatterHook; }
+		bool getScatterHook() { return disableScatterHook; }
 
 		// This should really be in a separate .cc file...
 		void printProgramOptions() {
@@ -138,18 +172,17 @@ class ProgramOpts
 			cout << "PROGRAM OPTIONS" << endl;
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 			
+			cout << "Process: " << userProcess << endl;
 			if (outputEvent)
 				cout << "Outputting first event" << endl;
 			if (writeHLTToHEPMC)
 				cout << "Writing events that pass HLT mu cuts to hepmc file" << endl;
 			if (writeNoHLTToHEPMC)
 				cout << "Writing events that have >= 2 muons to hepmc file" << endl;
-			if (muOnly)
-				cout << "Forcing b/c hadrons to decay to semi-muonic final state" << endl;
-			if (tauToMuOnly)
-				cout << "Force taus from b/c hadrons to decay to muons" << endl;
-			if (enableScatterHook)
-				cout << "q-g scatter: make scatter process only do (b|c)g -> (b|c)(bbbcar|ccbar)" << endl;
+			if (notMuOnly)
+				cout << "Don't care if 2+ muons" << endl;
+			if (disableScatterHook)
+				cout << "q-g scatter: scatter process use all flavours of q/qbar" << endl;
 			cout << "Doing " << nEvents << " events" << endl;
 			cout << "Writing to " << filename <<"(_HLT|_NoHLT).hepmc" << endl;
 			

@@ -19,9 +19,10 @@ int main(int argc, char* argv[]) {
   bool outputEvent       = pOpts.getOutputEvent(); // output entire event listing to STDOUT (long!), for debugging only
   bool writeHLTToHEPMC   = pOpts.getWriteHLTToHEPMC(); // output to HEPMC events passing HLT
   bool writeNoHLTToHEPMC = pOpts.getWriteNoHLTToHEPMC(); // output to HEPMC events without any HLT cuts
-  bool muOnly            = pOpts.getMuOnly(); // Only allow b/c hadrons to decay to muons or taus
-  bool tauToMuOnly       = pOpts.getTauToMuOnly(); // Only allow those taus from b/c hadrons to decay to muons 
+  bool notMuOnly         = pOpts.getNotMuOnly(); // Ture is the user doesn't want events generated that are guaranteed to have 2+ muons
   bool DEBUG             = pOpts.getVerbose();
+
+  process userProcess = pOpts.getProcess(); // qcdb, qcdc, qcdscatter
 
   std::string filename   = pOpts.getFilename(); // HEPMC filename stem to be used
 
@@ -77,19 +78,26 @@ int main(int argc, char* argv[]) {
   // You would need to use HardQCD:all or even SoftQCD:nonDiffractive for that.
   
   // g-q scatter:
-  pythia.readString("HardQCD:nQuarkNew = 5");    
-  pythia.readString("HardQCD:qg2qqqbarDiff = on");    
-  pythia.readString("HardQCD:qg2qqqbarSame= on");    
-  QGScatterHook* scatterHook = new QGScatterHook(DEBUG);
-  if (pOpts.getScatterHook()){
-    pythia.setUserHooksPtr(scatterHook);
+  if(userProcess == qcdscatter) {
+    pythia.readString("HardQCD:nQuarkNew = 5");    
+    pythia.readString("HardQCD:qg2qqqbarDiff = on");    
+    pythia.readString("HardQCD:qg2qqqbarSame= on");    
+    QGScatterHook* scatterHook = new QGScatterHook(DEBUG); // should smart pointer this
+    if (!pOpts.getScatterHook()){
+      pythia.setUserHooksPtr(scatterHook);
+    }
   }
+  
   // gg/qqbar - > ccbar:
-  // pythia.readString("HardQCD:hardccbar = on");    
+  if (userProcess == qcdc) {
+    pythia.readString("HardQCD:hardccbar = on");    
+  }
   
   // gg/qqbar - > bbbar:
-  // pythia.readString("HardQCD:hardbbbar = on");    
-  
+  if (userProcess == qcdb) {
+    pythia.readString("HardQCD:hardbbbar = on");    
+  }
+
   // Extra ttbar contribution
   // pythia.readString("Top:gg2ttbar = on");
   // pythia.readString("Top:qqbar2ttbar = on");
@@ -101,8 +109,12 @@ int main(int argc, char* argv[]) {
 
   // pythia.readString("ProcessLevel:all = off");   
   // pythia.readString("PartonLevel:all = off");   
-  pythia.readString("HadronLevel:all = off"); // To do repeated hadronisations
   
+  // Do repeated hadronisation to get 2+ muons out of each event
+  if (!pOpts.getNotMuOnly()) {
+    pythia.readString("HadronLevel:all = off");
+  }
+
   // Initialize 
   pythia.init();
 
@@ -147,35 +159,52 @@ int main(int argc, char* argv[]) {
     std::vector<double> muPtVec;
     
     int iRepeat = 0; // count repeated decays of same event
-
-    while(muPtVec.size() < 2) {
-      muPtVec.clear();
-      nMuNeg = 0;
-      nMuPos = 0;
     
-      if (iRepeat > 0) event = savedEvent;
-
-      if (!pythia.forceHadronLevel(false)) continue;
-
-      iRepeat++;
-
-      for (int i = 0; i < event.size(); ++i) {
-        int id = event[i].id();  
-        int status = event[i].status();
-        if (id ==  13 && status > 0){ 
-          nMuNeg++;
-          muPtVec.push_back(event[i].pT());
-        }
-        if (id == -13 && status > 0) {
-          nMuPos++;
-          muPtVec.push_back(event[i].pT());
-        }
+    for (int i = 0; i < event.size(); ++i) {
+      int id = event[i].id();  
+      int status = event[i].status();
+      if (id ==  13 && status > 0){ 
+        nMuNeg++;
+        muPtVec.push_back(event[i].pT());
       }
-      // nMuInEvent.fill(muPtVec.size());
+      if (id == -13 && status > 0) {
+        nMuPos++;
+        muPtVec.push_back(event[i].pT());
+      }
     }
     
-    // event.list();
-    nRepeats.fill(iRepeat);
+    // Unless user wants any # muons in their events, 
+    // we continually hadronise until we get 2+ muons
+    if (!pOpts.getNotMuOnly()){
+      while(muPtVec.size() < 2) {
+        muPtVec.clear();
+        nMuNeg = 0;
+        nMuPos = 0;
+
+        if (iRepeat > 0) event = savedEvent;
+
+        if (!pythia.forceHadronLevel(false)) continue;
+
+        iRepeat++;
+
+        for (int i = 0; i < event.size(); ++i) {
+          int id = event[i].id();  
+          int status = event[i].status();
+          if (id ==  13 && status > 0){ 
+            nMuNeg++;
+            muPtVec.push_back(event[i].pT());
+          }
+          if (id == -13 && status > 0) {
+            nMuPos++;
+            muPtVec.push_back(event[i].pT());
+          }
+        }
+        nMuInEvent.fill(muPtVec.size());
+      }
+
+      // if (DEBUG) event.list();
+      nRepeats.fill(iRepeat);
+    }
 
     // Check whether SS pair(s) present.
     if ((nMuNeg  > 1) || (nMuPos > 1)) {
@@ -243,6 +272,8 @@ int main(int argc, char* argv[]) {
   cout << "Number of events with pair of SS muon: " << nWithSSMuPair << endl;
 
   // Done.
-  delete scatterHook;
+  // if(userProcess == qcdscatter) {
+    // delete scatterHook;
+  // }
   return 0;
 }
