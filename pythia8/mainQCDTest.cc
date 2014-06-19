@@ -81,14 +81,14 @@ int main(int argc, char* argv[]) {
   pythia.readString("HardQCD:qg2qqqbarDiff = on");    
   pythia.readString("HardQCD:qg2qqqbarSame= on");    
   QGScatterHook* scatterHook = new QGScatterHook(DEBUG);
-  if (pOpts.getScatterHook())
-    pythia.setUserHooksPtr( scatterHook);
-  
+  if (pOpts.getScatterHook()){
+    pythia.setUserHooksPtr(scatterHook);
+  }
   // gg/qqbar - > ccbar:
-  pythia.readString("HardQCD:hardccbar = on");    
+  // pythia.readString("HardQCD:hardccbar = on");    
   
   // gg/qqbar - > bbbar:
-  pythia.readString("HardQCD:hardbbbar = on");    
+  // pythia.readString("HardQCD:hardbbbar = on");    
   
   // Extra ttbar contribution
   // pythia.readString("Top:gg2ttbar = on");
@@ -112,7 +112,7 @@ int main(int argc, char* argv[]) {
   Hist nMuInEvent2plus("number of muons in an event (2+ selection)", 10, -0.5, 9.5);
 
   Hist muPt("pT muons in an event (HLT)", 40, 0.0, 40.0); 
-  Hist muPtNoHLT("pT muons in an event (NoHLT)", 40, 0.0, 40.0); 
+  Hist muPtNoHLT("pT muons in an event (2+ muons)", 40, 0.0, 40.0); 
   
   Hist nRepeats("number of repeats required to get 2+ muons", 50, 0.5, 100.5); 
   int nWithSSMuPair = 0;
