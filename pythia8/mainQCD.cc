@@ -183,9 +183,9 @@ int main(int argc, char* argv[]) {
 
         if (iRepeat > 0) event = savedEvent;
 
+        iRepeat++;
         if (!pythia.forceHadronLevel(false)) continue;
 
-        iRepeat++;
 
         for (int i = 0; i < event.size(); ++i) {
           int id = event[i].id();  
