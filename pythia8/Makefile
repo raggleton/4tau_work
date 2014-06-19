@@ -44,7 +44,7 @@ main00  main01 main02 main03 main04 main05 main06 main07 main08 main09 main10 \
 # Create an executable linked to HepMC (if all goes well).
 # Owing to excessive warning output -Wshadow is not used for HepMC.
 ifneq (x$(HEPMCLOCATION),x)
-  main41 main42 mainQCD mainQCDb mainQCDbScatter mainQCDc mainQCDScatter mainLHEhadronise mainLHEhadroniseDoTaus: \
+  main41 main42 mainQCD mainQCDb mainQCDbScatter mainQCDc mainQCDScatter mainQCDTest mainLHEhadronise mainLHEhadroniseDoTaus: \
 	$(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8.a $(PYTHIA8LOCATION)/$(LIBDIRARCH)/libpythia8tohepmc.a
 	@mkdir -p $(BINDIR)
 	$(CXX) $(CXXFLAGS) -Wno-shadow -I$(PYTHIA8LOCATION)/$(INCDIR) -I$(HEPMCLOCATION)/include \
@@ -54,10 +54,10 @@ ifneq (x$(HEPMCLOCATION),x)
 	-L$(PYTHIA8LOCATION)/$(LIBDIRARCH) -lpythia8 -llhapdfdummy $(LIBGZIP) \
 	-lpythia8tohepmc \
 	-L$(HEPMCLOCATION)/lib -lHepMC \
-	-L$(HOME)/boost_1_55_0_install/lib -lboost_program_options -lboost_filesystem
+	-L$(HOME)/boost_1_55_0_install/lib -lboost_program_options
 	@ln -fs $(BINDIR)/$@.exe $@.exe
 else
-  main41 main42 mainQCD mainQCDb mainQCDbScatter mainQCDScatter  mainQCDc mainLHEhadronise mainLHEhadroniseDoTaus:
+  main41 main42 mainQCD mainQCDb mainQCDbScatter mainQCDScatter mainQCDTest mainQCDc mainLHEhadronise mainLHEhadroniseDoTaus:
 	@echo ERROR, this target needs HepMC, variable HEPMCLOCATION
 endif
 
