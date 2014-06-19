@@ -77,10 +77,10 @@ class QGScatterHook : public UserHooks {
       // Since the continuing quark doesn't change flav, 
       // we require all 3 particles from process[5] to process[7] must be b/c
       if (checkBorC(process[5].idAbs()) && checkBorC(process[6].idAbs()) && checkBorC(process[7].idAbs())){
-        if (DEBUG) cout << "slot 1: " << process[1].id() << ", slot 2: " << process[2].id() 
+        if (DEBUG) { cout << "slot 1: " << process[1].id() << ", slot 2: " << process[2].id() 
             << ", slot 3: " << process[3].id() << ", slot 4: " << process[4].id() 
             << ", slot 5: " << process[5].id() << ", slot 6: " << process[6].id() 
-            << ", slot 7: " << process[7].id() << endl;
+            << ", slot 7: " << process[7].id() << endl; }
         return false;
       } else {
         return true;

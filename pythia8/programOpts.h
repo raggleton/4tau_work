@@ -114,6 +114,9 @@ class ProgramOpts
 			}
 			if (vm.count("tauToMuOnly")) {
 			    tauToMuOnly = true;
+			}			
+			if (vm.count("scatterBC")) {
+			    enableScatterHook = true;
 			}
 
 		} // end of constructor
