@@ -14,8 +14,8 @@ int main(int argc, char* argv[]) {
   bool outputEvent       = false; // output entire event listing to STDOUT (long!), for debugging only
   bool writeHLTToHEPMC   = true; // output to HEPMC events passing HLT
   bool writeNoHLTToHEPMC = false; // output to HEPMC events without any HLT cuts
-  bool muOnly            = true; // Only allow b hadrons to decay to muons or taus
-  bool tauToMuOnly       = true; // Only allow those taus from b hadrons to decay to muons 
+  bool muOnly            = false; // Only allow b hadrons to decay to muons or taus
+  bool tauToMuOnly       = false; // Only allow those taus from b hadrons to decay to muons 
 
   // Check that correct number of command-line arguments
   // Unfortunately required even if writeToHEPMC = false
@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
   // For HLT. NoHLT has about 60X HLT amount (320K NoHLT evt for 5K HLT evnt)
   // Warning, 5K events ~900MB hepmc file and takes ~5 min.
   // Warning, 50K events ~9GB hepmc file and takes ~40 min.
-  int nEvent = 500;
+  int nEvent = 5000;
   pythia.readString("Next:numberShowEvent = 00");
   // pythia.readString("Next:numberShowProcess = 100");
   
@@ -151,6 +151,7 @@ int main(int argc, char* argv[]) {
 
   // Some basic histograms
   Hist nMuInEvent("number of muons in an event (HLT)", 10, -0.5, 9.5); 
+  Hist nMuInEventNoHLT("number of muons in an event (NoHLT)", 10, -0.5, 9.5); 
   Hist muPt("pT muons in an event (HLT)", 40, 0.0, 40.0); 
   Hist muPtNoHLT("pT muons in an event (NoHLT)", 40, 0.0, 40.0); 
   int nWithMuPair = 0;
@@ -256,7 +257,9 @@ int main(int argc, char* argv[]) {
     if ((nMuNeg  > 1) || (nMuPos > 1)) {
       ++nWithMuPair;
     }
-
+    
+    nMuInEventNoHLT.fill(muPtVec.size());
+    
     if (nMuPos+nMuNeg < 2) continue; // Skip if there's only 1 muon
     
     if (!writeHLTToHEPMC) iEvent++; // Count evt if not doing HLT mode. Need to be careful when testing this without either...
@@ -316,7 +319,7 @@ int main(int argc, char* argv[]) {
 
   // Statistics. Histograms. 
   pythia.stat();
-  cout << muPt << nMuInEvent << muPtNoHLT << endl;
+  cout << nMuInEventNoHLT << muPt << nMuInEvent << muPtNoHLT << endl;
   cout << "Number of events with pair, & passing HLT: " << nWithMuPair << endl;
 
   // Done. 
