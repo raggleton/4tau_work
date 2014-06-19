@@ -19,8 +19,8 @@ int main(int argc, char* argv[]) {
   bool outputEvent       = pOpts.getOutputEvent(); // output entire event listing to STDOUT (long!), for debugging only
   bool writeHLTToHEPMC   = pOpts.getWriteHLTToHEPMC(); // output to HEPMC events passing HLT
   bool writeNoHLTToHEPMC = pOpts.getWriteNoHLTToHEPMC(); // output to HEPMC events without any HLT cuts
-  bool muOnly            = pOpts.getMuOnly(); // Only allow b/c hadrons to decay to muons or taus
-  bool tauToMuOnly       = pOpts.getTauToMuOnly(); // Only allow those taus from b/c hadrons to decay to muons 
+  bool muOnly            = true; // Only allow b/c hadrons to decay to muons or taus
+  bool tauToMuOnly       = true; // Only allow those taus from b/c hadrons to decay to muons 
   bool DEBUG             = pOpts.getVerbose();
 
   std::string filename   = pOpts.getFilename(); // HEPMC filename stem to be used

@@ -100,7 +100,7 @@ class ProgramOpts
 				("noScatterBC",
 					"Make qcdscatter process use all flavours of q/qbar (defualt is b/c only)")
 				("number,n", po::value<int>(&nEvents), 
-					"Number of events to run over [default = 500]")
+					"Number of events to run over [default = 500]. If writeHLT enabled, counts # events passing HLT. Otherwise, counts # events with 2+ muons.")
 				("name", po::value<std::string>(&filename),
 					"Stem for output HepMC filenames (produces name_HLT.hepmc and name_NoHLT.hepmc)")
 				("verbose,v", "Output debugging statements")
