@@ -12,7 +12,7 @@
 // -I $(HOME)/boost_1_55_0 -I $(HOME)/boost_1_55_0_install/include 
 // to CXXFLAGS in Delphes/Makefile
 // and
-// -L/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib -lboost_program_options -lboost_filesystem
+// -L$(HOME)/boost_1_55_0_install/lib -lboost_program_options -lboost_filesystem
 // to complate make list (after -L$(HEPMCLOCATION)/lib -lHepMC \ )
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
@@ -35,6 +35,7 @@ class ProgramOpts
 		int nEvents;
 		std::string filename;
 		bool verbose;
+		bool enableScatterHook;
 
 	public: 
 		// constructor, parses input
@@ -46,7 +47,8 @@ class ProgramOpts
 			tauToMuOnly(false),
 			nEvents(500),
 			filename("testChangeMe"),
-			verbose(false)
+			verbose(false),
+			enableScatterHook(false)
 		{
 			po::options_description desc("\nAllowed options");
 			desc.add_options()
@@ -61,6 +63,8 @@ class ProgramOpts
 					"Allow b/c hadrons to only decay to final state which contains a muon")
 				("tauToMuOnly", 
 					"Enforce Taus from b/c hadrons decays to decay to muons")
+				("scatterBC",
+					"Make scatter process only do (b|c)g -> (b|c)(bbbcar|ccbar)")
 				("number,n", po::value<int>(&nEvents), 
 					"Number of events to run over [default = 500]")
 				("name", po::value<std::string>(&filename),
@@ -123,6 +127,7 @@ class ProgramOpts
 		int getNEvents() { return nEvents; }
 		std::string getFilename() { return filename; }
 		bool getVerbose() { return verbose; }
+		bool getScatterHook() { return enableScatterHook; }
 
 		// This should really be in a separate .cc file...
 		void printProgramOptions() {
@@ -140,6 +145,8 @@ class ProgramOpts
 				cout << "Forcing b/c hadrons to decay to semi-muonic final state" << endl;
 			if (tauToMuOnly)
 				cout << "Force taus from b/c hadrons to decay to muons" << endl;
+			if (enableScatterHook)
+				cout << "q-g scatter: make scatter process only do (b|c)g -> (b|c)(bbbcar|ccbar)" << endl;
 			cout << "Doing " << nEvents << " events" << endl;
 			cout << "Writing to " << filename <<"(_HLT|_NoHLT).hepmc" << endl;
 			
