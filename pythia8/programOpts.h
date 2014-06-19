@@ -14,12 +14,14 @@
 // and
 // -L$(HOME)/boost_1_55_0_install/lib -lboost_program_options 
 // to complate make list (after -L$(HEPMCLOCATION)/lib -lHepMC \ )
-#include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
+// #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 using std::cout;
 using std::endl;
 
+// namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 
 class ProgramOpts
