@@ -54,7 +54,7 @@ ifneq (x$(HEPMCLOCATION),x)
 	-L$(PYTHIA8LOCATION)/$(LIBDIRARCH) -lpythia8 -llhapdfdummy $(LIBGZIP) \
 	-lpythia8tohepmc \
 	-L$(HEPMCLOCATION)/lib -lHepMC \
-	-L/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib -lboost_program_options -lboost_filesystem
+	-L$(HOME)/boost_1_55_0_install/lib -lboost_program_options -lboost_filesystem
 	@ln -fs $(BINDIR)/$@.exe $@.exe
 else
   main41 main42 mainQCD mainQCDb mainQCDbScatter mainQCDScatter  mainQCDc mainLHEhadronise mainLHEhadroniseDoTaus:
