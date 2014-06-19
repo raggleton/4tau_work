@@ -6,25 +6,23 @@
 #include "Pythia8/Pythia8ToHepMC.h"
 #include "HepMC/GenEvent.h"   
 #include "HepMC/IO_GenEvent.h"
+#include "programOpts.h"
 
 using namespace Pythia8;
  
 int main(int argc, char* argv[]) {
 
-  bool outputEvent       = false; // output entire event listing to STDOUT (long!), for debugging only
-  bool writeHLTToHEPMC   = true; // output to HEPMC events passing HLT
-  bool writeNoHLTToHEPMC = false; // output to HEPMC events without any HLT cuts
-  bool muOnly            = false; // Only allow b hadrons to decay to muons or taus
-  bool tauToMuOnly       = false; // Only allow those taus from b hadrons to decay to muons 
+  ProgramOpts pOpts(argc, argv);
+  pOpts.printProgramOptions();
 
-  // Check that correct number of command-line arguments
-  // Unfortunately required even if writeToHEPMC = false
-  if (argc != 2) {
-    cerr << " Unexpected number of command-line arguments. \n "
-         <<  "You are expected to provide one output file name eg myQCDb \n"
-         << " Program stopped! " << endl;
-    return 1;
-  }
+  bool outputEvent       = pOpts.getOutputEvent(); // output entire event listing to STDOUT (long!), for debugging only
+  bool writeHLTToHEPMC   = pOpts.getWriteHLTToHEPMC(); // output to HEPMC events passing HLT
+  bool writeNoHLTToHEPMC = pOpts.getWriteNoHLTToHEPMC(); // output to HEPMC events without any HLT cuts
+  bool muOnly            = pOpts.getMuOnly(); // Only allow b/c hadrons to decay to muons or taus
+  bool tauToMuOnly       = pOpts.getTauToMuOnly(); // Only allow those taus from b/c hadrons to decay to muons 
+  bool DEBUG             = pOpts.getVerbose();
+
+  std::string filename   = pOpts.getFilename(); // HEPMC filename stem to be used
 
   if (writeHLTToHEPMC) cout << "Writing HLT events to HEPMC" << endl;
   if (writeNoHLTToHEPMC) cout << "Writing all events to HEPMC" << endl;
@@ -56,7 +54,7 @@ int main(int argc, char* argv[]) {
   // For HLT. NoHLT has about 60X HLT amount (320K NoHLT evt for 5K HLT evnt)
   // Warning, 5K events ~900MB hepmc file and takes ~5 min.
   // Warning, 50K events ~9GB hepmc file and takes ~40 min.
-  int nEvent = 5000;
+  int nEvent = pOpts.getNEvents();
   pythia.readString("Next:numberShowEvent = 00");
   // pythia.readString("Next:numberShowProcess = 100");
   
@@ -78,11 +76,11 @@ int main(int argc, char* argv[]) {
   // You would need to use HardQCD:all or even SoftQCD:nonDiffractive for that.
   pythia.readString("HardQCD:gg2bbbar = on");    
   pythia.readString("HardQCD:qqbar2bbbar = on");    
-  pythia.readString("Top:gg2ttbar = on");
-  pythia.readString("Top:qqbar2ttbar = on");
+  // pythia.readString("Top:gg2ttbar = on");
+  // pythia.readString("Top:qqbar2ttbar = on");
   // Make sure t->Wb only
-  pythia.readString("6: onMode = off");
-  pythia.readString("6: onIfAny = 5");
+  // pythia.readString("6: onMode = off");
+  // pythia.readString("6: onIfAny = 5");
   pythia.readString("PhaseSpace:pTHatMin = 20.");  
   // pythia.readString("HadronLevel:all = on");
   // pythia.readString("ProcessLevel:all = off");   
