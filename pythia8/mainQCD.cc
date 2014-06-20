@@ -8,8 +8,20 @@
 #include "HepMC/IO_GenEvent.h"
 #include "myHooks.h"
 #include "programOpts.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace Pythia8;
+using namespace boost::algorithm;
+
+std::string getCurrentTime() {
+    // current date/time based on current system
+  time_t now = time(0);
+  // convert now to string form
+  char* dt = ctime(&now);
+  std::string str1 = std::string(dt);
+  trim(str1);
+  return str1;
+}
  
 int main(int argc, char* argv[]) {
 
@@ -39,7 +51,12 @@ int main(int argc, char* argv[]) {
   HepMC::IO_GenEvent ascii_io_NoHLT(noHLTfile, std::ios::out);
   HepMC::IO_GenEvent ascii_io_HLT(HLTfile, std::ios::out);
 
+  // Text file to write progress - handy for monitoring during PBS jobs
+  ofstream myfile;
+  myfile.open((filename+"_progress.txt").c_str());
+
   cout << "Outputting to " << noHLTfile << " and " << HLTfile << endl;
+  cout << "Outputting iEvent status to " << filename << ".txt" << endl;
 
   // Generator. Shorthand for event.
   Pythia pythia;
@@ -129,6 +146,9 @@ int main(int argc, char* argv[]) {
   Hist nRepeats("number of repeats required to get 2+ muons", 50, 0.5, 100.5); 
   int nWithSSMuPair = 0;
 
+  cout << "Starting at " << getCurrentTime() << endl;
+  myfile << "Starting at " << getCurrentTime() << endl;
+
   ///////////////////////
   // Begin event loop. //
   ///////////////////////
@@ -142,7 +162,8 @@ int main(int argc, char* argv[]) {
 
     if ((iEvent % outputEvery == 0) && (iEvent!= lastiEvent)){
       lastiEvent = iEvent;
-      cout << "iEvent: " << iEvent << endl;
+      cout << "iEvent: " << iEvent << " - " << getCurrentTime() << endl;
+      myfile << "iEvent: " << iEvent << " - " << getCurrentTime() << endl;
     }
    
     // Generate event. Skip it if error.
@@ -275,5 +296,6 @@ int main(int argc, char* argv[]) {
   // if(userProcess == qcdscatter) {
     // delete scatterHook;
   // }
+  myfile.close();
   return 0;
 }
