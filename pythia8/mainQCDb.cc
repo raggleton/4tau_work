@@ -30,8 +30,8 @@ int main(int argc, char* argv[]) {
 
   // Specify file where HepMC events will be stored.
   // Do one for with HLT cuts, one wihtout HLT cuts
-  std::string noHLTfile = std::string(argv[1])+"_NoHLT.hepmc";
-  std::string HLTfile = std::string(argv[1])+"_HLT.hepmc";
+  std::string noHLTfile = filename+"_NoHLT.hepmc";
+  std::string HLTfile = filename+"_HLT.hepmc";
   HepMC::IO_GenEvent ascii_io_NoHLT(noHLTfile, std::ios::out);
   HepMC::IO_GenEvent ascii_io_HLT(HLTfile, std::ios::out);
 
@@ -99,8 +99,8 @@ int main(int argc, char* argv[]) {
     5324,5332,5334,5142,5242,5412,5422,5414,5424,5342,5432,5434,5442,5444,5512,5522,5514,5524,5532,5534,
     5542,5544,5554};
   int nCodes = sizeof(bCodes)/sizeof(int);
-  bool muOnly = true;
-  bool tauToMuOnly = true;
+  bool muOnly = false;
+  bool tauToMuOnly = false;
   if (muOnly){
     // Set B hadrons to decay to modes involving a muon or tau
     for (int iC = 0; iC < nCodes; ++iC) {
