@@ -244,18 +244,21 @@ int main(int argc, char* argv[]) {
     
     // Do HLT cuts
     if (writeHLTToHEPMC){
-      // order mu pt vector
-      std::sort(muPtVec.begin(),muPtVec.end(), std::greater<int>());
+      
+      if (muPtVec.size() != 0){
+        // order mu pt vector
+        std::sort(muPtVec.begin(),muPtVec.end(), std::greater<int>());
 
-      // Emulate HLT - HLT_Mu17_Mu8
-      if (muPtVec[0] > 17 && muPtVec[1] > 8 ){
-        // if it gets to here, then we're happy with the event
-        iEvent++;
-        for (unsigned a = 0; a < muPtVec.size(); a++){
-          muPt.fill(muPtVec.at(a));
+        // Emulate HLT - HLT_Mu17_Mu8
+        if (muPtVec[0] > 17 && muPtVec[1] > 8 ){
+          // if it gets to here, then we're happy with the event
+          iEvent++;
+          for (unsigned a = 0; a < muPtVec.size(); a++){
+            muPt.fill(muPtVec.at(a));
+          }
+          nMuInEventHLT.fill(nMuPos + nMuNeg);
+          wantedHLT = true;
         }
-        nMuInEventHLT.fill(nMuPos + nMuNeg);
-        wantedHLT = true;
       }
     }
 
