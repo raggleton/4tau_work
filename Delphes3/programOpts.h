@@ -36,7 +36,7 @@ namespace po = boost::program_options;
 
 // Global enum for the MC source
 // Note convention of all lower case
-enum MCsource { signal, qcdb, qcdc, qcdscatter, qcdall };
+enum MCsource { signal, qcdb, qcdc, qcdscatter, qcdall, test };
 
 // Have to define << and >> ops to get enum to work with boost::lexical_cast 
 // and program_options, and also so we can cout the enum easily
@@ -50,6 +50,7 @@ std::ostream& operator<<(std::ostream& out, const MCsource value) {
         PROCESS_VAL(qcdc);
         PROCESS_VAL(qcdscatter);
         PROCESS_VAL(qcdall);
+        PROCESS_VAL(test);
     }
 #undef PROCESS_VAL
 
@@ -70,6 +71,8 @@ std::istream & operator>>(std::istream & in, MCsource & value) {
   		value = qcdscatter;
   	else if (token == "qcdall")
   		value = qcdall;
+  	else if (token == "test")
+  		value = test;
   	else
   		throw runtime_error("Invalid string cast to enum");
   }
@@ -82,7 +85,7 @@ std::istream & operator>>(std::istream & in, MCsource & value) {
 class ProgramOpts
 {
 	private:
-		MCsource source; // do signal or qcd(b)(c)(scatter)
+		MCsource source; // do signal or qcd(b)(c)(scatter) or test (a qcdb file)
 		bool doSignal; // do signal, or not signal (some parts are signal only)
 		bool doMu; // for QCDb - either inclusive decays or mu only decays - DEPRECIATED
 		bool swapMuRandomly; // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
@@ -106,7 +109,7 @@ class ProgramOpts
 			desc.add_options()
 				("help,h", "Produce help message")
 				("source,s", po::value<MCsource>(&source), 
-					"Process to run: signal [default], qcdb, qcdc, qcdscatter")
+					"Process to run: signal [default], qcdb, qcdc, qcdscatter, test (a qcdb file)")
 				("swapMuRandomly", po::value<bool>(&swapMuRandomly), 
 					"TRUE [default] - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
 				("doHLT", po::value<bool>(&doHLT), 
@@ -288,25 +291,29 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			file = "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_";
 			nFiles = 200;
 		}
+	} else if (source == test) {
+		cout << "Doing test file" << endl;
+		chain->Add("QCDb_HLT_bare/QCDb_HLT_1.root");
 	}
 
 	// Auto-loop over ROOT files in folder using Boost::Filesystem
 	
 	// TODO
 
-
-	// For manually looping over files in a folder from 1 to nFiles (inclusive)	
-	for (int i = 1; i <= nFiles; i ++) {
-		cout << "Adding " << 
-			folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
-		chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
-	}
-	file = "QCDb_HLT_10000_";
-	nFiles=10;
-	for (int i = 1; i <= nFiles; i ++) {
-		cout << "Adding " << 
-			folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
-		chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
+	if (source != test) {
+		// For manually looping over files in a folder from 1 to nFiles (inclusive)	
+		for (int i = 1; i <= nFiles; i ++) {
+			cout << "Adding " << 
+				folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
+			chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
+		}
+		file = "QCDb_HLT_10000_";
+		nFiles=10;
+		for (int i = 1; i <= nFiles; i ++) {
+			cout << "Adding " << 
+				folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
+			chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
+		}
 	}
 }
 

@@ -25,6 +25,8 @@ bool checkMuons(GenParticle* muA, GenParticle* muB, double deltaR){
 	if ((muA->Charge == muB->Charge)
 		&& (fabs(muA->Eta) < 2.1)
 		&& (fabs(muB->Eta) < 2.1)
+		// && (fabs() < ) // dZ < 0.1cm
+		// && (fabs() < ) // d0 < 0.03cm
 		&& ((muA->P4().DeltaR(muB->P4())) > deltaR)
 		){
 		return true;
@@ -44,7 +46,7 @@ void massPlots(int argc, char* argv[])
 	// Get program options from user and store
 	ProgramOpts pOpts(argc, argv);
 
-	// MCsource source     = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
+	MCsource source     = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
 	bool doSignal       = pOpts.getSignal(); // for signal or not
 	// bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
@@ -212,7 +214,7 @@ void massPlots(int argc, char* argv[])
 		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<GenParticle>);
 
 
-		// Make pairs, see if they pass all cuts (SS, eta, deltaR)
+		// Make pairs, see if they pass all cuts (SS, eta, deltaR, dZ, d0)
 		// If they do, store in mu1 and mu2 (mu1 has higher pT)
 		GenParticle *mu1(nullptr), *mu2(nullptr);
 		bool foundMuonPair = false;
@@ -424,8 +426,8 @@ void massPlots(int argc, char* argv[])
 				if (   (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
 					&& (candTk->PT != mu2->PT)
 					&& (candTk->PT > 1.)
-					&& (fabs(candTk->Z) < 1.) //dz < 1mm
-					&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
+					&& (fabs(candTk->Z) < 0.5) //dz < 0.5cm
+					&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) // impact parameter < 1cm
 					&& (fabs(candTk->Eta)<2.4)
 				){
 					// Store track in suitable vector
@@ -439,7 +441,11 @@ void massPlots(int argc, char* argv[])
 						tk2_1.push_back(candTk);
 					}
 
-					if (candTk->PT > 2.5){
+					// 1 prong candiate must have pT >2.5, 
+					// d_z < 0.04cm, d_0 < 0.02cm
+					if (   (candTk->PT > 2.5)
+						// && (fabs(candTk->)<0.04)
+					){
 						if (dR1 < 0.5){
 							tk1_2p5.push_back(candTk);
 						}
@@ -826,6 +832,9 @@ void massPlots(int argc, char* argv[])
 	app += "_dR";
 	app += boost::lexical_cast<std::string>(deltaR);
 
+	if (source == test)
+		app += "_TEST";
+	
 	// Get directory that input file was in - put plots in there
 	std::string directory = getDirectory(chain.GetFile());
 
