@@ -246,9 +246,12 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 		if (doMu) {
 			if(doHLT) {
 				cout << "Doing QCDb_mu with HLT cuts" << endl;
-				folder = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/";
-				file = "QCDb_mu_pthatmin20_Mu17_Mu8_";
-				nFiles = 350;
+				// folder = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/";
+				folder = "QCDb_HLT_bare/";
+				// file = "QCDb_mu_pthatmin20_Mu17_Mu8_";
+				file = "QCDb_HLT_";
+				// nFiles = 350;
+				nFiles = 600;
 			} else{
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
 				folder = "QCDb_mu_pthatmin20_bare/";
@@ -293,6 +296,13 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 
 
 	// For manually looping over files in a folder from 1 to nFiles (inclusive)	
+	for (int i = 1; i <= nFiles; i ++) {
+		cout << "Adding " << 
+			folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
+		chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
+	}
+	file = "QCDb_HLT_10000_";
+	nFiles=10;
 	for (int i = 1; i <= nFiles; i ++) {
 		cout << "Adding " << 
 			folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
