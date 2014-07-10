@@ -230,7 +230,6 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 
 	if (source == signal) {
 		if (doHLT) {
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_HLT_bare.root");
 			cout << "Doing signal with HLT cuts" << endl;
 			// folder = "Signal_1prong_500K_TauPythia_bare/";
 			// file = "signal_1prong_500K_TauPythia_HLT_";
@@ -239,7 +238,6 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			nFiles = 20;
 			// nFiles = 1;
 		} else { 
-			// chain->Add("Signal_1prong_500K_bare/signal_1prong_500K_1_NoHLT_bare.root");
 			cout << "Doing signal without HLT cuts" << endl;
 			folder = "Signal_1prong_500K_bare/";
 			file = "signal_1prong_500K_NoHLT_";
@@ -250,16 +248,15 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			if(doHLT) {
 				cout << "Doing QCDb_mu with HLT cuts" << endl;
 				// folder = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/";
-				folder = "QCDb_HLT_bare/";
 				// file = "QCDb_mu_pthatmin20_Mu17_Mu8_";
-				file = "QCDb_HLT_";
 				// nFiles = 350;
+				folder = "QCDb_HLT_bare/";
+				file = "QCDb_HLT_";
 				nFiles = 600;
 			} else{
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
 				folder = "QCDb_mu_pthatmin20_bare/";
 				file = "QCDb_mu_pthatmin20_";
-				// chain->Add("QCDb_mu_pthatmin20_bare/QCDb_mu_pthatmin20_92.root");
 				nFiles = 94;
 			}
 		} else {
@@ -293,6 +290,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 		}
 	} else if (source == test) {
 		cout << "Doing test file" << endl;
+		cout << "Adding QCDb_HLT_bare/QCDb_HLT_1.root" << endl;
 		chain->Add("QCDb_HLT_bare/QCDb_HLT_1.root");
 	}
 
