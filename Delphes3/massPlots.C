@@ -5,6 +5,12 @@
 using std::cout;
 using std::endl;
 
+
+/**
+ * NB ALL DISTANCES IN MM, ALL ENERGIES IN GeV
+ * SEE DelphesHepMCReader.cc
+ */
+
 // int getMassBin(double m){
 // 	std::vector<double> massBins {0,1,2,3,10};
 // 	for(unsigned i = 1; i < massBins.size(); i++){
@@ -19,14 +25,36 @@ using std::endl;
  * apart from pT. 
  * @param  muA Higher pT muon
  * @param  muB Lesser pT muon
+ * @param  deltaR dR(mu-mu) cut
+ * @return    TRUE if muA and muB pass cuts, FALSE otherwise
+ */
+bool checkMuons(Track* muA, Track* muB, double deltaR){
+	if ((muA->Charge == muB->Charge)
+		&& (fabs(muA->Eta) < 2.1)
+		&& (fabs(muB->Eta) < 2.1)
+		&& (fabs(muA->Zd) < 1.) // dZ < 0.1cm
+		&& (fabs(muB->Zd) < 1.) // dZ < 0.1cm
+		&& (fabs(muA->Dxy) < 0.3 ) // d0 < 0.03cm
+		&& (fabs(muB->Dxy) < 0.3 ) // d0 < 0.03cm
+		&& ((muA->P4().DeltaR(muB->P4())) > deltaR)
+		){
+		return true;
+	} else {
+		return false;
+	}
+}
+/**
+ * These checks to see if muA and muB satisfy all muon condtions
+ * apart from pT and impact params. 
+ * @param  muA Higher pT muon
+ * @param  muB Lesser pT muon
+ * @param  deltaR dR(mu-mu) cut
  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
  */
 bool checkMuons(GenParticle* muA, GenParticle* muB, double deltaR){
 	if ((muA->Charge == muB->Charge)
 		&& (fabs(muA->Eta) < 2.1)
 		&& (fabs(muB->Eta) < 2.1)
-		// && (fabs() < ) // dZ < 0.1cm
-		// && (fabs() < ) // d0 < 0.03cm
 		&& ((muA->P4().DeltaR(muB->P4())) > deltaR)
 		){
 		return true;
@@ -68,8 +96,8 @@ void massPlots(int argc, char* argv[])
 	// and use https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription
 	// TClonesArray* branchMuon = treeReader->UseBranch("Muon");
 	TClonesArray* branchTracks   = treeReader->UseBranch("Track");
-	TClonesArray* branchGenMuons = treeReader->UseBranch("OnlyGenMuons"); // GenParticle object
-	// TClonesArray* branchGenMuons = treeReader->UseBranch("GenMuon"); // Track object
+	// TClonesArray* branchGenMuons = treeReader->UseBranch("OnlyGenMuons"); // GenParticle object
+	TClonesArray* branchGenMuons = treeReader->UseBranch("GenMuon"); // Track object
 	// TClonesArray* branchStable   = treeReader->UseBranch("StableParticle");
 	TClonesArray* branchAll      = treeReader->UseBranch("AllParticle");
 
@@ -189,16 +217,17 @@ void massPlots(int argc, char* argv[])
 
 		/////////////////////////////////////////////////////////////////////////
 		// Now, get the two highest pT muons in the event that pass selection, // 
-		// store pointers to the GenParticles and 4-momenta                    //
+		// store pointers to the Track particles and 4-momenta                 //
+		// (Use tracks for muons as store more info about position)
 		/////////////////////////////////////////////////////////////////////////
 		
 		// Track *candTk(nullptr);
 
 		// Fill vectors with muons, based on pT
-		std::vector<GenParticle*> muons10to17;
-		std::vector<GenParticle*> muons17toInf;
+		std::vector<Track*> muons10to17;
+		std::vector<Track*> muons17toInf;
 		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
-			GenParticle* cand = (GenParticle*) branchGenMuons->At(i);
+			Track* cand = (Track*) branchGenMuons->At(i);
 			if (cand->PT > 17) {
 				muons17toInf.push_back(cand);
 			} else if (cand->PT > 10) {
@@ -210,17 +239,17 @@ void massPlots(int argc, char* argv[])
 		if (!(muons17toInf.size() >= 1 && (muons17toInf.size() + muons10to17.size()) >= 2)) continue;
 
 		// Sort both vectors by descending pT
-		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<GenParticle>);
-		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<GenParticle>);
+		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<Track>);
+		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<Track>);
 
 
 		// Make pairs, see if they pass all cuts (SS, eta, deltaR, dZ, d0)
 		// If they do, store in mu1 and mu2 (mu1 has higher pT)
-		GenParticle *mu1(nullptr), *mu2(nullptr);
+		Track *mu1(nullptr), *mu2(nullptr);
 		bool foundMuonPair = false;
 
 		// for (auto muA : muons17toInf) {
-		std::vector<GenParticle*>::iterator muA = muons17toInf.begin();
+		std::vector<Track*>::iterator muA = muons17toInf.begin();
 		while(!foundMuonPair && muA != muons17toInf.end()){
 			
 			// Need to make pairs among the 17toInf vector also, if size >= 2
@@ -257,7 +286,7 @@ void massPlots(int argc, char* argv[])
 		// cout << " >>>>> deltaR " << mu1->P4().DeltaR(mu2->P4()) << endl;
 
 		// Now randomly swap mu1 - mu2
-		GenParticle *origMu1(nullptr), *origMu2(nullptr);
+		Track *origMu1(nullptr), *origMu2(nullptr);
 		origMu1 = mu1;
 		origMu2 = mu2;
 		if (swapMuRandomly){
@@ -426,9 +455,9 @@ void massPlots(int argc, char* argv[])
 				if (   (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
 					&& (candTk->PT != mu2->PT)
 					&& (candTk->PT > 1.)
-					&& (fabs(candTk->Z) < 0.5) //dz < 0.5cm
-					&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) // impact parameter < 1cm
-					&& (fabs(candTk->Eta)<2.4)
+					&& (fabs(candTk->Zd) < 5.) //dz < 0.5cm
+					&& (fabs(candTk->Dxy) < 10.) // d_0 impact parameter < 1cm
+					&& (fabs(candTk->Eta) < 2.4)
 				){
 					// Store track in suitable vector
 					double dR1 = (candTk->P4()).DeltaR(mu1Mom);
@@ -444,7 +473,8 @@ void massPlots(int argc, char* argv[])
 					// 1 prong candiate must have pT >2.5, 
 					// d_z < 0.04cm, d_0 < 0.02cm
 					if (   (candTk->PT > 2.5)
-						// && (fabs(candTk->)<0.04)
+						&& (fabs(candTk->Zd) < 0.4)
+						&& (fabs(candTk->Dxy) < 0.2)
 					){
 						if (dR1 < 0.5){
 							tk1_2p5.push_back(candTk);
@@ -834,7 +864,7 @@ void massPlots(int argc, char* argv[])
 
 	if (source == test)
 		app += "_TEST";
-	
+
 	// Get directory that input file was in - put plots in there
 	std::string directory = getDirectory(chain.GetFile());
 
