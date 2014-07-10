@@ -9,6 +9,7 @@
 #include "myHooks.h"
 #include "programOpts.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace Pythia8;
 using namespace boost::algorithm;
@@ -33,9 +34,8 @@ int main(int argc, char* argv[]) {
   bool writeNoHLTToHEPMC = pOpts.getWriteNoHLTToHEPMC(); // output to HEPMC events without any HLT cuts
   bool notMuOnly         = pOpts.getNotMuOnly(); // Ture is the user doesn't want events generated that are guaranteed to have 2+ muons
   bool DEBUG             = pOpts.getVerbose();
-
-  process userProcess = pOpts.getProcess(); // qcdb, qcdc, qcdscatter
-
+  int seed               = pOpts.getSeed();
+  process userProcess    = pOpts.getProcess(); // qcdb, qcdc, qcdscatter
   std::string filename   = pOpts.getFilename(); // HEPMC filename stem to be used
 
   if (writeHLTToHEPMC) cout << "Writing HLT events to HEPMC" << endl;
@@ -66,7 +66,8 @@ int main(int argc, char* argv[]) {
   // Do random seed
   // A value 0 gives a random seed based on the time
   pythia.readString("Random:setSeed = on");
-  pythia.readString("Random:seed = 0");
+  std::string seedStr = "Random:seed = "+boost::lexical_cast<std::string>(seed);
+  pythia.readString(seedStr);
   
   ////////////////////////
   // Number of events.  //
@@ -155,7 +156,7 @@ int main(int argc, char* argv[]) {
   int iEvent      = 0; // counts events passing HLT, NOT NoHLT
   int lastiEvent  = 0; // for outputting to screen every outputEvery events
   int outputEvery = 5; 
-
+  bool printEvent = true;
   while(iEvent < nEvent) {
     bool wantedHLT = false;
     bool wantedNoHLT = false;
@@ -197,7 +198,9 @@ int main(int argc, char* argv[]) {
     // Unless user wants any # muons in their events, 
     // we continually hadronise until we get 2+ muons
     if (!pOpts.getNotMuOnly()){
-      while(muPtVec.size() < 2) {
+      int nAttempts = 0;
+      while(muPtVec.size() < 2 && nAttempts <100) {
+        nAttempts++;
         muPtVec.clear();
         nMuNeg = 0;
         nMuPos = 0;
@@ -263,8 +266,10 @@ int main(int argc, char* argv[]) {
     }
 
     // Output the first HLT event to screen
-    if (outputEvent && iEvent <= 1)
+    if (outputEvent && iEvent == 1 && printEvent){
       event.list();
+      printEvent = false;
+    }
 
     // Write out events that pass HLT cuts
     if (wantedHLT && writeHLTToHEPMC){

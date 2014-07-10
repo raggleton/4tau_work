@@ -70,6 +70,7 @@ class ProgramOpts
 		std::string filename;
 		bool verbose;
 		bool disableScatterHook;
+		int seed;
 
 	public: 
 		// constructor, parses input
@@ -82,7 +83,8 @@ class ProgramOpts
 			nEvents(1),
 			filename("testChangeMe"),
 			verbose(false),
-			disableScatterHook(false)
+			disableScatterHook(false),
+			seed(0)
 		{
 			po::options_description desc("\nAllowed options");
 			desc.add_options()
@@ -103,6 +105,8 @@ class ProgramOpts
 					"Number of events to run over [default = 500]. If writeHLT enabled, counts # events passing HLT. Otherwise, counts # events with 2+ muons.")
 				("name", po::value<std::string>(&filename),
 					"Stem for output HepMC filenames (produces name_HLT.hepmc and name_NoHLT.hepmc)")
+				("seed", po::value<int>(&seed),
+					"Seed for random number generator. 0 = uses time. DON'T USE FOR BATCH SYSTEM. Get simultaneous start = same seed = pain. Use file numebr instead.")
 				("verbose,v", "Output debugging statements")
 			;
 
@@ -165,6 +169,7 @@ class ProgramOpts
 		std::string getFilename() { return filename; }
 		bool getVerbose() { return verbose; }
 		bool getScatterHook() { return disableScatterHook; }
+		int getSeed() { return seed; }
 
 		// This should really be in a separate .cc file...
 		void printProgramOptions() {
@@ -185,7 +190,7 @@ class ProgramOpts
 				cout << "q-g scatter: scatter process use all flavours of q/qbar" << endl;
 			cout << "Doing " << nEvents << " events" << endl;
 			cout << "Writing to " << filename <<"(_HLT|_NoHLT).hepmc" << endl;
-			
+			cout << "Random seed: " << seed << endl;
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		}
 
