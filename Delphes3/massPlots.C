@@ -49,9 +49,9 @@ void massPlots(int argc, char* argv[])
 	// bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
-	bool DEBUG          = pOpts.getVerbose(); // output debug statments
+	// bool DEBUG          = pOpts.getVerbose(); // output debug statments
 
-	double deltaR = 2; // dR(mu-mu) value to use
+	double deltaR = 1; // dR(mu-mu) value to use
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -84,6 +84,9 @@ void massPlots(int argc, char* argv[])
 
 	TH1D* histM1                       = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}",10,0,10);
 	TH1D* histM2                       = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}",10,0,10);
+	
+	TH1D* histM1_fine                  = new TH1D("hM1Fine", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}",50,0,10);
+	TH1D* histM2_fine                  = new TH1D("hM2Fine", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}",50,0,10);
 
 	TH1D* histM1_side_1to2p5           = new TH1D("hM1_side_1to2p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
 	TH1D* histM2_side_1to2p5           = new TH1D("hM2_side_1to2p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
@@ -256,6 +259,8 @@ void massPlots(int argc, char* argv[])
 		origMu1 = mu1;
 		origMu2 = mu2;
 		if (swapMuRandomly){
+			// TLorentzVector mu1MomTmp = mu1->P4();
+			// TLorentzVector mu2MomTmp = mu2->P4();
 			double randNum = (double)rand() / RAND_MAX;
 			if (randNum > 0.5){
 				mu1 = origMu2;
@@ -468,6 +473,21 @@ void massPlots(int argc, char* argv[])
 				} // End of track selection criteria
 			} // End of track loop
 
+
+			// Do swapping
+			// if (tk1_1.size() == 1 && tk2_1.size() == 1 
+			// && tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) {
+			// 	TLorentzVector mu1MomTmp = mu1->P4();		
+			// 	TLorentzVector tk1MomTmp = tk1_2p5_OS[0]->P4();		
+			// 	TLorentzVector sys1Mom = mu1MomTmp+tk1MomTmp;
+			// 	TLorentzVector mu2MomTmp = mu2->P4();		
+			// 	TLorentzVector tk2MomTmp = tk2_2p5_OS[0]->P4();		
+			// 	TLorentzVector sys2Mom = mu2MomTmp+tk2MomTmp;
+			// 	TLorentzVector totMom = mu1MomTmp+mu2MomTmp+tk1MomTmp+tk2MomTmp;
+
+			// }
+
+
 			/////////////////////////
 			// SIGNAL SELECTION    //
 			/////////////////////////
@@ -484,7 +504,9 @@ void massPlots(int argc, char* argv[])
 				double m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
 				histM1->Fill(m1);
+				histM1_fine->Fill(m1);
 				histM2->Fill(m2);
+				histM2_fine->Fill(m2);
 				
 				// Fill symmetrically to increase stats
 				histM1vsM2->Fill(m1,m2);
@@ -716,8 +738,10 @@ void massPlots(int argc, char* argv[])
 	normaliseHist(histM1vsM2_side_1to1p5);
 
 	normaliseHist(histM1);
+	normaliseHist(histM1_fine);
 	normaliseHist(histM1_rebin);
 	normaliseHist(histM2);
+	normaliseHist(histM2_fine);
 	normaliseHist(histM2_rebin);
 	normaliseHist(histM);
 	normaliseHist(histM1vsM2);
@@ -853,8 +877,10 @@ void massPlots(int argc, char* argv[])
 
 	// SIGNAL region
 	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
+	drawHistAndSave(histM1_fine, "HISTE", "M1_fine", directory, app);
 	drawHistAndSave(histM1_rebin, "HISTE", "M1_rebin", directory, app);
 	drawHistAndSave(histM2, "HISTE", "M2", directory, app);
+	drawHistAndSave(histM2_fine, "HISTE", "M2_fine", directory, app);
 	drawHistAndSave(histM2_rebin, "HISTE", "M2_rebin", directory, app);
 	drawHistAndSave(histM, "HISTE", "M", directory, app);
 	drawHistAndSave(histM1vsM2, "colzTEXTE","M1vsM2", directory, app);
@@ -869,7 +895,9 @@ void massPlots(int argc, char* argv[])
 	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
 	histM1->Write("",TObject::kOverwrite);
+	histM1_fine->Write("",TObject::kOverwrite);
 	histM2->Write("",TObject::kOverwrite);
+	histM2_fine->Write("",TObject::kOverwrite);
 	histM->Write("",TObject::kOverwrite);
 	if (doSignal){
 		histM1_truth_0to1->Write("",TObject::kOverwrite);
