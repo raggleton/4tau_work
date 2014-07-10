@@ -336,6 +336,13 @@ void normaliseHist(TH1* h) {
 	}
 }
 
+/**
+ * Print out integral of TH1 object (or dervied class)
+ * @param h Print integral of this hist
+ */
+void printIntegral(TH1* h) {
+	cout << h->GetName() << " : [" << h->GetTitle() << "] = " << h->Integral() << endl;
+}
 
 /**
  * Draws mass correlation plot, saves file as 

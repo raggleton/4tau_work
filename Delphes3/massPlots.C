@@ -46,6 +46,7 @@ bool checkMuons(Track* muA, Track* muB, double deltaR){
 /**
  * These checks to see if muA and muB satisfy all muon condtions
  * apart from pT and impact params. 
+ * (Old version kept incase you use RawGenMuons branch instead of GenMuons)
  * @param  muA Higher pT muon
  * @param  muB Lesser pT muon
  * @param  deltaR dR(mu-mu) cut
@@ -761,6 +762,26 @@ void massPlots(int argc, char* argv[])
 	TH1D* histM2_rebin = (TH1D*) histM2->Rebin(nBinsX,"hM2_rebin",&massBins[0]);
 	histM->Add(histM1_rebin);
 	histM->Add(histM2_rebin);
+
+	// Print out integrals before we normalise
+	printIntegral(histM1_side_1to2p5);
+	printIntegral(histM2_side_1to2p5);
+	printIntegral(histM_side_1to2p5);
+	printIntegral(histM1vsM2_side_1to2p5);
+
+	printIntegral(histM1_side_1to1p5);
+	printIntegral(histM2_side_1to1p5);
+	printIntegral(histM_side_1to1p5);
+	printIntegral(histM1vsM2_side_1to1p5);
+
+	printIntegral(histM1);
+	printIntegral(histM1_fine);
+	printIntegral(histM1_rebin);
+	printIntegral(histM2);
+	printIntegral(histM2_fine);
+	printIntegral(histM2_rebin);
+	printIntegral(histM);
+	printIntegral(histM1vsM2);
 
 	// Do some normalizing
 	normaliseHist(histM1_side_1to2p5);
