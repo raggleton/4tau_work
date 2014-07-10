@@ -21,9 +21,9 @@ Sorry in advance if this is a bit rubbish - it's constantly in a state of flux, 
 
 ** Requires version 3.1.2 or greater** (basically need track class to have impact parameter variables Dxy,Xd, Yd, etc - check in `DelphesClasses.h`)
 
-- Downlaod tarball, extract
+- Download tarball, extract
 - `cd` into folder, run `make`
-
+- Edit and run `setupDelphesLinks.sh` to create symlinks to files in your Delphes folder
 
 ## Workflow
 
