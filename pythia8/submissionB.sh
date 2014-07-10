@@ -9,8 +9,8 @@
 
 for i in {401..600}
 do
-        echo "qsub -N $i -v args="-n 5000 -p qcdb --writeHLT --name b_5000_${i}" qcdJob.sh"
-	qsub -N b$i -v args="-n 5000 -p qcdb --writeHLT --name b_5000_${i}" qcdJob.sh
+        echo "qsub -N $i -v args="-n 5000 -p qcdb --writeHLT --name b_5000_${i} --seed ${i}" qcdJob.sh"
+	qsub -N b$i -v args="-n 5000 -p qcdb --writeHLT --name b_5000_${i} --seed ${i}" qcdJob.sh
 	sleep 10
 done
 
