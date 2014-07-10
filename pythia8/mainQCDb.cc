@@ -9,7 +9,15 @@
 #include "programOpts.h"
 
 using namespace Pythia8;
- 
+
+std::string getCurrentTime() {
+    // current date/time based on current system
+  time_t now = time(0);
+  // convert now to string form
+  char* dt = ctime(&now);
+   return std::string(dt);
+}
+
 int main(int argc, char* argv[]) {
 
   ProgramOpts pOpts(argc, argv);
@@ -35,8 +43,12 @@ int main(int argc, char* argv[]) {
   HepMC::IO_GenEvent ascii_io_NoHLT(noHLTfile, std::ios::out);
   HepMC::IO_GenEvent ascii_io_HLT(HLTfile, std::ios::out);
 
-  cout << "Outputting to " << noHLTfile << " and " << HLTfile << endl;
+  // Text file to write progress - handy for monitoring during PBS jobs
+  ofstream myfile;
+  myfile.open(filename+".txt");
 
+  cout << "Outputting to " << noHLTfile << " and " << HLTfile << endl;
+  cout << "Outputting iEvent status to " << filename << ".txt" << endl;
   // Generator. Shorthand for event.
   Pythia pythia;
   Event& event = pythia.event;
@@ -153,6 +165,9 @@ int main(int argc, char* argv[]) {
   Hist muPtNoHLT("pT muons in an event (NoHLT)", 40, 0.0, 40.0); 
   int nWithMuPair = 0;
 
+  cout << "Starting at " << getCurrentTime() << endl;
+  myfile << "Starting at " << getCurrentTime() << endl;
+
   ///////////////////////
   // Begin event loop. //
   ///////////////////////
@@ -166,7 +181,8 @@ int main(int argc, char* argv[]) {
 
     if ((iEvent % outputEvery == 0) && (iEvent!= lastiEvent)){
       lastiEvent = iEvent;
-      cout << "iEvent: " << iEvent << endl;
+      cout << "iEvent: " << iEvent << " - " << getCurrentTime() << endl;
+      myfile << "iEvent: " << iEvent << " - " << getCurrentTime() << endl;    
     }
 
     if (tauToMuOnly){
@@ -320,5 +336,6 @@ int main(int argc, char* argv[]) {
   cout << "Number of events with pair, & passing HLT: " << nWithMuPair << endl;
 
   // Done. 
+  myfile.close();
   return 0;
 }
