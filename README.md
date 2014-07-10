@@ -4,14 +4,26 @@
 For Robin's work on NMSSM H1 -> 2a1 -> 4tau
 
 Monte Carlo stuff is in `pythia8` and `Delphes3` folders.
-You'll need Boost for the Delphes analysis scripts.
+You'll need Boost both Pythia and Delphes.
 
-Sorry in advance if this is a bit rubbish - it's constantly in a state of fluz, and no-one but me uses it. (Standard weak HEP excuse)
+Sorry in advance if this is a bit rubbish - it's constantly in a state of flux, and no-one but me uses it. (Standard weak HEP excuse)
+
+## Setup BOOST 
+
+- See below
 
 ## Setup PYTHIA8
 
 - Download tarball, extract
 - Follow README.HepMC
+
+## Setup Delphes3
+
+** Requires version 3.1.2 or greater** (basically need track class to have impact parameter variables Dxy,Xd, Yd, etc - check in `DelphesClasses.h`)
+
+- Downlaod tarball, extract
+- `cd` into folder, run `make`
+
 
 ## Workflow
 
@@ -25,25 +37,23 @@ make mainLHEhadronise
 ```
 This outputs a HEPMC file.
 
-**QCD[b/c]**:
-- Make it all in Pythia
-(following uses QCDb, also QCDc available)
+**QCD[b/c/q-g scatter]**:
+- Make it all in Pythia using one executable
 ```
-make mainQCDb
-./mainQCDb.exe # to show usage
-./mainQCDb.exe <output HEPMC filename>
+make mainQCD
+./mainQCD.exe # to show usage
 ```
 Once you have a HEPMC file, you now run it through Delphes to produce a ROOT file:
 - Run `./DelphesHepMC` for relevant options.
-- Use `Scripts/submitDelphesLots.sh` or `Scripts/submitDelphesSingle.sh` for use on PBS batch system.
+- Use `Scripts/submitDelphesLots.sh` or `Scripts/submitDelphesSingle.sh` for use on PBS batch system, or `Scripts/runDelphesLots.sh` for lots of local jobs.
 
 ## Delphes Analysis Programs:
-- `basicScript`: template script for making a new program (see below)
-- `mainAnalysis`: does lots of plots, like pT, track eta Vs phi, soft track distributions. Used for QCDb rejection studies
-- `massPlots`: makes plots of invariant masses of mu+tk, and calcualtes & plots correlation coefficients for backgrounds
-- `IP`: plots impact parameters of things. Not really kept up to date.
+- `basicScript`: template script for making a new program (see below) **OUT OF DATE**
+- `mainAnalysis`: does lots of plots, like pT, track eta Vs phi, soft track distributions. Used for QCDb rejection studies **OUT OF DATE**
+- `massPlots`: makes plots of invariant masses of mu+tk, and calculates & plots correlation coefficients for backgrounds
+- `IP`: plots impact parameters of things. Not really kept up to date. **OUT OF DATE**
 
-## Making a new Delphes analysis program:
+## Making a new Delphes analysis program: **OUT OF DATE**
 - Look at `Scripts/createNewScript.sh` - you'll need to edit the relevant paths
 - Run `createNewScript.sh <myscriptName>`. Make sure it puts the new scripts in your `Delphes/examples` folder
 - Go to your Delphes directory, run `./configure` to pick up new script
@@ -53,6 +63,10 @@ Once you have a HEPMC file, you now run it through Delphes to produce a ROOT fil
 - To run your program, do `./runMyCoolNewProgram` in the main Delphes installation folder.
 
 You can now edit your new analysis code. To re-make it, just run `makeScripts`. This will re-make ALL the analysis programs. See `makeMain` and `makeMass` for examples on how to write a script to re-make just one program.
+
+### Notes
+
+- There are old Pythia programs, `mainQCDb`, `mainQCDScatter`, etc. **These are are all old, and buggy. Do not use them.** Only use `mainQCD` (plus, it does everything with command-line options, so win).
 
 
 Installing & compiling against Boost
