@@ -2,8 +2,10 @@
 
 # This modifies the Delphes makefile to add in BOOST, ROOT stuff, C++11 support
 # Run this any time you run ./configure as it'll overwrite it
-# 
-CXXMOD="-I \$(HOME)/boost_1_55_0 -I \$(HOME)/boost_1_55_0_install/include -std=c++11"
+# Use -isystem instead of -I to turn off boost warnings
+# But may need to turn back to -I to debug! 
+# CXXMOD="-I \$(HOME)/boost_1_55_0 -I \$(HOME)/boost_1_55_0_install/include -std=c++11"
+CXXMOD="-isystem \$(HOME)/boost_1_55_0 -isystem \$(HOME)/boost_1_55_0_install/include -std=c++11"
 LIBMOD="-L/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib -lboost_program_options -lboost_filesystem"
 
 echo "Appending to Makefile..."
