@@ -24,7 +24,7 @@ using std::endl;
 bool checkMuons(GenParticle* muA, GenParticle* muB, double deltaR){
 	if ((muA->Charge == muB->Charge)
 		&& (fabs(muA->Eta) < 2.1)
-		&& (fabs(muB->Eta) < 2.4)
+		&& (fabs(muB->Eta) < 2.1)
 		&& ((muA->P4().DeltaR(muB->P4())) > deltaR)
 		){
 		return true;
