@@ -165,7 +165,8 @@ module Calorimeter Calorimeter {
 module Merger EFlowMerger {
 # add InputArray InputArray
   add InputArray Calorimeter/eflowTracks
-  add InputArray Calorimeter/eflowTowers
+  add InputArray Calorimeter/eflowPhotons
+  add InputArray Calorimeter/eflowNeutralHadrons
   # add InputArray ParticlePropagator/muons
   set OutputArray eflow
 }
@@ -325,7 +326,7 @@ module TreeWriter TreeWriter {
   add Branch ParticlePropagator/chargedHadrons GenChargedHadron Track
   add Branch ParticlePropagator/muons GenMuon Track
   add Branch ParticlePropagator/electrons GenElectron Track
-  add Branch MuonGenFilter/onlyGenMuons OnlyGenMuons GenParticle
+  add Branch MuonGenFilter/onlyGenMuons RawGenMuons GenParticle
 
 }
 

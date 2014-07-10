@@ -45,6 +45,7 @@ make mainQCD
 ```
 Once you have a HEPMC file, you now run it through Delphes to produce a ROOT file:
 - Run `./DelphesHepMC` for relevant options.
+- Generally, you'll want to use `DelphesCards\delphes_card_cms_bare.tcl`. If you're using a version of Delphes older than 3.1.2, use `delphes_card_CMS_bare_OLD.tcl`.
 - Use `Scripts/submitDelphesLots.sh` or `Scripts/submitDelphesSingle.sh` for use on PBS batch system, or `Scripts/runDelphesLots.sh` for lots of local jobs.
 
 ## Delphes Analysis Programs:
