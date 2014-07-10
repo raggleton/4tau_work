@@ -27,6 +27,7 @@ alias lh='ls -lh'
 alias ll='ls -l --color=auto'
 alias ls='ls --color=auto'
 alias lt='ls -lrth'
+alias lS='ls -rSlh'
 alias mc='. /usr/libexec/mc/mc-wrapper.sh'
 alias qstatme='qstat -u ra12451; getNumberInQueue '
 alias delEmpty="find . -type f -empty -delete"
