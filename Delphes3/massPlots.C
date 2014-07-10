@@ -84,6 +84,8 @@ void massPlots(int argc, char* argv[])
 
 	double deltaR = 1; // dR(mu-mu) value to use
 
+	bool do1to1p5 = true; // for additional sideband studies. Slower?
+
 	// Create chain of root trees
 	TChain chain("Delphes");
 	addInputFiles(&chain, &pOpts);
@@ -498,12 +500,14 @@ void massPlots(int argc, char* argv[])
 						if (dR2 < 0.5){
 							tk2_1to2p5.push_back(candTk);
 						}
-						if (candTk->PT < 1.5){
-							if (dR1 < 0.5){
-								tk1_1to1p5.push_back(candTk);
-							}
-							if (dR2 < 0.5){
-								tk2_1to1p5.push_back(candTk);
+						if (do1to1p5){
+							if (candTk->PT < 1.5){
+								if (dR1 < 0.5){
+									tk1_1to1p5.push_back(candTk);
+								}
+								if (dR2 < 0.5){
+									tk2_1to1p5.push_back(candTk);
+								}
 							}
 						}
 					}
@@ -670,72 +674,72 @@ void massPlots(int argc, char* argv[])
 			////////////////////////////////////////////////////
 			// SIDEBAND REGION - for soft tracks 1 < pT < 1.5 //
 			////////////////////////////////////////////////////
-			// 
-			// For 2D plot of N(m1,m2):
-			// Each muon must have exactly 1 OS tk with pT > 2.5 within ∆R < 0.5.
-			// And *at least* one muon has 1 additional soft track with 1 < pT < 1.5,
-			// within dR < 0.5. No sign requirement on additional soft track.
-			if (   tk1_1.size() >= 1 && tk1_1.size() <= 2 
-				&& tk2_1.size() >= 1 && tk2_1.size() <= 2 
-				&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
-				&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
-				&& tk1_1to1p5.size() <= 1 && tk2_1to1p5.size() <= 1 
-				&& !(tk1_1to1p5.size() == 0 && tk2_1to1p5.size() == 0)
-				){
-					double m1(0), m2(0);		
+			//
+			if (do1to1p5) { 
+				// For 2D plot of N(m1,m2):
+				// Each muon must have exactly 1 OS tk with pT > 2.5 within ∆R < 0.5.
+				// And *at least* one muon has 1 additional soft track with 1 < pT < 1.5,
+				// within dR < 0.5. No sign requirement on additional soft track.
+				if (   tk1_1.size() >= 1 && tk1_1.size() <= 2 
+					&& tk2_1.size() >= 1 && tk2_1.size() <= 2 
+					&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
+					&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
+					&& tk1_1to1p5.size() <= 1 && tk2_1to1p5.size() <= 1 
+					&& !(tk1_1to1p5.size() == 0 && tk2_1to1p5.size() == 0)
+					){
+						double m1(0), m2(0);		
+						m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+						m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
+
+						// Fill 2D m1 vs m2 plot only if at least one muon has a soft track
+						// Fill symmetrically to increase stats
+						histM1vsM2_side_1to1p5->Fill(m1,m2);
+						// if (getMassBin(m1) != getMassBin(m2)){
+						histM1vsM2_side_1to1p5->Fill(m2,m1);
+						// }
+
+						// Fill 1D plot for the various m2 bins
+						// histM1_side_1to1p5->Fill(m1);
+						// histM2_side_1to1p5->Fill(m2);
+						if(m2 < 1.) {
+							histM1_side_1to1p5_0to1->Fill(m1);
+							histMu1Pt_side_1to1p5_0to1->Fill(mu1->PT);
+						} else if (m2 < 2.) {
+							histM1_side_1to1p5_1to2->Fill(m1);
+							histMu1Pt_side_1to1p5_1to2->Fill(mu1->PT);
+						} else if (m2 < 3.) {
+							histM1_side_1to1p5_2to3->Fill(m1);
+							histMu1Pt_side_1to1p5_2to3->Fill(mu1->PT);
+						} else {
+							histM1_side_1to1p5_3toInf->Fill(m1);
+							histMu1Pt_side_1to1p5_3toInf->Fill(mu1->PT);
+						}
+
+				} // end of sideband 1to1p5 for 2D plot
+				
+				// SIDEBAND - 1D plot for mu1 
+				// mu1 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
+				// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
+				// No sign requirement.
+				// No track requirements on mu2, all it has to do is pass the mu selection above.
+				if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to1p5.size() <= 1){
+					double m1(0);		
 					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+					histM1_side_1to1p5->Fill(m1);
+				}
+
+				// SIDEBAND - 1D plot for mu2
+				// mu2 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
+				// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
+				// No sign requirement.
+				// No track requirements on mu1, all it has to do is pass the mu selection above.
+				if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to1p5.size() <= 1){
+					double m2(0);		
 					m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
-
-					// Fill 2D m1 vs m2 plot only if at least one muon has a soft track
-					// Fill symmetrically to increase stats
-					histM1vsM2_side_1to1p5->Fill(m1,m2);
-					// if (getMassBin(m1) != getMassBin(m2)){
-					histM1vsM2_side_1to1p5->Fill(m2,m1);
-					// }
-
-					// Fill 1D plot for the various m2 bins
-					// histM1_side_1to1p5->Fill(m1);
-					// histM2_side_1to1p5->Fill(m2);
-					if(m2 < 1.) {
-						histM1_side_1to1p5_0to1->Fill(m1);
-						histMu1Pt_side_1to1p5_0to1->Fill(mu1->PT);
-					} else if (m2 < 2.) {
-						histM1_side_1to1p5_1to2->Fill(m1);
-						histMu1Pt_side_1to1p5_1to2->Fill(mu1->PT);
-					} else if (m2 < 3.) {
-						histM1_side_1to1p5_2to3->Fill(m1);
-						histMu1Pt_side_1to1p5_2to3->Fill(mu1->PT);
-					} else {
-						histM1_side_1to1p5_3toInf->Fill(m1);
-						histMu1Pt_side_1to1p5_3toInf->Fill(mu1->PT);
-					}
-
-			} // end of sideband 1to1p5 for 2D plot
-			
-			// SIDEBAND - 1D plot for mu1 
-			// mu1 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
-			// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
-			// No sign requirement.
-			// No track requirements on mu2, all it has to do is pass the mu selection above.
-			if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to1p5.size() <= 1){
-				double m1(0);		
-				m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
-				histM1_side_1to1p5->Fill(m1);
-			}
-
-			// SIDEBAND - 1D plot for mu2
-			// mu2 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
-			// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
-			// No sign requirement.
-			// No track requirements on mu1, all it has to do is pass the mu selection above.
-			if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to1p5.size() <= 1){
-				double m2(0);		
-				m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
-				histM2_side_1to1p5->Fill(m2);
-			}
-
+					histM2_side_1to1p5->Fill(m2);
+				}
+			} // end of do1to1p5
 		} // end of muon selection
-		
 	} // end of event loop
 
 	// Create sum of m1 and m2 1D hists and rebin
@@ -747,15 +751,17 @@ void massPlots(int argc, char* argv[])
 	histM_side_1to2p5->Add(histM2_side_1to2p5);
 	histM_side_1to2p5 = (TH1D*) histM_side_1to2p5->Rebin(nBinsX, "hM_side_1to2p5", &massBins[0]);
 	
-	TH1D* histM_side_1to1p5 = new TH1D("hM_side_1to1p5","m(#mu-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu-tk) [GeV];A.U.",										
+	TH1D* histM_side_1to1p5;
+	if(do1to1p5) {
+		histM_side_1to1p5 = new TH1D("hM_side_1to1p5","m(#mu-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu-tk) [GeV];A.U.",										
 										histM1_side_1to1p5->GetNbinsX(), 
 										histM1_side_1to1p5->GetXaxis()->GetBinLowEdge(1), 
 										histM1_side_1to1p5->GetXaxis()->GetBinLowEdge(histM1_side_1to1p5->GetNbinsX()+1));
 
-	histM_side_1to1p5->Add(histM1_side_1to1p5);
-	histM_side_1to1p5->Add(histM2_side_1to1p5);
-	histM_side_1to1p5 = (TH1D*) histM_side_1to1p5->Rebin(nBinsX, "hM_side_1to1p5", &massBins[0]);
-	
+		histM_side_1to1p5->Add(histM1_side_1to1p5);
+		histM_side_1to1p5->Add(histM2_side_1to1p5);
+		histM_side_1to1p5 = (TH1D*) histM_side_1to1p5->Rebin(nBinsX, "hM_side_1to1p5", &massBins[0]);
+	}
 	// Rebin the M1 and M2 plots, add together
 	TH1D* histM = new TH1D("hM", "Inv. Mass of system, full selection; m(#mu-tk) [GeV];A.U.",nBinsX,&massBins[0]);
 	TH1D* histM1_rebin = (TH1D*) histM1->Rebin(nBinsX,"hM1_rebin",&massBins[0]);
@@ -769,10 +775,12 @@ void massPlots(int argc, char* argv[])
 	printIntegral(histM_side_1to2p5);
 	printIntegral(histM1vsM2_side_1to2p5);
 
-	printIntegral(histM1_side_1to1p5);
-	printIntegral(histM2_side_1to1p5);
-	printIntegral(histM_side_1to1p5);
-	printIntegral(histM1vsM2_side_1to1p5);
+	if (do1to1p5) {
+		printIntegral(histM1_side_1to1p5);
+		printIntegral(histM2_side_1to1p5);
+		printIntegral(histM_side_1to1p5);
+		printIntegral(histM1vsM2_side_1to1p5);
+	}
 
 	printIntegral(histM1);
 	printIntegral(histM1_fine);
@@ -789,10 +797,12 @@ void massPlots(int argc, char* argv[])
 	normaliseHist(histM_side_1to2p5);
 	normaliseHist(histM1vsM2_side_1to2p5);
 
-	normaliseHist(histM1_side_1to1p5);
-	normaliseHist(histM2_side_1to1p5);
-	normaliseHist(histM_side_1to1p5);
-	normaliseHist(histM1vsM2_side_1to1p5);
+	if (do1to1p5) {
+		normaliseHist(histM1_side_1to1p5);
+		normaliseHist(histM2_side_1to1p5);
+		normaliseHist(histM_side_1to1p5);
+		normaliseHist(histM1vsM2_side_1to1p5);
+	}
 
 	normaliseHist(histM1);
 	normaliseHist(histM1_fine);
@@ -810,10 +820,11 @@ void massPlots(int argc, char* argv[])
 			histM1timesM1_side_1to2p5->SetBinContent(a,b,histM_side_1to2p5->GetBinContent(a)*histM_side_1to2p5->GetBinContent(b));
 			histM1timesM1_side_1to2p5->SetBinError(a,b,sqrt(pow(histM_side_1to2p5->GetBinContent(b)*histM_side_1to2p5->GetBinError(a),2)
 															+pow(histM_side_1to2p5->GetBinContent(a)*histM_side_1to2p5->GetBinError(b),2)));
-
-			histM1timesM1_side_1to1p5->SetBinContent(a,b,histM_side_1to1p5->GetBinContent(a)*histM_side_1to1p5->GetBinContent(b));
-			histM1timesM1_side_1to1p5->SetBinError(a,b,sqrt(pow(histM_side_1to1p5->GetBinContent(b)*histM_side_1to1p5->GetBinError(a),2)
-															+pow(histM_side_1to1p5->GetBinContent(a)*histM_side_1to1p5->GetBinError(b),2)));
+			if (do1to1p5) {
+				histM1timesM1_side_1to1p5->SetBinContent(a,b,histM_side_1to1p5->GetBinContent(a)*histM_side_1to1p5->GetBinContent(b));
+				histM1timesM1_side_1to1p5->SetBinError(a,b,sqrt(pow(histM_side_1to1p5->GetBinContent(b)*histM_side_1to1p5->GetBinError(a),2)
+																+pow(histM_side_1to1p5->GetBinContent(a)*histM_side_1to1p5->GetBinError(b),2)));
+			}
 
 			histM1timesM1->SetBinContent(a,b,histM->GetBinContent(a)*histM->GetBinContent(b));
 			histM1timesM1->SetBinError(a,b,sqrt(pow(histM->GetBinContent(b)*histM->GetBinError(a),2)
@@ -825,10 +836,13 @@ void massPlots(int argc, char* argv[])
 		"m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
 	histM1vsM2_correlations_side_1to2p5->Divide(histM1timesM1_side_1to2p5);
 
-	TH2D* histM1vsM2_correlations_side_1to1p5 = (TH2D*)histM1vsM2_side_1to1p5->Clone("hM1vsM2_correlations_side_1to1p5");
-	histM1vsM2_correlations_side_1to1p5->SetTitle(
-		"m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
-	histM1vsM2_correlations_side_1to1p5->Divide(histM1timesM1_side_1to1p5);
+	TH2D* histM1vsM2_correlations_side_1to1p5;
+	if (do1to1p5) {
+		histM1vsM2_correlations_side_1to1p5 = (TH2D*)histM1vsM2_side_1to1p5->Clone("hM1vsM2_correlations_side_1to1p5");
+		histM1vsM2_correlations_side_1to1p5->SetTitle(
+			"m(#mu_{1}-tk) vs m(#mu_{2}-tk) / m(sideband) #times m(sideband), (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]");
+		histM1vsM2_correlations_side_1to1p5->Divide(histM1timesM1_side_1to1p5);
+	}
 
 	TH2D* histM1vsM2_correlations = (TH2D*)histM1vsM2->Clone("hM1vsM2_correlations");
 	histM1vsM2_correlations->SetTitle(
@@ -849,9 +863,11 @@ void massPlots(int argc, char* argv[])
 			histCorr1D_side_1to2p5->SetBinError(counter,histM1vsM2_correlations_side_1to2p5->GetBinError(i,j));
 			histCorr1D_side_1to2p5->GetXaxis()->SetBinLabel(counter,binLabel.c_str());
 
-			histCorr1D_side_1to1p5->SetBinContent(counter,histM1vsM2_correlations_side_1to1p5->GetBinContent(i,j));
-			histCorr1D_side_1to1p5->SetBinError(counter,histM1vsM2_correlations_side_1to1p5->GetBinError(i,j));
-			histCorr1D_side_1to1p5->GetXaxis()->SetBinLabel(counter,binLabel.c_str());
+			if (do1to1p5) {
+				histCorr1D_side_1to1p5->SetBinContent(counter,histM1vsM2_correlations_side_1to1p5->GetBinContent(i,j));
+				histCorr1D_side_1to1p5->SetBinError(counter,histM1vsM2_correlations_side_1to1p5->GetBinError(i,j));
+				histCorr1D_side_1to1p5->GetXaxis()->SetBinLabel(counter,binLabel.c_str());
+			}
 
 			histCorr1D->SetBinContent(counter,histM1vsM2_correlations->GetBinContent(i,j));
 			histCorr1D->SetBinError(counter,histM1vsM2_correlations->GetBinError(i,j));
@@ -898,8 +914,9 @@ void massPlots(int argc, char* argv[])
 		histM1_0to1, histM1_1to2, histM1_2to3, histM1_3toInf, "M1_M2", directory, app);
 	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (soft tk with p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV]; A.U.",
 		histM1_side_1to2p5_0to1, histM1_side_1to2p5_1to2, histM1_side_1to2p5_2to3, histM1_side_1to2p5_3toInf, "M1_M2_side_1to2p5", directory, app);
-	drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (soft tk with p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV]; A.U.", 
-		histM1_side_1to1p5_0to1, histM1_side_1to1p5_1to2, histM1_side_1to1p5_2to3, histM1_side_1to1p5_3toInf, "M1_M2_side_1to1p5", directory, app);
+	if (do1to1p5)
+		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - sideband region (soft tk with p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV]; A.U.", 
+			histM1_side_1to1p5_0to1, histM1_side_1to1p5_1to2, histM1_side_1to1p5_2to3, histM1_side_1to1p5_3toInf, "M1_M2_side_1to1p5", directory, app);
 	
 	if(doSignal){
 		drawMassPlot("m(#mu_{1}-tk) in bins of m(#mu_{2}-tk) - MC truth;m(#mu_{1}-tk) [GeV]; A.U.", 
@@ -927,13 +944,15 @@ void massPlots(int argc, char* argv[])
 	drawHistAndSave(histCorr1D_side_1to2p5, "e1", "Correlations1D_side_1to2p5", directory, app);
 
 	// SIDEBAND - 1 < tk pT < 1.5
-	drawHistAndSave(histM1_side_1to1p5, "HISTE", "M1_side_1to1p5", directory, app);
-	drawHistAndSave(histM2_side_1to1p5, "HISTE", "M2_side_1to1p5", directory, app);
-	drawHistAndSave(histM_side_1to1p5, "HISTE", "M_side_1to1p5", directory, app);
-	drawHistAndSave(histM1vsM2_side_1to1p5, "colzTEXTE","M1vsM2_side_1to1p5", directory, app);
-	drawHistAndSave(histM1timesM1_side_1to1p5, "colzTEXTE","M1timesM1_side_1to1p5", directory, app);
-	drawHistAndSave(histM1vsM2_correlations_side_1to1p5, "colzTEXTE","M1vsM2_correlations_side_1to1p5", directory, app);
-	drawHistAndSave(histCorr1D_side_1to1p5, "e1", "Correlations1D_side_1to1p5", directory, app);
+	if (do1to1p5) {
+		drawHistAndSave(histM1_side_1to1p5, "HISTE", "M1_side_1to1p5", directory, app);
+		drawHistAndSave(histM2_side_1to1p5, "HISTE", "M2_side_1to1p5", directory, app);
+		drawHistAndSave(histM_side_1to1p5, "HISTE", "M_side_1to1p5", directory, app);
+		drawHistAndSave(histM1vsM2_side_1to1p5, "colzTEXTE","M1vsM2_side_1to1p5", directory, app);
+		drawHistAndSave(histM1timesM1_side_1to1p5, "colzTEXTE","M1timesM1_side_1to1p5", directory, app);
+		drawHistAndSave(histM1vsM2_correlations_side_1to1p5, "colzTEXTE","M1vsM2_correlations_side_1to1p5", directory, app);
+		drawHistAndSave(histCorr1D_side_1to1p5, "e1", "Correlations1D_side_1to1p5", directory, app);
+	}
 
 	// SIGNAL region
 	drawHistAndSave(histM1, "HISTE", "M1", directory, app);
@@ -975,10 +994,12 @@ void massPlots(int argc, char* argv[])
 	histM1_side_1to2p5_2to3->Write("",TObject::kOverwrite);
 	histM1_side_1to2p5_3toInf->Write("",TObject::kOverwrite);
 	
-	histM1_side_1to1p5_0to1->Write("",TObject::kOverwrite);
-	histM1_side_1to1p5_1to2->Write("",TObject::kOverwrite);
-	histM1_side_1to1p5_2to3->Write("",TObject::kOverwrite);
-	histM1_side_1to1p5_3toInf->Write("",TObject::kOverwrite);
+	if (do1to1p5) {
+		histM1_side_1to1p5_0to1->Write("",TObject::kOverwrite);
+		histM1_side_1to1p5_1to2->Write("",TObject::kOverwrite);
+		histM1_side_1to1p5_2to3->Write("",TObject::kOverwrite);
+		histM1_side_1to1p5_3toInf->Write("",TObject::kOverwrite);
+	}
 
 	histMu1Pt_0to1->Write("",TObject::kOverwrite);
 	histMu1Pt_1to2->Write("",TObject::kOverwrite);
@@ -997,24 +1018,28 @@ void massPlots(int argc, char* argv[])
 	histMu1Pt_side_1to2p5_2to3->Write("",TObject::kOverwrite);
 	histMu1Pt_side_1to2p5_3toInf->Write("",TObject::kOverwrite);
 	
-	histMu1Pt_side_1to1p5_0to1->Write("",TObject::kOverwrite);
-	histMu1Pt_side_1to1p5_1to2->Write("",TObject::kOverwrite);
-	histMu1Pt_side_1to1p5_2to3->Write("",TObject::kOverwrite);
-	histMu1Pt_side_1to1p5_3toInf->Write("",TObject::kOverwrite);
-	
+	if (do1to1p5) {
+		histMu1Pt_side_1to1p5_0to1->Write("",TObject::kOverwrite);
+		histMu1Pt_side_1to1p5_1to2->Write("",TObject::kOverwrite);
+		histMu1Pt_side_1to1p5_2to3->Write("",TObject::kOverwrite);
+		histMu1Pt_side_1to1p5_3toInf->Write("",TObject::kOverwrite);
+	}
+
 	histM1_side_1to2p5->Write("",TObject::kOverwrite);
 	histM2_side_1to2p5->Write("",TObject::kOverwrite);
 	histM_side_1to2p5->Write("",TObject::kOverwrite);
 	histM1vsM2_side_1to2p5->Write("",TObject::kOverwrite);
 	histM1vsM2_correlations_side_1to2p5->Write("",TObject::kOverwrite);
 	histCorr1D_side_1to2p5->Write("",TObject::kOverwrite);
-	
-	histM1_side_1to1p5->Write("",TObject::kOverwrite);
-	histM2_side_1to1p5->Write("",TObject::kOverwrite);
-	histM_side_1to1p5->Write("",TObject::kOverwrite);
-	histM1vsM2_side_1to1p5->Write("",TObject::kOverwrite);
-	histM1vsM2_correlations_side_1to1p5->Write("",TObject::kOverwrite);
-	histCorr1D_side_1to1p5->Write("",TObject::kOverwrite);
+
+	if (do1to1p5) {
+		histM1_side_1to1p5->Write("",TObject::kOverwrite);
+		histM2_side_1to1p5->Write("",TObject::kOverwrite);
+		histM_side_1to1p5->Write("",TObject::kOverwrite);
+		histM1vsM2_side_1to1p5->Write("",TObject::kOverwrite);
+		histM1vsM2_correlations_side_1to1p5->Write("",TObject::kOverwrite);
+		histCorr1D_side_1to1p5->Write("",TObject::kOverwrite);
+	}
 
 	histM1vsM2->Write("",TObject::kOverwrite);
 	histM1vsM2_correlations->Write("",TObject::kOverwrite);
