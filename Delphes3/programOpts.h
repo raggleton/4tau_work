@@ -236,8 +236,10 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			cout << "Doing signal with HLT cuts" << endl;
 			// folder = "Signal_1prong_500K_TauPythia_bare/";
 			// file = "signal_1prong_500K_TauPythia_HLT_";
-			folder = "Signal_1prong_500K_bare/";
-			file = "signal_1prong_500K_HLT_";
+			// folder = "Signal_1prong_500K_bare/";
+			// file = "signal_1prong_500K_HLT_";
+			folder = "Signal_1prong_HLT_bare/";
+			file = "Signal_HLT_";
 			nFiles = 20;
 			// nFiles = 1;
 		} else { 
