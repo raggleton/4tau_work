@@ -275,9 +275,11 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	} else if (source == qcdscatter) {
 		if(doHLT) {
 			cout << "Doing QCDScatter with HLT cuts" << endl;
-			folder = "QCDScatter_mu_pthatmin20_Mu17_Mu8_bare/";
-			file = "QCDScatter_mu_pthatmin20_Mu17_Mu8_";
-			nFiles = 2000;
+			// folder = "QCDScatter_mu_pthatmin20_Mu17_Mu8_bare/";
+			// file = "QCDScatter_mu_pthatmin20_Mu17_Mu8_";
+			folder = "QCDbcScatter_HLT_bare/";
+			file = "QCDbcScatter_HLT_250_";
+			nFiles = 200;
 		}
 	} else if (source == qcdall) {
 		if (doHLT) {
@@ -305,12 +307,15 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 				folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
 			chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
 		}
-		file = "QCDb_HLT_10000_";
-		nFiles=10;
-		for (int i = 1; i <= nFiles; i ++) {
-			cout << "Adding " << 
-				folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
-			chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
+		
+		if (source == qcdb) {
+			file = "QCDb_HLT_10000_";
+			nFiles=10;
+			for (int i = 1; i <= nFiles; i ++) {
+				cout << "Adding " << 
+					folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
+				chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
+			}
 		}
 	}
 }
