@@ -228,6 +228,9 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	bool doMu       = pOpts->getQCDMu();
 	bool doHLT      = pOpts->getHLT();
 
+	////////////////
+	// SIGNAL MC //
+	////////////////
 	if (source == signal) {
 		if (doHLT) {
 			cout << "Doing signal with HLT cuts" << endl;
@@ -243,6 +246,10 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			file = "signal_1prong_500K_NoHLT_";
 			nFiles = 20;
 		}
+
+	////////////////
+	// QCDb MC	 //
+	////////////////
 	} else if (source == qcdb) {
 		if (doMu) {
 			if(doHLT) {
@@ -265,6 +272,10 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			file = "QCDb_";
 			nFiles = 10;
 		}
+	
+	//////////////
+	// QCDc MC //
+	//////////////
 	} else if (source == qcdc) {
 		if(doHLT) {
 			cout << "Doing QCDc_mu with HLT cuts" << endl;
@@ -272,6 +283,10 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			file = "QCDc_mu_pthatmin20_Mu17_Mu8_";
 			nFiles = 200;
 		}
+	
+	//////////////////////
+	// QCD q-g scatter //
+	//////////////////////
 	} else if (source == qcdscatter) {
 		if(doHLT) {
 			cout << "Doing QCDScatter with HLT cuts" << endl;
@@ -281,6 +296,10 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			file = "QCDbcScatter_HLT_250_";
 			nFiles = 200;
 		}
+	
+	////////////////////
+	// QCD all? OLD! //
+	////////////////////
 	} else if (source == qcdall) {
 		if (doHLT) {
 			cout << "Doing QCDAll with HLT cuts" << endl;
@@ -290,6 +309,10 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			file = "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_";
 			nFiles = 200;
 		}
+	
+	////////////////
+	// Test file //
+	////////////////
 	} else if (source == test) {
 		cout << "Doing test file" << endl;
 		cout << "Adding QCDb_HLT_bare/QCDb_HLT_1.root" << endl;
