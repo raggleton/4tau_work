@@ -64,6 +64,20 @@ bool checkMuons(GenParticle* muA, GenParticle* muB, double deltaR){
 	}
 }
 
+int countParticle(TClonesArray* branchAll, int PID) {
+	int nParticle = 0;
+	// cout << "**** EVENT *****" << endl;
+	for (int a = 0; a < branchAll->GetEntries(); a++){
+		GenParticle* candP = (GenParticle*) branchAll->At(a);
+		// cout << candP->PID << endl;
+		if (fabs(candP->PID) == fabs(PID)) { 
+			nParticle++;
+		}
+	}
+	// cout << "**** ENDE *****" << endl;
+	return nParticle;
+}
+
 void massPlots(int argc, char* argv[])
 {
 	// setTDRStyle();
@@ -82,9 +96,9 @@ void massPlots(int argc, char* argv[])
 	bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 	// bool DEBUG          = pOpts.getVerbose(); // output debug statments
 
-	double deltaR = 1; // dR(mu-mu) value to use
+	double deltaR = 2; // dR(mu-mu) value to use
 
-	bool do1to1p5 = true; // for additional sideband studies. Slower?
+	bool do1to1p5 = false; // for additional sideband studies. Slower?
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -198,6 +212,12 @@ void massPlots(int argc, char* argv[])
 	// 2D plots of m1 Vs m2 - sideband (soft track pT 1-1.5)
 	TH2D* histM1vsM2_side_1to1p5       = new TH2D("hM1vsM2_side_1to1p5","m(#mu_{1}-tk) vs m(#mu_{2}-tk) (soft tk p_{T} = 1-1.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",nBinsX,&massBins[0],nBinsX,&massBins[0]);
 	TH2D* histM1timesM1_side_1to1p5    = new TH2D("hM1timesM2_side_1to1p5","m(sideband) #times m(sideband) (soft tk p_{T} = 1-1.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",nBinsX,&massBins[0],nBinsX,&massBins[0]);
+
+	// ------------------
+	// Testing histograms
+	// ------------------
+	TH1D* histN_JPsi = new TH1D("hN_JPsi","Fraction of J/#Psi in events signal region, 3 < m_{1} < 3.2 GeV;Number of J/#Psi; Fraction", 3, 0, 3);
+	TH1D* histN_JPsi_side_1to2p5 = new TH1D("hN_JPsi_side_1to2p5","Fraction of J/#Psi in events sideband (soft tk p_{T} = 1-2.5 GeV), 3 < m_{1} < 3.2 GeV;Number of J/#Psi; Fraction", 3, 0, 3);
 
 	// int nMu(0);
 	// int n1(0), n2(0), nMuPass(0);
@@ -567,6 +587,10 @@ void massPlots(int argc, char* argv[])
 					histM1_3toInf->Fill(m1);
 					histMu1Pt_3toInf->Fill(mu1->PT);
 				}
+				if (m1 < 3.2 && m1 > 3.){
+					int nJPSi = countParticle(branchAll, 443);
+					histN_JPsi->Fill(nJPSi);
+				}
 
 			}
 
@@ -623,6 +647,9 @@ void massPlots(int argc, char* argv[])
 					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 					m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
+					histM1_side_1to2p5->Fill(m1);
+					histM2_side_1to2p5->Fill(m2);
+
 					// Fill 2D m1 vs m2 plot only if at least one muon has a soft track
 					// Fill symmetrically to increase stats
 					histM1vsM2_side_1to2p5->Fill(m1,m2);
@@ -647,6 +674,11 @@ void massPlots(int argc, char* argv[])
 						histMu1Pt_side_1to2p5_3toInf->Fill(mu1->PT);
 					}
 
+					if (m1 < 3.2 && m1 > 3.){
+						int nJPSi = countParticle(branchAll, 443);
+						histN_JPsi_side_1to2p5->Fill(nJPSi);
+					}
+
 			} // end of sideband 1to2p5 
 
 			// SIDEBAND - 1D plot for mu1 
@@ -654,22 +686,22 @@ void massPlots(int argc, char* argv[])
 			// Also has 0 or 1 soft track, 1 < pT < 2.5, within ∆R < 0.5.
 			// No sign requirement.
 			// No track requirements on mu2, all it has to do is pass the mu selection above.
-			if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to2p5.size() <= 1){
-				double m1(0);		
-				m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
-				histM1_side_1to2p5->Fill(m1);
-			}
+			// if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to2p5.size() <= 1){
+			// 	double m1(0);		
+			// 	m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+			// 	histM1_side_1to2p5->Fill(m1);
+			// }
 
 			// SIDEBAND - 1D plot for mu2
 			// mu2 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
 			// Also has 0 or 1 soft track, 1 < pT < 2.5, within ∆R < 0.5.
 			// No sign requirement.
 			// No track requirements on mu1, all it has to do is pass the mu selection above.
-			if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to2p5.size() <= 1){
-				double m2(0);		
-				m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
-				histM2_side_1to2p5->Fill(m2);
-			}
+			// if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to2p5.size() <= 1){
+			// 	double m2(0);		
+			// 	m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
+			// 	histM2_side_1to2p5->Fill(m2);
+			// }
 
 			////////////////////////////////////////////////////
 			// SIDEBAND REGION - for soft tracks 1 < pT < 1.5 //
@@ -722,22 +754,22 @@ void massPlots(int argc, char* argv[])
 				// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
 				// No sign requirement.
 				// No track requirements on mu2, all it has to do is pass the mu selection above.
-				if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to1p5.size() <= 1){
-					double m1(0);		
-					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
-					histM1_side_1to1p5->Fill(m1);
-				}
+				// if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to1p5.size() <= 1){
+				// 	double m1(0);		
+				// 	m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+				// 	histM1_side_1to1p5->Fill(m1);
+				// }
 
 				// SIDEBAND - 1D plot for mu2
 				// mu2 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
 				// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
 				// No sign requirement.
 				// No track requirements on mu1, all it has to do is pass the mu selection above.
-				if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to1p5.size() <= 1){
-					double m2(0);		
-					m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
-					histM2_side_1to1p5->Fill(m2);
-				}
+				// if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to1p5.size() <= 1){
+				// 	double m2(0);		
+				// 	m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
+				// 	histM2_side_1to1p5->Fill(m2);
+				// }
 			} // end of do1to1p5
 		} // end of muon selection
 	} // end of event loop
@@ -812,6 +844,11 @@ void massPlots(int argc, char* argv[])
 	normaliseHist(histM2_rebin);
 	normaliseHist(histM);
 	normaliseHist(histM1vsM2);
+	
+	// Testing ones
+	normaliseHist(histN_JPsi);
+	normaliseHist(histN_JPsi_side_1to2p5);
+	
 	
 	// Do correlations plot by making m1*m1 first, then dividing m1vsm2 by m1*m1
 	// Don't need to normalise m1timesm1, as histM1_side already normalised
@@ -967,6 +1004,11 @@ void massPlots(int argc, char* argv[])
 	drawHistAndSave(histM1vsM2_correlations, "colzTEXTE","M1vsM2_correlations", directory, app);
 	drawHistAndSave(histCorr1D, "e1", "Correlations1D", directory, app);
 
+	// Testing hists
+	// -------------
+	
+	drawHistAndSave(histN_JPsi, "HISTE", "N_JPsi", directory, app);
+	drawHistAndSave(histN_JPsi_side_1to2p5, "HISTE", "N_JPsi_side_1to2p5", directory, app);
 
 	//////////////////////////
 	// Write hists to file //
@@ -1044,6 +1086,9 @@ void massPlots(int argc, char* argv[])
 	histM1vsM2->Write("",TObject::kOverwrite);
 	histM1vsM2_correlations->Write("",TObject::kOverwrite);
 	histCorr1D->Write("",TObject::kOverwrite);
+
+	histN_JPsi->Write("", TObject::kOverwrite);
+	histN_JPsi_side_1to2p5->Write("", TObject::kOverwrite);
 
 	outFile->Close();
 
