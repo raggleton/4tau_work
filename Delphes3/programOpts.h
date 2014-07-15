@@ -318,7 +318,11 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	} else if (source == test) {
 		cout << "Doing test file" << endl;
 		cout << "Adding QCDb_HLT_bare/QCDb_HLT_1.root" << endl;
+		cout << "Adding QCDb_HLT_bare/QCDb_HLT_2.root" << endl;
+		cout << "Adding QCDb_HLT_bare/QCDb_HLT_3.root" << endl;
 		chain->Add("QCDb_HLT_bare/QCDb_HLT_1.root");
+		chain->Add("QCDb_HLT_bare/QCDb_HLT_2.root");
+		chain->Add("QCDb_HLT_bare/QCDb_HLT_3.root");
 	}
 
 	// Auto-loop over ROOT files in folder using Boost::Filesystem
