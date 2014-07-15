@@ -81,10 +81,18 @@ std::string getDelph(std::string directory) {
  *                    or the number of events the user specified.
  */
 Long64_t getNumberEvents(ExRootTreeReader *treeReader, ProgramOpts* pOpts) {
-	if (pOpts->getNEvents() == -1) {
-		return treeReader->GetEntries();
+	int userNEvents = pOpts->getNEvents();
+	int treeNEvents = treeReader->GetEntries();
+	if (userNEvents == -1) {
+		return treeNEvents;
 	} else {
-		return pOpts->getNEvents();
+		if (userNEvents > treeNEvents) {
+			cout << "WARNING: You wanted " << userNEvents << " but only " 
+			<< treeNEvents << " in files, so doing those ones." << endl;
+			return treeNEvents;
+		} else {
+			return userNEvents;
+		}
 	}
 }
 
