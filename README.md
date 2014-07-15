@@ -99,7 +99,7 @@ http://www.boost.org/doc/libs/1_55_0/more/getting_started/unix-variants.html
 	>- Boost.Wave
 
 4. Create installation folder for those libraries: `mkdir ~/boost_1_55_0_install`
-5. In the original boost folder, do `./bootsrap.sh --prefix=$(HOME)/boost_1_55_0_install`
+5. In the original boost folder, do `./bootsrap.sh --prefix=${HOME}/boost_1_55_0_install`
 6. Then run `./b2 install`. This should install libraries to  `~/boost_1_55_0_install/lib`
 7. In the Delphes Makefile, change the following:
 	- Add `-I $(HOME)/boost_1_55_0 -I $(HOME)/boost_1_55_0_install/include` to `CCXFLAGS` (line 18)
