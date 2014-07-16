@@ -17,8 +17,8 @@ alias root="root -l"
 
 export PS1="\[\033[36m\][\t]\[\033[m\]:\[\033[32;1m\]\w\[\033[m\] >> "
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/panfs/panasas01/phys/ra12451/HepMC-2.06.08/x86_64-slc5-gcc43-opt/lib:/panfs/panasas01/phys/ra12451/root/root/lib:/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib
-export PATH=$PATH:/panfs/panasas01/phys/ra12451/root/root/bin:/panfs/panasas01/phys/ra12451/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/HepMC-2.06.08/x86_64-slc5-gcc43-opt/lib:$HOME/root/root/lib:$HOME/boost_1_55_0_install/lib
+export PATH=$PATH:$HOME/root/root/bin:/panfs/panasas01/phys/ra12451/bin
 
 alias duh='du -hcs * | sort -h'
 alias l.='ls -d .* --color=auto'
