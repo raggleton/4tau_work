@@ -241,11 +241,19 @@ void cutFlow(int argc, char* argv[])
 		// Muon selection //
 		////////////////////
 		if (DEBUG) cout << "Testing if mu w pT > 17" << endl;
-		if (muons17toInf.size() > 0) (*it)++; else continue;
+		if (muons17toInf.size() > 0) {
+			(*it)++;
+		} else {
+			continue;
+		}
 		it++;
 
 		if (DEBUG) cout << "Testing if mu w pT > 10" << endl;
-		if (muons10to17.size() > 0 || muons17toInf.size() > 1) (*it)++; else continue;
+		if (muons10to17.size() > 0 || muons17toInf.size() > 1) {
+			(*it)++; 
+		} else {
+			continue;
+		}
 		it++;
 
 		// Need to be a bit clever here. It could be that there are more than 
@@ -260,11 +268,6 @@ void cutFlow(int argc, char* argv[])
 		} else {
 			continue;
 		}
-		// if (p.first && p.second) {
-		// 	if (DEBUG) cout << "p.first not null" << endl;
-		// 	(*it)++;
-		// } else continue;
-		// it++;
 
 		if (DEBUG) cout << "Testing if eta OK" << endl;
 		if (testResults(testMuons(muons17toInf, muons10to17, &checkMuonsPTSSEta), *it)) {
@@ -272,15 +275,6 @@ void cutFlow(int argc, char* argv[])
 		} else {
 			continue;
 		}
-		// std::pair<Track*, Track*> p = testMuons(muons17toInf,
-		// 			  muons10to17,
-		// 			  &checkMuonsPTSSEta);
-
-		// if (p.first && p.second) {
-		// 	if (DEBUG) cout << "p.first not null" << endl;
-		// 	(*it)++; 
-		// } else continue;
-		// it++;
 
 		if (DEBUG) cout << "Testing if dR OK" << endl;
 		std::pair<Track*, Track*> p = testMuons(muons17toInf,
@@ -291,11 +285,6 @@ void cutFlow(int argc, char* argv[])
 		} else {
 			continue;
 		}
-		// if (p.first && p.second) {
-		// 	if (DEBUG) cout << "p.first not null" << endl;
-		// 	(*it)++; 
-		// } else continue;
-		// it++;
 
 		Track* mu1 = p.first;
 		Track* mu2 = p.second;
