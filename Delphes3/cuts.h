@@ -114,7 +114,7 @@ bool checkMuonsPTSS(Track* muA, Track* muB){
  */
 bool checkMuonsPTSSEta(Track* muA, Track* muB){
 	if (checkMuonsPTSS(muA, muB) 
-		&& (fabs(muA->Eta) < 2.1) && (fabs(muB->Eta) < 2.4)){
+		&& (fabs(muA->Eta) < 2.1) && (fabs(muB->Eta) < 2.1)){
 		return true;
 	} else {
 		return false;
