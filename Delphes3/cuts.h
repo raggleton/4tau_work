@@ -7,30 +7,27 @@
 using std::cout;
 using std::endl;
 
+/**
+ * Lots of fucntions that do cuts
+ * Really this should be an object, but that requires more thinking...
+ */
 
 /**
- * Object that does cuts for all programs
+ * This function takes two vectors of muons, and a muon test function,
+ * and returns a std::pair (pT descending) if highest pT muons passing test function.
+ * Used a lot in cutFlow program
+ * @param  muons17toInf  std::vector of muons with pT > 17 GeV, descending pT order
+ * @param  muons10to17   std::vector of muons with 17 > pT > 10 GeV, descending pT order
+ * @param  checkMuons    function to test muons against
+ * @return   std::pair of highest-pT muons passing cuts.
  */
-// class Cuts
-// {
-// 	private:
-// 		std::vector<T*> muons;
-// 	public:
-// 		// Ctor
-// 		Cuts():
-// 		{
+std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf, 
+		  std::vector<Track*> muons10to17, 
+		  bool (*checkMuons)(Track*,Track*)) {
 
-// 		}
-// };
-
-std::pair<GenParticle*, GenParticle*> testMuons(std::vector<GenParticle*> muons17toInf, 
-		  std::vector<GenParticle*> muons10to17, 
-		  bool (*checkMuons)(GenParticle*,GenParticle*)) {
-
-	GenParticle *mu1(nullptr), *mu2(nullptr);
+	Track *mu1(nullptr), *mu2(nullptr);
 	bool foundMuonPair = false;
-	// if (!p.first) cout << "p.first NULL" << endl;
-	std::vector<GenParticle*>::iterator muA = muons17toInf.begin();
+	std::vector<Track*>::iterator muA = muons17toInf.begin();
 	while(!foundMuonPair && muA != muons17toInf.end()){
 		
 		// Need to make pairs among the 17toInf vector also, if size >= 2
@@ -59,10 +56,15 @@ std::pair<GenParticle*, GenParticle*> testMuons(std::vector<GenParticle*> muons1
 		}
 		muA++;
 	}
-	std::pair<GenParticle*, GenParticle*> p(mu1, mu2);
-	// if (!p.first) cout << "p.first NULL" << endl; else cout << "p.first not null" << endl;
+	std::pair<Track*, Track*> p(mu1, mu2);
 	return p;
 }
+
+/////////////////////////
+// LOTS OF 2-MUON CUTS //
+/////////////////////////
+
+// Template these?
 
 /**
  * These checks to see if muA and muB satisfy all muon condtions,
@@ -71,47 +73,36 @@ std::pair<GenParticle*, GenParticle*> testMuons(std::vector<GenParticle*> muons1
  * @param  muB Lesser pT muon
  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
  */
-bool checkMuonsAllDR1(GenParticle* muA, GenParticle* muB){
-	if (muA->PT > 17. && muB->PT > 10
-		&& (muA->Charge == muB->Charge)
-		&& (fabs(muA->Eta) < 2.1)
-		&& (fabs(muB->Eta) < 2.4)
-		&& ((muA->P4().DeltaR(muB->P4())) > 1.)
-		){
-		return true;
-	} else {
-		return false;
-	}
+bool checkMuonsAllDR1(Track* muA, Track* muB){
+	return checkMuons(muA, muB, 1.0);
 }
 
 /**
  * These checks to see if muA and muB satisfy all muon condtions 
- * for signal region
+ * for signal region (dR(mu-mu) > 2)
  * @param  muA Higher pT muon
  * @param  muB Lesser pT muon
  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
  */
-bool checkMuonsAllSignal(GenParticle* muA, GenParticle* muB){
-	if (muA->PT > 17. && muB->PT > 10
-		&& (muA->Charge == muB->Charge)
-		&& (fabs(muA->Eta) < 2.1)
-		&& (fabs(muB->Eta) < 2.4)
-		&& ((muA->P4().DeltaR(muB->P4())) > 2.)
-		){
-		return true;
-	} else {
-		return false;
-	}
+bool checkMuonsAllSignal(Track* muA, Track* muB){
+	return checkMuons(muA, muB, 2.0);
 }
 
 /**
  * These checks to see if muA and muB satisfy muon pT condtions
+ * & IP conditions
+ * NB IP cuts only work with Track objects starting in Delphes 3.1.2
  * @param  muA Higher pT muon
  * @param  muB Lesser pT muon
  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
  */
-bool checkMuonsPT(GenParticle* muA, GenParticle* muB){
-	if (muA->PT > 17. && muB->PT > 10){
+bool checkMuonsPT(Track* muA, Track* muB){
+	if (muA->PT > 17. && muB->PT > 10
+		&& (fabs(muA->Zd) < 1.) // dZ < 0.1cm
+		&& (fabs(muB->Zd) < 1.) // dZ < 0.1cm
+		&& (fabs(muA->Dxy) < 0.3 ) // d0 < 0.03cm
+		&& (fabs(muB->Dxy) < 0.3 ) // d0 < 0.03cm
+		){
 		return true;
 	} else {
 		return false;
@@ -125,10 +116,8 @@ bool checkMuonsPT(GenParticle* muA, GenParticle* muB){
  * @param  muB Lesser pT muon
  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
  */
-bool checkMuonsPTSS(GenParticle* muA, GenParticle* muB){
-	if (muA->PT > 17. && muB->PT > 10
-		&& (muA->Charge == muB->Charge)
-		){
+bool checkMuonsPTSS(Track* muA, Track* muB){
+	if (checkMuonsPT(muA, muB) && (muA->Charge == muB->Charge)){
 		return true;
 	} else {
 		return false;
@@ -142,12 +131,9 @@ bool checkMuonsPTSS(GenParticle* muA, GenParticle* muB){
  * @param  muB Lesser pT muon
  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
  */
-bool checkMuonsPTSSEta(GenParticle* muA, GenParticle* muB){
-	if (muA->PT > 17. && muB->PT > 10
-		&& (muA->Charge == muB->Charge)
-		&& (fabs(muA->Eta) < 2.1)
-		&& (fabs(muB->Eta) < 2.4)
-		){
+bool checkMuonsPTSSEta(Track* muA, Track* muB){
+	if (checkMuonsPTSS(muA, muB) 
+		&& (fabs(muA->Eta) < 2.1) && (fabs(muB->Eta) < 2.4)){
 		return true;
 	} else {
 		return false;
@@ -155,31 +141,29 @@ bool checkMuonsPTSSEta(GenParticle* muA, GenParticle* muB){
 }
 
 /**
- * These checks to see if muA and muB satisfy all muon condtions
- * apart from pT. 
+ * These checks to see if muA and muB satisfy all muon condtions, 
+ * with user-defined deltaR cut
  * @param  muA Higher pT muon
  * @param  muB Lesser pT muon
  * @param  deltaR dR(mu-mu) cut
  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
  */
 bool checkMuons(Track* muA, Track* muB, double deltaR){
-	if ((muA->Charge == muB->Charge)
-		&& (fabs(muA->Eta) < 2.1)
-		&& (fabs(muB->Eta) < 2.1)
-		&& (fabs(muA->Zd) < 1.) // dZ < 0.1cm
-		&& (fabs(muB->Zd) < 1.) // dZ < 0.1cm
-		&& (fabs(muA->Dxy) < 0.3 ) // d0 < 0.03cm
-		&& (fabs(muB->Dxy) < 0.3 ) // d0 < 0.03cm
-		&& ((muA->P4().DeltaR(muB->P4())) > deltaR)
-		){
+	if (checkMuonsPTSSEta(muA, muB)	&& (muA->P4().DeltaR(muB->P4()) > deltaR)){
 		return true;
 	} else {
 		return false;
 	}
 }
+
+
+/////////////////
+// OLD VERSION //
+/////////////////
+
 /**
  * These checks to see if muA and muB satisfy all muon condtions
- * apart from pT and impact params. 
+ * apart from impact params (as vars not stored)
  * (Old version kept incase you use RawGenMuons branch instead of GenMuons)
  * @param  muA Higher pT muon
  * @param  muB Lesser pT muon
@@ -187,7 +171,8 @@ bool checkMuons(Track* muA, Track* muB, double deltaR){
  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
  */
 bool checkMuons(GenParticle* muA, GenParticle* muB, double deltaR){
-	if ((muA->Charge == muB->Charge)
+	if (muA->PT > 17. && muB->PT > 10.
+		&& (muA->Charge == muB->Charge)
 		&& (fabs(muA->Eta) < 2.1)
 		&& (fabs(muB->Eta) < 2.1)
 		&& ((muA->P4().DeltaR(muB->P4())) > deltaR)
