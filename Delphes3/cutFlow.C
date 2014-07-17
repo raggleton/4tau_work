@@ -27,7 +27,7 @@ void sortTrackVector(std::vector<Track*>& tk){
  */
 bool testResults(const std::pair<Track*, Track*> &p, int &counter) {
 	if (p.first && p.second) {
-		if (DEBUG) cout << "p.first not null" << endl;
+		if (DEBUG) cout << "p.first and p.second not null" << endl;
 		counter++; 
 		return true;
 	} else { 
@@ -240,7 +240,7 @@ void cutFlow(int argc, char* argv[])
 		////////////////////
 		// Muon selection //
 		////////////////////
-		if (DEBUG) cout << "Testing if mu w pT > 17" << endl;
+		if (DEBUG) cout << "Testing if mu with pT > 17" << endl;
 		if (muons17toInf.size() > 0) {
 			(*it)++;
 		} else {
@@ -248,7 +248,7 @@ void cutFlow(int argc, char* argv[])
 		}
 		it++;
 
-		if (DEBUG) cout << "Testing if mu w pT > 10" << endl;
+		if (DEBUG) cout << "Testing if mu with pT > 10" << endl;
 		if (muons10to17.size() > 0 || muons17toInf.size() > 1) {
 			(*it)++; 
 		} else {
@@ -360,12 +360,20 @@ void cutFlow(int argc, char* argv[])
 		// sortTrackVector(tk1_2p5_OS);
 		// sortTrackVector(tk2_2p5_OS);
 
-		if (tk1_1.size() == 1 && tk2_1.size() == 1 ) (*it)++;  else continue;
+		if (DEBUG) cout << "Testing if only 1 tk with pT > 1 GeV around each muon" << endl;
+		if (tk1_1.size() == 1 && tk2_1.size() == 1 ) {
+			(*it)++; 
+		} else { 
+			continue; 
+		}
 		it++;
 
 		// SIGNAL SELECTION
+		if (DEBUG) cout << "Testing if that 1 tk with pT > 2.5 GeV around each muon" << endl;
 		if (tk1_1.size() == 1 && tk2_1.size() == 1 
-		&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) (*it)++; 
+		&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) {
+			(*it)++; 
+		}
 		it++;
 	} // end of event loop
 
