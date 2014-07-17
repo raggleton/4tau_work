@@ -76,8 +76,17 @@ void cutFlow(int argc, char* argv[])
 
 	bool stop = false; // used to stop the loop, for debugging/testing
 
-	std::vector<int> cutCount(8); // hold # evts passing cut
-	std::vector<int>::iterator it = cutCount.begin();
+	// Hold cut counts and names
+	std::vector< std::pair<int, std::string> > cutCount;
+	cutCount.push_back(std::make_pair(0,"2+ muons"));
+	cutCount.push_back(std::make_pair(0,"1+ mu with pT > 17 GeV"));
+	cutCount.push_back(std::make_pair(0,"at least one other mu with pT > 10 GeV"));
+	cutCount.push_back(std::make_pair(0,"SS muons"));
+	cutCount.push_back(std::make_pair(0,"Mu be within tracker"));
+	cutCount.push_back(std::make_pair(0,"dR(mu-mu) > 2"));
+	cutCount.push_back(std::make_pair(0,"1 track with pT > 1 GeV within dR of each mu"));
+	cutCount.push_back(std::make_pair(0,"Track pT > 2.5 GeV"));
+	std::vector<std::pair<int, std::string> >::iterator it = cutCount.begin();
 
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
 
@@ -85,11 +94,12 @@ void cutFlow(int argc, char* argv[])
 		treeReader->ReadEntry(entry);
 
 		if (DEBUG) cout << "*** Event" << endl;
+		// Important! Go back to start of vector
 		it = cutCount.begin();
 
-		if (DEBUG) cout << "Testing if >=2 muons" << endl;
+		if (DEBUG) cout << (*it).second << endl;
 		if (branchGenMuons->GetEntries() >= 2) {
-			(*it)++; 
+			(*it).first++; 
 		} else continue; // skip if <2 muons!
 		it++;
 
@@ -240,17 +250,17 @@ void cutFlow(int argc, char* argv[])
 		////////////////////
 		// Muon selection //
 		////////////////////
-		if (DEBUG) cout << "Testing if mu with pT > 17" << endl;
+		if (DEBUG) cout << (*it).second << endl;
 		if (muons17toInf.size() > 0) {
-			(*it)++;
+			(*it).first++;
 		} else {
 			continue;
 		}
 		it++;
 
-		if (DEBUG) cout << "Testing if mu with pT > 10" << endl;
+		if (DEBUG) cout << (*it).second << endl;
 		if (muons10to17.size() > 0 || muons17toInf.size() > 1) {
-			(*it)++; 
+			(*it).first++; 
 		} else {
 			continue;
 		}
@@ -262,25 +272,23 @@ void cutFlow(int argc, char* argv[])
 		// all pairs to find a suitable pair that meet the criteria
 		// That's what the testMuons function does.
 
-		if (DEBUG) cout << "Testing if SS muons" << endl;
-		if (testResults(testMuons(muons17toInf, muons10to17, &checkMuonsPTSS), *it)) {
+		if (DEBUG) cout << (*it).second << endl;
+		if (testResults(testMuons(muons17toInf, muons10to17, &checkMuonsPTSS), (*it).first)) {
 			it++;
 		} else {
 			continue;
 		}
 
-		if (DEBUG) cout << "Testing if eta OK" << endl;
-		if (testResults(testMuons(muons17toInf, muons10to17, &checkMuonsPTSSEta), *it)) {
+		if (DEBUG) cout << (*it).second << endl;
+		if (testResults(testMuons(muons17toInf, muons10to17, &checkMuonsPTSSEta), (*it).first)) {
 			it++;
 		} else {
 			continue;
 		}
 
-		if (DEBUG) cout << "Testing if dR OK" << endl;
-		std::pair<Track*, Track*> p = testMuons(muons17toInf,
-					  muons10to17,
-					  &checkMuonsSignal);
-		if (testResults(p, *it)) {
+		if (DEBUG) cout << (*it).second << endl;
+		std::pair<Track*, Track*> p = testMuons(muons17toInf, muons10to17, &checkMuonsSignal);
+		if (testResults(p, (*it).first)) {
 			it++;
 		} else {
 			continue;
@@ -361,26 +369,26 @@ void cutFlow(int argc, char* argv[])
 		// sortTrackVector(tk1_2p5_OS);
 		// sortTrackVector(tk2_2p5_OS);
 
-		if (DEBUG) cout << "Testing if only 1 tk with pT > 1 GeV around each muon" << endl;
+		if (DEBUG) cout << (*it).second << endl;
 		if (tk1_1.size() == 1 && tk2_1.size() == 1 ) {
-			(*it)++; 
+			(*it).first++; 
 		} else { 
 			continue; 
 		}
 		it++;
 
 		// SIGNAL SELECTION
-		if (DEBUG) cout << "Testing if that 1 tk with pT > 2.5 GeV around each muon" << endl;
+		if (DEBUG) cout << (*it).second << endl;
 		if (tk1_1.size() == 1 && tk2_1.size() == 1 
 		&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) {
-			(*it)++; 
+			(*it).first++; 
 		}
 		it++;
 	} // end of event loop
 
 	// Print out cuts
 	for (auto a : cutCount){
-		std::cout << a << std::endl;
+		std::cout << a.second << ": " << a.first << std::endl;
 	}
 	
 }
