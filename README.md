@@ -8,6 +8,14 @@ You'll need Boost both Pythia and Delphes.
 
 Sorry in advance if this is a bit rubbish - it's constantly in a state of flux, and no-one but me uses it. (Standard weak HEP excuse)
 
+Also see runningOnBlueCrystal.md
+
+## Thngs needed:
+- BOOST (for Pythia event generation and Delphes)
+- ROOT (for Delphes)
+- Pythia8 (for event generation)
+- Delphes 3.1.X, X>2 (for converting HepMC to ROOT)
+
 ## Setup BOOST 
 
 - See below
@@ -16,6 +24,17 @@ Sorry in advance if this is a bit rubbish - it's constantly in a state of flux, 
 
 - Download tarball, extract
 - Follow README.HepMC
+
+## Setup ROOT
+
+- `mkdir root`
+- `cd root`
+- Get latest 5-34-XX version from git, see website (e.g. `git clone http://root.cern.ch/git/root.git root-v5-34`, `git checkout -b v5-34-19 v5-34-19`)
+- `mkdir install`
+- `cd root-v5-34`
+- `./configure --prefix=$HOME/root/install`
+- `make`
+- `make install`
 
 ## Setup Delphes3
 
