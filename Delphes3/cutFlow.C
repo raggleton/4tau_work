@@ -352,12 +352,13 @@ void cutFlow(int argc, char* argv[])
 		} // End of track loop
 
 		// Now pT order the track collections for each muon
-		sortTrackVector(tk1_1);
-		sortTrackVector(tk2_1);
+		// Not needed unless you want the track itself
+		// sortTrackVector(tk1_1);
+		// sortTrackVector(tk2_1);
 		// sortTrackVector(tk1_2p5);
 		// sortTrackVector(tk2_2p5);
-		sortTrackVector(tk1_2p5_OS);
-		sortTrackVector(tk2_2p5_OS);
+		// sortTrackVector(tk1_2p5_OS);
+		// sortTrackVector(tk2_2p5_OS);
 
 		if (tk1_1.size() == 1 && tk2_1.size() == 1 ) (*it)++;  else continue;
 		it++;
