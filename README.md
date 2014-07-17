@@ -31,9 +31,10 @@ Also see runningOnBlueCrystal.md
 - `cd root`
 - Get latest 5-34-XX version from git, see website (e.g. `git clone http://root.cern.ch/git/root.git root-v5-34`, `git checkout -b v5-34-19 v5-34-19`)
 - `mkdir install`
+- `mkdir config`
 - `cd root-v5-34`
-- `./configure --prefix=$HOME/root/install`
-- `make`
+- `./configure --prefix=$HOME/root/install --etcdir=/gpfs/cluster/phys/ra12451/root/config/`
+- `make -j2`
 - `make install`
 
 ## Setup Delphes3
