@@ -67,28 +67,6 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
 // Template these?
 
 /**
- * These checks to see if muA and muB satisfy all muon condtions,
- * but deltaR(mu-mu) > 1, used for sideband.
- * @param  muA Higher pT muon
- * @param  muB Lesser pT muon
- * @return    TRUE if muA and muB pass cuts, FALSE otherwise
- */
-bool checkMuonsAllDR1(Track* muA, Track* muB){
-	return checkMuons(muA, muB, 1.0);
-}
-
-/**
- * These checks to see if muA and muB satisfy all muon condtions 
- * for signal region (dR(mu-mu) > 2)
- * @param  muA Higher pT muon
- * @param  muB Lesser pT muon
- * @return    TRUE if muA and muB pass cuts, FALSE otherwise
- */
-bool checkMuonsAllSignal(Track* muA, Track* muB){
-	return checkMuons(muA, muB, 2.0);
-}
-
-/**
  * These checks to see if muA and muB satisfy muon pT condtions
  * & IP conditions
  * NB IP cuts only work with Track objects starting in Delphes 3.1.2
@@ -156,6 +134,28 @@ bool checkMuons(Track* muA, Track* muB, double deltaR){
 	}
 }
 
+
+/**
+ * These checks to see if muA and muB satisfy all muon condtions,
+ * but deltaR(mu-mu) > 1, used for sideband.
+ * @param  muA Higher pT muon
+ * @param  muB Lesser pT muon
+ * @return    TRUE if muA and muB pass cuts, FALSE otherwise
+ */
+bool checkMuonsDR1(Track* muA, Track* muB){
+	return checkMuons(muA, muB, 1.0);
+}
+
+/**
+ * These checks to see if muA and muB satisfy all muon condtions 
+ * for signal region (dR(mu-mu) > 2)
+ * @param  muA Higher pT muon
+ * @param  muB Lesser pT muon
+ * @return    TRUE if muA and muB pass cuts, FALSE otherwise
+ */
+bool checkMuonsSignal(Track* muA, Track* muB){
+	return checkMuons(muA, muB, 2.0);
+}
 
 /////////////////
 // OLD VERSION //
