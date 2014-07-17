@@ -1,0 +1,18 @@
+[user]
+	email = robin.aggleton@cern.ch
+	name = Robin Aggleton
+[color]
+       	ui = true
+[alias]
+       	co = checkout
+        cb = checkout -b
+        b = branch -vv
+        l = log --graph --all --abbrev-commit --date=relative --format=format:'%C(bold blue)%h%C(reset) %C(green)%ar %C(yellow)%an%C(bold yellow)%d%C(reset)%n        %C(white)%s%n'
+        lt = log --graph --abbrev-commit --date=relative --format=format:'%C(bold blue)%h%C(reset) %C(green)%ar %C(yellow)%an%C(bold yellow)%d%C(reset)%n        %C(white)%s%n'
+        ll = log --graph --abbrev-commit --date=relative --format=format:'%C(bold blue)%h%C(reset) %C(green)%ar %C(yellow)%an%C(bold yellow)%d%C(reset)%n        %C(white)%s%n' -10 HEAD~6..HEAD
+        lf = log --pretty=fuller
+        ls = log --pretty=fuller --stat
+        s = status
+        hist = log --pretty=format:\"%h %ad | %s%d [%an]\" --graph --date=short
+[core]
+      	editor = nano
