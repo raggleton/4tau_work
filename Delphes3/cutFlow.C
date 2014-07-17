@@ -330,6 +330,7 @@ void cutFlow(int argc, char* argv[])
 					tk2_1.push_back(candTk);
 				}
 
+				// For 1-prong candidates, need tighter pT and IP cuts
 				if (checkTrackPTTight(candTk)
 					&& checkTrackIPTight(candTk)){
 					// if (dR1 < 0.5){

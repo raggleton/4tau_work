@@ -33,7 +33,8 @@ namespace po = boost::program_options;
  * This header contains common functions for all my Delphes analysis scripts.
  *
  * For classes/functions pertaining to user options, see programOpts.h
- *
+ * For cuts on tracks and muons, see cuts.h
+ * 
  * Robin Aggleton 2014
  */
 
