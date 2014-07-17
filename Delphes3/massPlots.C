@@ -1,5 +1,6 @@
 #include "commonFunctions.h"
 #include "classes/SortableObject.h"
+#include "cuts.h"
 // #include "tdrstyle.C"
 
 using std::cout;
@@ -20,49 +21,49 @@ using std::endl;
 // 	return 5;
 // }
 
-/**
- * These checks to see if muA and muB satisfy all muon condtions
- * apart from pT. 
- * @param  muA Higher pT muon
- * @param  muB Lesser pT muon
- * @param  deltaR dR(mu-mu) cut
- * @return    TRUE if muA and muB pass cuts, FALSE otherwise
- */
-bool checkMuons(Track* muA, Track* muB, double deltaR){
-	if ((muA->Charge == muB->Charge)
-		&& (fabs(muA->Eta) < 2.1)
-		&& (fabs(muB->Eta) < 2.1)
-		&& (fabs(muA->Zd) < 1.) // dZ < 0.1cm
-		&& (fabs(muB->Zd) < 1.) // dZ < 0.1cm
-		&& (fabs(muA->Dxy) < 0.3 ) // d0 < 0.03cm
-		&& (fabs(muB->Dxy) < 0.3 ) // d0 < 0.03cm
-		&& ((muA->P4().DeltaR(muB->P4())) > deltaR)
-		){
-		return true;
-	} else {
-		return false;
-	}
-}
-/**
- * These checks to see if muA and muB satisfy all muon condtions
- * apart from pT and impact params. 
- * (Old version kept incase you use RawGenMuons branch instead of GenMuons)
- * @param  muA Higher pT muon
- * @param  muB Lesser pT muon
- * @param  deltaR dR(mu-mu) cut
- * @return    TRUE if muA and muB pass cuts, FALSE otherwise
- */
-bool checkMuons(GenParticle* muA, GenParticle* muB, double deltaR){
-	if ((muA->Charge == muB->Charge)
-		&& (fabs(muA->Eta) < 2.1)
-		&& (fabs(muB->Eta) < 2.1)
-		&& ((muA->P4().DeltaR(muB->P4())) > deltaR)
-		){
-		return true;
-	} else {
-		return false;
-	}
-}
+// /**
+//  * These checks to see if muA and muB satisfy all muon condtions
+//  * apart from pT. 
+//  * @param  muA Higher pT muon
+//  * @param  muB Lesser pT muon
+//  * @param  deltaR dR(mu-mu) cut
+//  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
+//  */
+// bool checkMuons(Track* muA, Track* muB, double deltaR){
+// 	if ((muA->Charge == muB->Charge)
+// 		&& (fabs(muA->Eta) < 2.1)
+// 		&& (fabs(muB->Eta) < 2.1)
+// 		&& (fabs(muA->Zd) < 1.) // dZ < 0.1cm
+// 		&& (fabs(muB->Zd) < 1.) // dZ < 0.1cm
+// 		&& (fabs(muA->Dxy) < 0.3 ) // d0 < 0.03cm
+// 		&& (fabs(muB->Dxy) < 0.3 ) // d0 < 0.03cm
+// 		&& ((muA->P4().DeltaR(muB->P4())) > deltaR)
+// 		){
+// 		return true;
+// 	} else {
+// 		return false;
+// 	}
+// }
+// /**
+//  * These checks to see if muA and muB satisfy all muon condtions
+//  * apart from pT and impact params. 
+//  * (Old version kept incase you use RawGenMuons branch instead of GenMuons)
+//  * @param  muA Higher pT muon
+//  * @param  muB Lesser pT muon
+//  * @param  deltaR dR(mu-mu) cut
+//  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
+//  */
+// bool checkMuons(GenParticle* muA, GenParticle* muB, double deltaR){
+// 	if ((muA->Charge == muB->Charge)
+// 		&& (fabs(muA->Eta) < 2.1)
+// 		&& (fabs(muB->Eta) < 2.1)
+// 		&& ((muA->P4().DeltaR(muB->P4())) > deltaR)
+// 		){
+// 		return true;
+// 	} else {
+// 		return false;
+// 	}
+// }
 
 int countParticle(TClonesArray* branchAll, int PID) {
 	int nParticle = 0;
@@ -91,12 +92,11 @@ void massPlots(int argc, char* argv[])
 
 	MCsource source     = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
 	bool doSignal       = pOpts.getSignal(); // for signal or not
-	// bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
+	// bool doMu        = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
-	// bool DEBUG          = pOpts.getVerbose(); // output debug statments
-
-	double deltaR = 2; // dR(mu-mu) value to use
+	// bool DEBUG       = pOpts.getVerbose(); // output debug statments
+	double deltaR       = pOpts.getdR(); // dR(mu-mu) value to use
 
 	bool do1to1p5 = false; // for additional sideband studies. Slower?
 

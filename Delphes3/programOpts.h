@@ -92,7 +92,7 @@ class ProgramOpts
 		bool doHLT; // whether to use MC that has HLT cuts already applied.
 		int  nEvents; // how many events to run over, -1 = all events
 		bool verbose; // output debugging info to screen
-
+		double dR; // deltaR(mu-mu) cut
 	public: 
 		// constructor, parses input
 		ProgramOpts(int argc, char* argv[]):
@@ -103,7 +103,8 @@ class ProgramOpts
 			swapMuRandomly(true),
 			doHLT(true),
 			nEvents(-1),
-			verbose(false)
+			verbose(false),
+			dR(2.)
 		{
 			po::options_description desc("\nAllowed options");
 			desc.add_options()
@@ -116,6 +117,8 @@ class ProgramOpts
 					"TRUE [default] - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
 				("number,n", po::value<int>(&nEvents), 
 					"Number of events to run over. -1 for all [default]")
+				("dR", po::value<double>(&dR),
+					"Set deltaR(mu-u) cut value (default = 2).")
 				("verbose,v", "Output debugging statements")
 			;
 
@@ -173,7 +176,7 @@ class ProgramOpts
 			} else {
 			    cout << "HLT requirement not set. Defaulting to using samples with HLT cuts." << endl;
 			}
-			
+
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		} // end of constructor
 
@@ -185,6 +188,7 @@ class ProgramOpts
 		bool getHLT() { return doHLT; }
 		int  getNEvents() { return nEvents; }
 		bool getVerbose() { return verbose; }
+		double getdR() { return dR; }
 
 		// This should really be in a separate .cc file...
 		void printProgramOptions() {
@@ -206,6 +210,7 @@ class ProgramOpts
 				cout << "Using MC without any HLT cuts." << endl;
 			}
 			
+			cout << "DeltaR(mu-mu) > " << dR << endl;
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		}
 
