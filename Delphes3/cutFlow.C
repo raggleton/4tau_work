@@ -9,9 +9,30 @@ using std::endl;
  * Not very sophisticated, could be made better!
  */
 
+// Yeah, I know global vars are hated, but it's handy for quickly debugging fns
+bool DEBUG = false;
+
 // For sorting track vectors by pT
 void sortTrackVector(std::vector<Track*>& tk){
 	std::sort(tk.begin(), tk.end(), sortByPT<Track>);
+}
+
+/**
+ * This checks that the pair p has non-null pointers (i.e. 2 muons passed cuts)
+ * If so, increment the iterator, and return TRUE
+ * @param  p        std::pair of objects. Must be const as not changing the pair, only checking it, 
+ *                  and allows us to do testResults(testMuons(...)) in one line.
+ * @param  counter  reference to the counter we want to increment
+ * @return    TRUE if pair is valid, FALSE otherwise
+ */
+bool testResults(const std::pair<Track*, Track*> &p, int &counter) {
+	if (p.first && p.second) {
+		if (DEBUG) cout << "p.first not null" << endl;
+		counter++; 
+		return true;
+	} else { 
+		return false;
+	}
 }
 
 void cutFlow(int argc, char* argv[])
@@ -27,7 +48,7 @@ void cutFlow(int argc, char* argv[])
 	// bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	// bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
-	bool DEBUG = pOpts.getVerbose();
+	DEBUG = pOpts.getVerbose();
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -196,7 +217,8 @@ void cutFlow(int argc, char* argv[])
 		}
 
 		// Check to see if we can skip the event if not enough muons
-		if (!(muons17toInf.size() >= 1 && (muons17toInf.size() + muons10to17.size()) >= 2)) continue;
+		// Don't enable this as all HLT events so unnecessary
+		// if (!(muons17toInf.size() >= 1 && (muons17toInf.size() + muons10to17.size()) >= 2)) continue;
 
 		// Sort both vectors by descending pT
 		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<Track>);
@@ -230,39 +252,50 @@ void cutFlow(int argc, char* argv[])
 		// 2 muons that satisfy the pT conditions, that aren't the 2 most 
 		// energetic muons, mu1 and mu2 above. We really need to loop through 
 		// all pairs to find a suitable pair that meet the criteria
+		// That's what the testMuons function does.
 
-
-		if (DEBUG) cout << "Testing if SS" << endl;
-		std::pair<Track*, Track*> p = testMuons(muons17toInf,
-															muons10to17,
-															&checkMuonsPTSS);
-		if (p.first && p.second) {
-			if (DEBUG) cout << "p.first not null" << endl;
-			(*it)++;
-		} else continue;
-		it++;
+		if (DEBUG) cout << "Testing if SS muons" << endl;
+		if (testResults(testMuons(muons17toInf, muons10to17, &checkMuonsPTSS), *it)) {
+			it++;
+		} else {
+			continue;
+		}
+		// if (p.first && p.second) {
+		// 	if (DEBUG) cout << "p.first not null" << endl;
+		// 	(*it)++;
+		// } else continue;
+		// it++;
 
 		if (DEBUG) cout << "Testing if eta OK" << endl;
-		p = testMuons(muons17toInf,
-					  muons10to17,
-					  &checkMuonsPTSSEta);
+		if (testResults(testMuons(muons17toInf, muons10to17, &checkMuonsPTSSEta), *it)) {
+			it++;
+		} else {
+			continue;
+		}
+		// std::pair<Track*, Track*> p = testMuons(muons17toInf,
+		// 			  muons10to17,
+		// 			  &checkMuonsPTSSEta);
 
-		if (p.first && p.second) {
-			if (DEBUG) cout << "p.first not null" << endl;
-			(*it)++; 
-		} else continue;
-		it++;
+		// if (p.first && p.second) {
+		// 	if (DEBUG) cout << "p.first not null" << endl;
+		// 	(*it)++; 
+		// } else continue;
+		// it++;
 
 		if (DEBUG) cout << "Testing if dR OK" << endl;
-		p = testMuons(muons17toInf,
+		std::pair<Track*, Track*> p = testMuons(muons17toInf,
 					  muons10to17,
 					  &checkMuonsSignal);
-
-		if (p.first && p.second) {
-			if (DEBUG) cout << "p.first not null" << endl;
-			(*it)++; 
-		} else continue;
-		it++;
+		if (testResults(p, *it)) {
+			it++;
+		} else {
+			continue;
+		}
+		// if (p.first && p.second) {
+		// 	if (DEBUG) cout << "p.first not null" << endl;
+		// 	(*it)++; 
+		// } else continue;
+		// it++;
 
 		Track* mu1 = p.first;
 		Track* mu2 = p.second;
