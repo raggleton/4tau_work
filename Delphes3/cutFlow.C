@@ -250,6 +250,8 @@ void cutFlow(int argc, char* argv[])
 		////////////////////
 		// Muon selection //
 		////////////////////
+		
+		// Check mu with pT > 17
 		if (DEBUG) cout << (*it).second << endl;
 		if (muons17toInf.size() > 0) {
 			(*it).first++;
@@ -258,6 +260,7 @@ void cutFlow(int argc, char* argv[])
 		}
 		it++;
 
+		// Check another mu wiht pT > 10
 		if (DEBUG) cout << (*it).second << endl;
 		if (muons10to17.size() > 0 || muons17toInf.size() > 1) {
 			(*it).first++; 
@@ -272,6 +275,7 @@ void cutFlow(int argc, char* argv[])
 		// all pairs to find a suitable pair that meet the criteria
 		// That's what the testMuons function does.
 
+		// Muon pT + SS
 		if (DEBUG) cout << (*it).second << endl;
 		if (testResults(testMuons(muons17toInf, muons10to17, &checkMuonsPTSS), (*it).first)) {
 			it++;
@@ -279,6 +283,7 @@ void cutFlow(int argc, char* argv[])
 			continue;
 		}
 
+		// Muon eta
 		if (DEBUG) cout << (*it).second << endl;
 		if (testResults(testMuons(muons17toInf, muons10to17, &checkMuonsPTSSEta), (*it).first)) {
 			it++;
@@ -286,6 +291,7 @@ void cutFlow(int argc, char* argv[])
 			continue;
 		}
 
+		// Muon dR cut
 		if (DEBUG) cout << (*it).second << endl;
 		std::pair<Track*, Track*> p = testMuons(muons17toInf, muons10to17, &checkMuonsSignal);
 		if (testResults(p, (*it).first)) {
