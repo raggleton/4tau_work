@@ -42,7 +42,8 @@ void cutFlow(int argc, char* argv[])
 	// and use https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription
 	// TClonesArray *branchMuon = treeReader->UseBranch("Muon");
 	TClonesArray *branchTracks   = treeReader->UseBranch("Track");
-	TClonesArray *branchGenMuons = treeReader->UseBranch("OnlyGenMuons");
+	// TClonesArray *branchGenMuons = treeReader->UseBranch("OnlyGenMuons");
+	TClonesArray *branchGenMuons = treeReader->UseBranch("GenMuon");
 	// TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
 	// TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
@@ -179,14 +180,14 @@ void cutFlow(int argc, char* argv[])
 		//////////////////////////////////////////////////////////////////////
 		// Now, do more general MC stuff:                                   //
 		// get the two highest pT muons in the event, store their pT        //
-		// and pointers to the GenParticles                                 //
+		// and pointers to the Tracks                                 //
 		//////////////////////////////////////////////////////////////////////
 		
 		// Fill vectors with muons, based on pT
-		std::vector<GenParticle*> muons10to17;
-		std::vector<GenParticle*> muons17toInf;
+		std::vector<Track*> muons10to17;
+		std::vector<Track*> muons17toInf;
 		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
-			GenParticle* cand = (GenParticle*) branchGenMuons->At(i);
+			Track* cand = (Track*) branchGenMuons->At(i);
 			if (cand->PT > 17) {
 				muons17toInf.push_back(cand);
 			} else if (cand->PT > 10) {
@@ -195,14 +196,14 @@ void cutFlow(int argc, char* argv[])
 		}
 
 		// Check to see if we can skip the event if not enough muons
-		// if (!(muons17toInf.size() >= 1 && (muons17toInf.size() + muons10to17.size()) >= 2)) continue;
+		if (!(muons17toInf.size() >= 1 && (muons17toInf.size() + muons10to17.size()) >= 2)) continue;
 
 		// Sort both vectors by descending pT
-		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<GenParticle>);
-		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<GenParticle>);
+		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<Track>);
+		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<Track>);
 
 		// // Now randomly swap mu1 - mu2 if desired
-		// GenParticle *origMu1(nullptr), *origMu2(nullptr);
+		// Track *origMu1(nullptr), *origMu2(nullptr);
 		// origMu1 = mu1;
 		// origMu2 = mu2;
 		// if (swapMuRandomly){
@@ -232,7 +233,7 @@ void cutFlow(int argc, char* argv[])
 
 
 		if (DEBUG) cout << "Testing if SS" << endl;
-		std::pair<GenParticle*, GenParticle*> p = testMuons(muons17toInf,
+		std::pair<Track*, Track*> p = testMuons(muons17toInf,
 															muons10to17,
 															&checkMuonsPTSS);
 		if (p.first && p.second) {
@@ -255,7 +256,7 @@ void cutFlow(int argc, char* argv[])
 		if (DEBUG) cout << "Testing if dR OK" << endl;
 		p = testMuons(muons17toInf,
 					  muons10to17,
-					  &checkMuonsAllSignal);
+					  &checkMuonsSignal);
 
 		if (p.first && p.second) {
 			if (DEBUG) cout << "p.first not null" << endl;
@@ -263,8 +264,8 @@ void cutFlow(int argc, char* argv[])
 		} else continue;
 		it++;
 
-		GenParticle* mu1 = p.first;
-		GenParticle* mu2 = p.second;
+		Track* mu1 = p.first;
+		Track* mu2 = p.second;
 
 		TLorentzVector mu1Mom, mu2Mom;
 		mu1Mom = mu1->P4();
