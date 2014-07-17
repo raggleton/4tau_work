@@ -157,6 +157,38 @@ bool checkMuonsSignal(Track* muA, Track* muB){
 	return checkMuons(muA, muB, 2.0);
 }
 
+
+////////////////
+// TRACK CUTS //
+////////////////
+
+/**
+ * Check to see if track passes loose pT requirement
+ * @param  candTk Pointer to track object
+ * @return    TRUE if track passes cuts, FALSE otherwise
+ */
+bool checkTrackPTLoose(Track* candTk){
+	if (candTk->PT > 1.){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/**
+ * Check to see if track passes Tight pT requirement
+ * @param  candTk Pointer to track object
+ * @return    TRUE if track passes cuts, FALSE otherwise
+ */
+bool checkTrackPTTight(Track* candTk){
+	if (candTk->PT > 2.5){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
 /////////////////
 // OLD VERSION //
 /////////////////
