@@ -316,10 +316,7 @@ void cutFlow(int argc, char* argv[])
 
 			if (   (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
 				&& (candTk->PT != mu2->PT)
-				&& checkTrackPTLoose(candTk)
-				&& (fabs(candTk->Z) < 1.) //dz < 1mm
-				&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
-				&& (fabs(candTk->Eta)<2.4)
+				&& checkTrackLoose(candTk)
 			){
 
 				// Store track in suitable vector
@@ -333,7 +330,8 @@ void cutFlow(int argc, char* argv[])
 					tk2_1.push_back(candTk);
 				}
 
-				if (checkTrackPTTight(candTk)){
+				if (checkTrackPTTight(candTk)
+					&& checkTrackIPTight(candTk)){
 					// if (dR1 < 0.5){
 					// 	tk1_2p5.push_back(candTk);
 					// }

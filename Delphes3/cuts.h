@@ -10,6 +10,9 @@ using std::endl;
 /**
  * Lots of fucntions that do cuts
  * Really this should be an object, but that requires more thinking...
+ *
+ * ALL DISTANCES IN MM, ALL MOMENTUM/ENERGY IN GeV
+ *
  */
 
 /**
@@ -163,9 +166,9 @@ bool checkMuonsSignal(Track* muA, Track* muB){
 ////////////////
 
 /**
- * Check to see if track passes loose pT requirement
+ * Check to see if track passes loose pT requirement (> 1 GeV)
  * @param  candTk Pointer to track object
- * @return    TRUE if track passes cuts, FALSE otherwise
+ * @return        TRUE if track passes cuts, FALSE otherwise
  */
 bool checkTrackPTLoose(Track* candTk){
 	if (candTk->PT > 1.){
@@ -176,9 +179,25 @@ bool checkTrackPTLoose(Track* candTk){
 }
 
 /**
- * Check to see if track passes Tight pT requirement
+ * Check to see if track passes loose IP requirement (dz < 0.5 cm, d0 < 1 cm)
+ * (Delphes does all distacnes in mm)
  * @param  candTk Pointer to track object
- * @return    TRUE if track passes cuts, FALSE otherwise
+ * @return        TRUE if track passes cuts, FALSE otherwise
+ */
+bool checkTrackIPLoose(Track* candTk){
+	if ((fabs(candTk->Zd) < 5.) // dz < 0.5cm
+		&& (fabs(candTk->Dxy) < 10.)){ // d0 impact parameter < 1cm
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/**
+ * Check to see if track passes Tight pT requirement (> 2.5 GeV)
+ * (Delphes does all distacnes in mm)
+ * @param  candTk Pointer to track object
+ * @return        TRUE if track passes cuts, FALSE otherwise
  */
 bool checkTrackPTTight(Track* candTk){
 	if (candTk->PT > 2.5){
@@ -188,6 +207,48 @@ bool checkTrackPTTight(Track* candTk){
 	}
 }
 
+/**
+ * Check to see if track passes tight IP requirement (dz < 0.04 cm, d0 < 0.02cm)
+ * (Delphes does all distacnes in mm)
+ * @param  candTk Pointer to track object
+ * @return        TRUE if track passes cuts, FALSE otherwise
+ */
+bool checkTrackIPTight(Track* candTk){
+	if ((fabs(candTk->Zd) < 0.4) // dz < 0.04cm
+		&& (fabs(candTk->Dxy) < 0.2)) { // d0 < 0.02cm 
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/**
+ * Check to see if track passes eta cut (|eta| < 2.4)
+ * @param  candTk Pointer to track object
+ * @return        TRUE if track passes cuts, FALSE otherwise
+ */
+bool checkTrackEta(Track* candTk) {
+	if (fabs(candTk->Eta) < 2.4) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/**
+ * Check track against loost pT cuts, loose IP cut, and eta cut/
+  * @param  candTk Pointer to track object
+ * @return        TRUE if track passes cuts, FALSE otherwise
+ */
+bool checkTrackLoose(Track* candTk) {
+	if (checkTrackPTLoose(candTk) 
+		&& checkTrackIPLoose(candTk) 
+		&& checkTrackEta(candTk)) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 /////////////////
 // OLD VERSION //
