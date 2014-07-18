@@ -36,6 +36,7 @@ Also see runningOnBlueCrystal.md
 - `./configure --prefix=$HOME/root/install --etcdir=/gpfs/cluster/phys/ra12451/root/config/`
 - `make -j2`
 - `make install`
+- add `source $HOME/root/root-v5-34/bin/thisroot.sh` to `~/.bashrc` or `~/.bash_profile`
 
 ## Setup Delphes3
 
@@ -72,6 +73,7 @@ Once you have a HEPMC file, you now run it through Delphes to produce a ROOT fil
 - `basicScript`: template script for making a new program (see below) **OUT OF DATE**
 - `mainAnalysis`: does lots of plots, like pT, track eta Vs phi, soft track distributions. Used for QCDb rejection studies **OUT OF DATE**
 - `massPlots`: makes plots of invariant masses of mu+tk, and calculates & plots correlation coefficients for backgrounds
+- `cutFlow`: prints out cutflow of various cuts stages in signal selection
 - `IP`: plots impact parameters of things. Not really kept up to date. **OUT OF DATE**
 
 ## Making a new Delphes analysis program: **OUT OF DATE**
