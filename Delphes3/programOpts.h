@@ -217,6 +217,32 @@ class ProgramOpts
 };
 
 /**
+ * Add ROOT files to TChain from specified folder, from file_startNum to file_endNum, inclusive.
+ * @param chain    TChain to add files to
+ * @param folder   folder name
+ * @param file     File name, of form myFile_whatever_
+ * @param startNum Starting file number
+ * @param endNum   Ending file number
+ */
+void addFileFromFolder(TChain* chain, std::string folder, std::string file, int startNum, int endNum) {
+	for (int i = startNum; i <= endNum; i++) {
+		cout << "Adding " << folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
+		chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
+	}
+}
+
+/**
+ * Add ROOT files to TChain from specified folder, from file_1 to file_endNum, inclusive.
+ * @param chain    TChain to add files to
+ * @param folder   folder name
+ * @param file     File name, of form myFile_whatever_
+ * @param endNum   Ending file number
+ */
+void addFileFromFolder(TChain* chain, std::string folder, std::string file, int endNum) {
+	addFileFromFolder(chain, folder, file, 1, endNum);
+}
+
+/**
  * Add Delphes ntuples to TChain so we can process them in one go
  * @param chain    Pointer to TChain to add files to
  * @param pOpts    Pointer to ProgramOpts object that holds all user flags 
@@ -224,9 +250,6 @@ class ProgramOpts
  */
 void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	// Create chain of root trees
-	int nFiles = 0; // number of files to be added
-	std::string folder = ""; // folder & file stem 
-	std::string file = ""; // folder & file stem 
 	// expect files to be named like myFile_i.root, where i = 1 -> nFiles
 	
 	MCsource source = pOpts->getSource();
@@ -243,15 +266,10 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			// file = "signal_1prong_500K_TauPythia_HLT_";
 			// folder = "Signal_1prong_500K_bare/";
 			// file = "signal_1prong_500K_HLT_";
-			folder = "Signal_1prong_HLT_bare/";
-			file = "Signal_HLT_";
-			nFiles = 20;
-			// nFiles = 1;
+			addFileFromFolder(chain, "Signal_1prong_HLT_bare/", "Signal_HLT_", 20);
 		} else { 
 			cout << "Doing signal without HLT cuts" << endl;
-			folder = "Signal_1prong_500K_bare/";
-			file = "signal_1prong_500K_NoHLT_";
-			nFiles = 20;
+			addFileFromFolder(chain, "Signal_1prong_500K_bare/", "signal_1prong_500K_NoHLT_", 20);
 		}
 
 	////////////////
@@ -261,23 +279,14 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 		if (doMu) {
 			if(doHLT) {
 				cout << "Doing QCDb_mu with HLT cuts" << endl;
-				// folder = "QCDb_mu_pthatmin20_Mu17_Mu8_bare/";
-				// file = "QCDb_mu_pthatmin20_Mu17_Mu8_";
-				// nFiles = 350;
-				folder = "QCDb_HLT_bare/";
-				file = "QCDb_HLT_";
-				nFiles = 800;
+				addFileFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", 800);
 			} else{
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
-				folder = "QCDb_mu_pthatmin20_bare/";
-				file = "QCDb_mu_pthatmin20_";
-				nFiles = 94;
+				addFileFromFolder(chain, "QCDb_mu_pthatmin20_bare/", "QCDb_mu_pthatmin20_", 94);
 			}
 		} else {
 			cout << "Doing QCDb" << endl;
-			folder = "QCDb_cleanTk/";
-			file = "QCDb_";
-			nFiles = 10;
+			addFileFromFolder(chain, "QCDb_cleanTk/", "QCDb_", 10);
 		}
 	
 	//////////////
@@ -286,9 +295,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	} else if (source == qcdc) {
 		if(doHLT) {
 			cout << "Doing QCDc_mu with HLT cuts" << endl;
-			folder = "QCDc_mu_pthatmin20_Mu17_Mu8_bare/";
-			file = "QCDc_mu_pthatmin20_Mu17_Mu8_";
-			nFiles = 200;
+			addFileFromFolder(chain, "QCDc_mu_pthatmin20_Mu17_Mu8_bare/", "QCDc_mu_pthatmin20_Mu17_Mu8_", 200);
 		}
 	
 	//////////////////////
@@ -297,11 +304,8 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	} else if (source == qcdscatter) {
 		if(doHLT) {
 			cout << "Doing QCDScatter with HLT cuts" << endl;
-			// folder = "QCDScatter_mu_pthatmin20_Mu17_Mu8_bare/";
-			// file = "QCDScatter_mu_pthatmin20_Mu17_Mu8_";
-			folder = "QCDbcScatter_HLT_bare/";
-			file = "QCDbcScatter_HLT_250_";
-			nFiles = 200;
+			addFileFromFolder(chain, "QCDbcScatter_HLT_bare/", "QCDbcScatter_HLT_250_", 1, 200);
+			addFileFromFolder(chain, "QCDbcScatter_HLT_bare/", "QCDbcScatter_HLT_500_", 201, 600);
 		}
 	
 	////////////////////
@@ -311,48 +315,21 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 		if (doHLT) {
 			cout << "Doing QCDAll with HLT cuts" << endl;
 			// folder = "QCDAll_mu_pthatmin20_Mu17_Mu8_bare/";
-			folder = "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_bare/";
 			// file = "QCDAll_mu_pthatmin20_Mu17_Mu8_";
-			file = "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_";
-			nFiles = 200;
+			addFileFromFolder(chain, "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_bare/", "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_", 200);
 		}
 	
 	////////////////
 	// Test file //
 	////////////////
 	} else if (source == test) {
-		cout << "Doing test file" << endl;
-		cout << "Adding QCDb_HLT_bare/QCDb_HLT_1.root" << endl;
-		cout << "Adding QCDb_HLT_bare/QCDb_HLT_2.root" << endl;
-		cout << "Adding QCDb_HLT_bare/QCDb_HLT_3.root" << endl;
-		chain->Add("QCDb_HLT_bare/QCDb_HLT_1.root");
-		chain->Add("QCDb_HLT_bare/QCDb_HLT_2.root");
-		chain->Add("QCDb_HLT_bare/QCDb_HLT_3.root");
+		cout << "Doing test files" << endl;
+		addFileFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", 5);
 	}
 
 	// Auto-loop over ROOT files in folder using Boost::Filesystem
 	
 	// TODO
-
-	if (source != test) {
-		// For manually looping over files in a folder from 1 to nFiles (inclusive)	
-		for (int i = 1; i <= nFiles; i ++) {
-			cout << "Adding " << 
-				folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
-			chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
-		}
-		
-		// Some extra qcdb ones?
-		// if (source == qcdb) {
-		// 	file = "QCDb_HLT_10000_";
-		// 	nFiles=10;
-		// 	for (int i = 1; i <= nFiles; i ++) {
-		// 		cout << "Adding " << 
-		// 			folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
-		// 		chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
-		// 	}
-		// }
-	}
 }
 
 #endif
