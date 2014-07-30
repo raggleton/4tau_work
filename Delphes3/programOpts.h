@@ -279,7 +279,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 		if (doMu) {
 			if(doHLT) {
 				cout << "Doing QCDb_mu with HLT cuts" << endl;
-				addFileFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", 800);
+				addFileFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", 1000);
 			} else{
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
 				addFileFromFolder(chain, "QCDb_mu_pthatmin20_bare/", "QCDb_mu_pthatmin20_", 94);
