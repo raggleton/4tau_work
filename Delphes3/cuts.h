@@ -63,6 +63,50 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
 	return p;
 }
 
+/*
+ * This is like the above function but adds an extra argument for specifying 
+ * the deltaR(mu-mu) cut for the checkMuons function
+ */
+std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf, 
+		  std::vector<Track*> muons10to17, 
+		  bool (*checkMuons)(Track*, Track*, double),
+		  double deltaR) {
+
+	Track *mu1(nullptr), *mu2(nullptr);
+	bool foundMuonPair = false;
+	std::vector<Track*>::iterator muA = muons17toInf.begin();
+	while(!foundMuonPair && muA != muons17toInf.end()){
+		
+		// Need to make pairs among the 17toInf vector also, if size >= 2
+		auto muB = muA;
+		muB++;
+		for (; muB != muA, muB != muons17toInf.end(); muB++) {
+			if (*muA != *muB){
+				if (checkMuons(*muA, *muB, deltaR)) {
+					mu1 = *muA;
+					mu2 = *muB;
+					foundMuonPair = true;
+					break;
+				}
+			}
+		}
+
+		if(!foundMuonPair) {
+			for (auto muB : muons10to17) {
+				if (checkMuons(*muA, muB, deltaR)) {
+					mu1 = *muA;
+					mu2 = muB;
+					foundMuonPair = true;
+					break;
+				}
+			}
+		}
+		muA++;
+	}
+	std::pair<Track*, Track*> p(mu1, mu2);
+	return p;
+}
+
 /////////////////////////
 // LOTS OF 2-MUON CUTS //
 /////////////////////////
@@ -236,13 +280,28 @@ bool checkTrackEta(Track* candTk) {
 }
 
 /**
- * Check track against loost pT cuts, loose IP cut, and eta cut/
+ * Check track against loose pT cuts, loose IP cut, and eta cut/
   * @param  candTk Pointer to track object
  * @return        TRUE if track passes cuts, FALSE otherwise
  */
 bool checkTrackLoose(Track* candTk) {
 	if (checkTrackPTLoose(candTk) 
 		&& checkTrackIPLoose(candTk) 
+		&& checkTrackEta(candTk)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/**
+ * Check track against tight pT cuts, Tight IP cut, and eta cut/
+  * @param  candTk Pointer to track object
+ * @return        TRUE if track passes cuts, FALSE otherwise
+ */
+bool checkTrackTight(Track* candTk) {
+	if (checkTrackPTTight(candTk) 
+		&& checkTrackIPTight(candTk) 
 		&& checkTrackEta(candTk)) {
 		return true;
 	} else {

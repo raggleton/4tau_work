@@ -237,95 +237,7 @@ void massPlots(int argc, char* argv[])
 		// cout << "*** Event" << endl;
 
 		if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons! (alhtough pointless for HLT samples)
-
-		/////////////////////////////////////////////////////////////////////////
-		// Now, get the two highest pT muons in the event that pass selection, // 
-		// store pointers to the Track particles and 4-momenta                 //
-		// (Use tracks for muons as store more info about position)
-		/////////////////////////////////////////////////////////////////////////
-		
-		// Track *candTk(nullptr);
-
-		// Fill vectors with muons, based on pT
-		std::vector<Track*> muons10to17;
-		std::vector<Track*> muons17toInf;
-		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
-			Track* cand = (Track*) branchGenMuons->At(i);
-			if (cand->PT > 17) {
-				muons17toInf.push_back(cand);
-			} else if (cand->PT > 10) {
-				muons10to17.push_back(cand);
-			}
-		}
-
-		// Check to see if we can skip the event if not enough muons
-		if (!(muons17toInf.size() >= 1 && (muons17toInf.size() + muons10to17.size()) >= 2)) continue;
-
-		// Sort both vectors by descending pT
-		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<Track>);
-		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<Track>);
-
-
-		// Make pairs, see if they pass all cuts (SS, eta, deltaR, dZ, d0)
-		// If they do, store in mu1 and mu2 (mu1 has higher pT)
-		Track *mu1(nullptr), *mu2(nullptr);
-		bool foundMuonPair = false;
-
-		// for (auto muA : muons17toInf) {
-		std::vector<Track*>::iterator muA = muons17toInf.begin();
-		while(!foundMuonPair && muA != muons17toInf.end()){
-			
-			// Need to make pairs among the 17toInf vector also, if size >= 2
-			auto muB = muA;
-			muB++;
-			for (; muB != muA, muB != muons17toInf.end(); muB++) {
-				if (*muA != *muB){
-					if (checkMuons(*muA, *muB, deltaR)) {
-						mu1 = *muA;
-						mu2 = *muB;
-						foundMuonPair = true;
-						break;
-					}
-				}
-			}
-
-			if(!foundMuonPair) {
-				for (auto muB : muons10to17) {
-					if (checkMuons(*muA, muB, deltaR)) {
-						mu1 = *muA;
-						mu2 = muB;
-						foundMuonPair = true;
-						break;
-					}
-				}
-			}
-			muA++;
-		}
-		if (!foundMuonPair) continue;
-
-		// cout << " >>>>> Muon pair details: " << endl;
-		// cout << " >>>>> Mu1 pT " << mu1->PT << " charge: " << mu1->Charge << " eta " << mu1->Eta << endl;
-		// cout << " >>>>> Mu2 pT " << mu2->PT << " charge: " << mu2->Charge << " eta " << mu2->Eta << endl;
-		// cout << " >>>>> deltaR " << mu1->P4().DeltaR(mu2->P4()) << endl;
-
-		// Now randomly swap mu1 - mu2
-		Track *origMu1(nullptr), *origMu2(nullptr);
-		origMu1 = mu1;
-		origMu2 = mu2;
-		if (swapMuRandomly){
-			// TLorentzVector mu1MomTmp = mu1->P4();
-			// TLorentzVector mu2MomTmp = mu2->P4();
-			double randNum = (double)rand() / RAND_MAX;
-			if (randNum > 0.5){
-				mu1 = origMu2;
-				mu2 = origMu1;
-			}
-		}
-
-		TLorentzVector mu1Mom, mu2Mom;
-		mu1Mom = mu1->P4();
-		mu2Mom = mu2->P4();
-
+	
 		////////////////////////////////////////////////////////////
 		// Get the hard interaction particles for signal MC truth //
 		// No selection cuts applied (only >=2 muons)             //
@@ -444,334 +356,385 @@ void massPlots(int argc, char* argv[])
 		} // end if(doSignal)
 
 
+		/////////////////////////////////////////////////////////////////////////
+		// Now, get the two highest pT muons in the event that pass selection, // 
+		// store pointers to the Track particles and 4-momenta                 //
+		// (Use tracks for muons as store more info about position)
+		/////////////////////////////////////////////////////////////////////////
+		
+		// Track *candTk(nullptr);
+
+		// Fill vectors with muons, based on pT
+		std::vector<Track*> muons10to17;
+		std::vector<Track*> muons17toInf;
+		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
+			Track* cand = (Track*) branchGenMuons->At(i);
+			if (cand->PT > 17) {
+				muons17toInf.push_back(cand);
+			} else if (cand->PT > 10) {
+				muons10to17.push_back(cand);
+			}
+		}
+
+		// Check to see if we can skip the event if not enough muons
+		if (!(muons17toInf.size() >= 1 && (muons17toInf.size() + muons10to17.size()) >= 2)) continue;
+
+		// Sort both vectors by descending pT
+		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<Track>);
+		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<Track>);
+
+
+		// Make pairs, see if they pass all cuts (SS, eta, deltaR, dZ, d0)
+		// If they do, store in mu1 and mu2 (mu1 has higher pT)
+		std::pair<Track*, Track*> p = testMuons(muons17toInf, muons10to17, &checkMuons, deltaR);
+		Track* mu1 = p.first;
+		Track* mu2 = p.second;
+
+		if (!(p.first && p.second)) continue;
+
+		// cout << " >>>>> Muon pair details: " << endl;
+		// cout << " >>>>> Mu1 pT " << mu1->PT << " charge: " << mu1->Charge << " eta " << mu1->Eta << endl;
+		// cout << " >>>>> Mu2 pT " << mu2->PT << " charge: " << mu2->Charge << " eta " << mu2->Eta << endl;
+		// cout << " >>>>> deltaR " << mu1->P4().DeltaR(mu2->P4()) << endl;
+
+		// Now randomly swap mu1 - mu2
+		Track *origMu1(nullptr), *origMu2(nullptr);
+		origMu1 = mu1;
+		origMu2 = mu2;
+		if (swapMuRandomly){
+			// TLorentzVector mu1MomTmp = mu1->P4();
+			// TLorentzVector mu2MomTmp = mu2->P4();
+			double randNum = (double)rand() / RAND_MAX;
+			if (randNum > 0.5){
+				mu1 = origMu2;
+				mu2 = origMu1;
+			}
+		}
+
+		TLorentzVector mu1Mom, mu2Mom;
+		mu1Mom = mu1->P4();
+		mu2Mom = mu2->P4();
+
 		/////////////////////////////////
 		// Look at tracks around muons //
 		/////////////////////////////////
-			
-		if (foundMuonPair){
 
-			// Vectors of tracks with pT > 1, within dR < 0.5 of respective muons + other cuts
-			// so tk1 is the track nearest to muon1, (may or may not be highest pT, depends if random swapping is on)
-			std::vector<Track*> tk1_1;
-			std::vector<Track*> tk2_1;
+		// Vectors of tracks with pT > 1, within dR < 0.5 of respective muons + other cuts
+		// so tk1 is the track nearest to muon1, (may or may not be highest pT, depends if random swapping is on)
+		std::vector<Track*> tk1_1;
+		std::vector<Track*> tk2_1;
 
-			// same but with pT >2.5
-			std::vector<Track*> tk1_2p5;
-			std::vector<Track*> tk2_2p5;
+		// same but with pT >2.5
+		std::vector<Track*> tk1_2p5;
+		std::vector<Track*> tk2_2p5;
 
-			// same but with pT > 2.5, OS to muon
-			std::vector<Track*> tk1_2p5_OS;
-			std::vector<Track*> tk2_2p5_OS;
-			
-			// same but with 1 < pT < 2.5 (for sideband)
-			std::vector<Track*> tk1_1to2p5;
-			std::vector<Track*> tk2_1to2p5;
+		// same but with pT > 2.5, OS to muon
+		std::vector<Track*> tk1_2p5_OS;
+		std::vector<Track*> tk2_2p5_OS;
+		
+		// same but with 1 < pT < 2.5 (for sideband)
+		std::vector<Track*> tk1_1to2p5;
+		std::vector<Track*> tk2_1to2p5;
 
-			// same but with 1 < pT < 1.5 (for sideband)
-			std::vector<Track*> tk1_1to1p5;
-			std::vector<Track*> tk2_1to1p5;
+		// same but with 1 < pT < 1.5 (for sideband)
+		std::vector<Track*> tk1_1to1p5;
+		std::vector<Track*> tk2_1to1p5;
 
-			Track *candTk(nullptr);
-			for(int a = 0; a < branchTracks->GetEntries(); a++){
-				candTk = (Track*) branchTracks->At(a);
+		Track *candTk(nullptr);
+		for(int a = 0; a < branchTracks->GetEntries(); a++){
+			candTk = (Track*) branchTracks->At(a);
 
-				if (   (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
-					&& (candTk->PT != mu2->PT)
-					&& (candTk->PT > 1.)
-					&& (fabs(candTk->Zd) < 5.) //dz < 0.5cm
-					&& (fabs(candTk->Dxy) < 10.) // d_0 impact parameter < 1cm
-					&& (fabs(candTk->Eta) < 2.4)
-				){
-					// Store track in suitable vector
-					double dR1 = (candTk->P4()).DeltaR(mu1Mom);
-					double dR2 = (candTk->P4()).DeltaR(mu2Mom);
+			if (   (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
+				&& (candTk->PT != mu2->PT)
+				&& checkTrackLoose(candTk)
+			){
+				// Store track in suitable vector
+				double dR1 = (candTk->P4()).DeltaR(mu1Mom);
+				double dR2 = (candTk->P4()).DeltaR(mu2Mom);
 
+				if (dR1 < 0.5){
+					tk1_1.push_back(candTk);
+				}
+				if (dR2 < 0.5){
+					tk2_1.push_back(candTk);
+				}
+
+				// 1 prong candiate must have pT >2.5, 
+				// d_z < 0.04cm, d_0 < 0.02cm
+				if (checkTrackTight(candTk)){
 					if (dR1 < 0.5){
-						tk1_1.push_back(candTk);
+						tk1_2p5.push_back(candTk);
 					}
 					if (dR2 < 0.5){
-						tk2_1.push_back(candTk);
+						tk2_2p5.push_back(candTk);
 					}
-
-					// 1 prong candiate must have pT >2.5, 
-					// d_z < 0.04cm, d_0 < 0.02cm
-					if (   (candTk->PT > 2.5)
-						&& (fabs(candTk->Zd) < 0.4)
-						&& (fabs(candTk->Dxy) < 0.2)
-					){
+					if ((candTk->Charge) * (mu1->Charge) < 0) {
 						if (dR1 < 0.5){
-							tk1_2p5.push_back(candTk);
+							tk1_2p5_OS.push_back(candTk);
 						}
 						if (dR2 < 0.5){
-							tk2_2p5.push_back(candTk);
+							tk2_2p5_OS.push_back(candTk);
 						}
-						if ((candTk->Charge) * (mu1->Charge) < 0) {
+					}					
+				} else {
+					if (dR1 < 0.5){
+						tk1_1to2p5.push_back(candTk);
+					}
+					if (dR2 < 0.5){
+						tk2_1to2p5.push_back(candTk);
+					}
+					if (do1to1p5){
+						if (candTk->PT < 1.5){
 							if (dR1 < 0.5){
-								tk1_2p5_OS.push_back(candTk);
+								tk1_1to1p5.push_back(candTk);
 							}
 							if (dR2 < 0.5){
-								tk2_2p5_OS.push_back(candTk);
-							}
-						}					
-					} else {
-						if (dR1 < 0.5){
-							tk1_1to2p5.push_back(candTk);
-						}
-						if (dR2 < 0.5){
-							tk2_1to2p5.push_back(candTk);
-						}
-						if (do1to1p5){
-							if (candTk->PT < 1.5){
-								if (dR1 < 0.5){
-									tk1_1to1p5.push_back(candTk);
-								}
-								if (dR2 < 0.5){
-									tk2_1to1p5.push_back(candTk);
-								}
+								tk2_1to1p5.push_back(candTk);
 							}
 						}
 					}
-				} // End of track selection criteria
-			} // End of track loop
-
-
-			// Do swapping
-			// if (tk1_1.size() == 1 && tk2_1.size() == 1 
-			// && tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) {
-			// 	TLorentzVector mu1MomTmp = mu1->P4();		
-			// 	TLorentzVector tk1MomTmp = tk1_2p5_OS[0]->P4();		
-			// 	TLorentzVector sys1Mom = mu1MomTmp+tk1MomTmp;
-			// 	TLorentzVector mu2MomTmp = mu2->P4();		
-			// 	TLorentzVector tk2MomTmp = tk2_2p5_OS[0]->P4();		
-			// 	TLorentzVector sys2Mom = mu2MomTmp+tk2MomTmp;
-			// 	TLorentzVector totMom = mu1MomTmp+mu2MomTmp+tk1MomTmp+tk2MomTmp;
-
-			// }
-
-
-			/////////////////////////
-			// SIGNAL SELECTION    //
-			/////////////////////////
-			// Only 1 track within ∆R < 0.5 of muon has pT > 1, 
-			// and that track must have pT > 2.5, and be oppsite charge to muon
-			if (tk1_1.size() == 1 && tk2_1.size() == 1 
-			&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) {
-				
-				TLorentzVector track1Mom=tk1_2p5_OS[0]->P4();
-				TLorentzVector track2Mom=tk2_2p5_OS[0]->P4();
-
-				// random since mu1Mom andmu2Mom are randomly assigned (if selected at top)
-				double m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
-				double m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
-
-				histM1->Fill(m1);
-				histM1_fine->Fill(m1);
-				histM2->Fill(m2);
-				histM2_fine->Fill(m2);
-				
-				// Fill symmetrically to increase stats
-				histM1vsM2->Fill(m1,m2);
-				// if (getMassBin(m1) != getMassBin(m2)){
-				histM1vsM2->Fill(m2,m1);
-				
-				if(m2 < 1.){
-					histM1_0to1->Fill(m1);
-					histMu1Pt_0to1->Fill(mu1->PT);
-				} else if (m2 < 2.){
-					histM1_1to2->Fill(m1);
-					histMu1Pt_1to2->Fill(mu1->PT);
-				} else if (m2 < 3.){
-					histM1_2to3->Fill(m1);
-					histMu1Pt_2to3->Fill(mu1->PT);
-				} else {
-					histM1_3toInf->Fill(m1);
-					histMu1Pt_3toInf->Fill(mu1->PT);
 				}
-				if (m1 < 3.2 && m1 > 3.){
-					int nJPSi = countParticle(branchAll, 443);
-					histN_JPsi->Fill(nJPSi);
-				}
+			} // End of track selection criteria
+		} // End of track loop
 
+
+		// Do swapping
+		// if (tk1_1.size() == 1 && tk2_1.size() == 1 
+		// && tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) {
+		// 	TLorentzVector mu1MomTmp = mu1->P4();		
+		// 	TLorentzVector tk1MomTmp = tk1_2p5_OS[0]->P4();		
+		// 	TLorentzVector sys1Mom = mu1MomTmp+tk1MomTmp;
+		// 	TLorentzVector mu2MomTmp = mu2->P4();		
+		// 	TLorentzVector tk2MomTmp = tk2_2p5_OS[0]->P4();		
+		// 	TLorentzVector sys2Mom = mu2MomTmp+tk2MomTmp;
+		// 	TLorentzVector totMom = mu1MomTmp+mu2MomTmp+tk1MomTmp+tk2MomTmp;
+
+		// }
+
+
+		/////////////////////////
+		// SIGNAL SELECTION    //
+		/////////////////////////
+		// Only 1 track within ∆R < 0.5 of muon has pT > 1, 
+		// and that track must have pT > 2.5, and be oppsite charge to muon
+		if (tk1_1.size() == 1 && tk2_1.size() == 1 
+		&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) {
+			
+			TLorentzVector track1Mom=tk1_2p5_OS[0]->P4();
+			TLorentzVector track2Mom=tk2_2p5_OS[0]->P4();
+
+			// random since mu1Mom andmu2Mom are randomly assigned (if selected at top)
+			double m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+			double m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
+
+			histM1->Fill(m1);
+			histM1_fine->Fill(m1);
+			histM2->Fill(m2);
+			histM2_fine->Fill(m2);
+			
+			// Fill symmetrically to increase stats
+			histM1vsM2->Fill(m1,m2);
+			// if (getMassBin(m1) != getMassBin(m2)){
+			histM1vsM2->Fill(m2,m1);
+			
+			if(m2 < 1.){
+				histM1_0to1->Fill(m1);
+				histMu1Pt_0to1->Fill(mu1->PT);
+			} else if (m2 < 2.){
+				histM1_1to2->Fill(m1);
+				histMu1Pt_1to2->Fill(mu1->PT);
+			} else if (m2 < 3.){
+				histM1_2to3->Fill(m1);
+				histMu1Pt_2to3->Fill(mu1->PT);
+			} else {
+				histM1_3toInf->Fill(m1);
+				histMu1Pt_3toInf->Fill(mu1->PT);
+			}
+			if (m1 < 3.2 && m1 > 3.){
+				int nJPSi = countParticle(branchAll, 443);
+				histN_JPsi->Fill(nJPSi);
 			}
 
-			// OLD SIDEBAND REGION
-			// one muon has 1 tk > 2.5 (OS), other has 2 or 3 ( 1 tk => "mu1", 2/3 tk => "mu2")
-			// so NOT pT ordered (although you could do that by eliminating the else if ... bit)
+		}
 
-			// if (tk1_1.size() == 1 && (tk2_1.size() == 2 || tk2_1.size() == 3)
-			// 	&& tk1_2p5_OS.size() == 1 && (tk2_2p5.size() == 2 || tk2_2p5.size() == 3)){
-				
-			// 	// mu1Mom has 1 tk, mu2Mom has 2/3 tks, stay as "mu1" and "mu2"
-			// 	double m1 = (mu1Mom+tk1_2p5[0]->P4()).M();
-			// 	double m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
-			// 	if(m2 < 1.)
-			// 		histM1_side_0to1->Fill(m1);
-			// 	else if (m2 < 2.)
-			// 		histM1_side_1to2->Fill(m1);
-			// 	else if (m2 < 3.)
-			// 		histM1_side_2to3->Fill(m1);
-			// 	else
-			// 		histM1_3toInf->Fill(m1);
-			// } else if (tk2_1.size() == 1 && (tk1_1.size() == 2 || tk1_1.size() == 3)
-			// 	&& tk2_2p5_OS.size() == 1 && (tk1_2p5.size() == 2 || tk1_2p5.size() == 3)){
+		// OLD SIDEBAND REGION
+		// one muon has 1 tk > 2.5 (OS), other has 2 or 3 ( 1 tk => "mu1", 2/3 tk => "mu2")
+		// so NOT pT ordered (although you could do that by eliminating the else if ... bit)
 
-			// 	// mu1Mom has 2/3 tks, mu2Mom has 1 tks, so m1 uses mu2Mom & v.v.
-			// 	double m1 = (mu2Mom+tk2_2p5[0]->P4()).M();
-			// 	double m2 = (mu1Mom+tk1_2p5[0]->P4()).M();
-			// 	if(m2 < 1.)
-			// 		histM1_side_0to1->Fill(m1);
-			// 	else if (m2 < 2.)
-			// 		histM1_side_1to2->Fill(m1);
-			// 	else if (m2 < 3.)
-			// 		histM1_side_2to3->Fill(m1);
-			// 	else
-			// 		histM1_side_3toInf->Fill(m1);
-			// }
+		// if (tk1_1.size() == 1 && (tk2_1.size() == 2 || tk2_1.size() == 3)
+		// 	&& tk1_2p5_OS.size() == 1 && (tk2_2p5.size() == 2 || tk2_2p5.size() == 3)){
+			
+		// 	// mu1Mom has 1 tk, mu2Mom has 2/3 tks, stay as "mu1" and "mu2"
+		// 	double m1 = (mu1Mom+tk1_2p5[0]->P4()).M();
+		// 	double m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
+		// 	if(m2 < 1.)
+		// 		histM1_side_0to1->Fill(m1);
+		// 	else if (m2 < 2.)
+		// 		histM1_side_1to2->Fill(m1);
+		// 	else if (m2 < 3.)
+		// 		histM1_side_2to3->Fill(m1);
+		// 	else
+		// 		histM1_3toInf->Fill(m1);
+		// } else if (tk2_1.size() == 1 && (tk1_1.size() == 2 || tk1_1.size() == 3)
+		// 	&& tk2_2p5_OS.size() == 1 && (tk1_2p5.size() == 2 || tk1_2p5.size() == 3)){
 
-			////////////////////////////////////////////////////
-			// SIDEBAND REGION - for soft tracks 1 < pT < 2.5 //
-			////////////////////////////////////////////////////
-			// 
+		// 	// mu1Mom has 2/3 tks, mu2Mom has 1 tks, so m1 uses mu2Mom & v.v.
+		// 	double m1 = (mu2Mom+tk2_2p5[0]->P4()).M();
+		// 	double m2 = (mu1Mom+tk1_2p5[0]->P4()).M();
+		// 	if(m2 < 1.)
+		// 		histM1_side_0to1->Fill(m1);
+		// 	else if (m2 < 2.)
+		// 		histM1_side_1to2->Fill(m1);
+		// 	else if (m2 < 3.)
+		// 		histM1_side_2to3->Fill(m1);
+		// 	else
+		// 		histM1_side_3toInf->Fill(m1);
+		// }
+
+		////////////////////////////////////////////////////
+		// SIDEBAND REGION - for soft tracks 1 < pT < 2.5 //
+		////////////////////////////////////////////////////
+		// 
+		// For 2D plot of N(m1,m2):
+		// Each muon must have exactly 1 OS tk with pT > 2.5 within ∆R < 0.5.
+		// And *at least* one muon has 1 additional soft track with 1 < pT < 2.5,
+		// within dR < 0.5. No sign requirement on additional soft track.
+		if (   tk1_1.size() >= 1 && tk1_1.size() <= 2 
+			&& tk2_1.size() >= 1 && tk2_1.size() <= 2 
+			&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
+			&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
+			&& tk1_1to2p5.size() <= 1 && tk2_1to2p5.size() <= 1 
+			&& !(tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 0)
+			){
+				double m1(0), m2(0);		
+				m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+				m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
+
+				histM1_side_1to2p5->Fill(m1);
+				histM2_side_1to2p5->Fill(m2);
+
+				// Fill 2D m1 vs m2 plot only if at least one muon has a soft track
+				// Fill symmetrically to increase stats
+				histM1vsM2_side_1to2p5->Fill(m1,m2);
+				// if (getMassBin(m1) != getMassBin(m2)){
+				histM1vsM2_side_1to2p5->Fill(m2,m1);
+				// }
+
+				// Fill 1D plot for the various m2 bins
+				// histM1_side_1to2p5->Fill(m1);
+				// histM2_side_1to2p5->Fill(m2);
+				if(m2 < 1.) {
+					histM1_side_1to2p5_0to1->Fill(m1);
+					histMu1Pt_side_1to2p5_0to1->Fill(mu1->PT);
+				} else if (m2 < 2.) {
+					histM1_side_1to2p5_1to2->Fill(m1);
+					histMu1Pt_side_1to2p5_1to2->Fill(mu1->PT);
+				} else if (m2 < 3.) {
+					histM1_side_1to2p5_2to3->Fill(m1);
+					histMu1Pt_side_1to2p5_2to3->Fill(mu1->PT);
+				} else {
+					histM1_side_1to2p5_3toInf->Fill(m1);
+					histMu1Pt_side_1to2p5_3toInf->Fill(mu1->PT);
+				}
+
+				if (m1 < 3.2 && m1 > 3.){
+					int nJPSi = countParticle(branchAll, 443);
+					histN_JPsi_side_1to2p5->Fill(nJPSi);
+				}
+
+		} // end of sideband 1to2p5 
+
+		// SIDEBAND - 1D plot for mu1 
+		// mu1 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
+		// Also has 0 or 1 soft track, 1 < pT < 2.5, within ∆R < 0.5.
+		// No sign requirement.
+		// No track requirements on mu2, all it has to do is pass the mu selection above.
+		// if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to2p5.size() <= 1){
+		// 	double m1(0);		
+		// 	m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+		// 	histM1_side_1to2p5->Fill(m1);
+		// }
+
+		// SIDEBAND - 1D plot for mu2
+		// mu2 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
+		// Also has 0 or 1 soft track, 1 < pT < 2.5, within ∆R < 0.5.
+		// No sign requirement.
+		// No track requirements on mu1, all it has to do is pass the mu selection above.
+		// if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to2p5.size() <= 1){
+		// 	double m2(0);		
+		// 	m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
+		// 	histM2_side_1to2p5->Fill(m2);
+		// }
+
+		////////////////////////////////////////////////////
+		// SIDEBAND REGION - for soft tracks 1 < pT < 1.5 //
+		////////////////////////////////////////////////////
+		//
+		if (do1to1p5) { 
 			// For 2D plot of N(m1,m2):
 			// Each muon must have exactly 1 OS tk with pT > 2.5 within ∆R < 0.5.
-			// And *at least* one muon has 1 additional soft track with 1 < pT < 2.5,
+			// And *at least* one muon has 1 additional soft track with 1 < pT < 1.5,
 			// within dR < 0.5. No sign requirement on additional soft track.
 			if (   tk1_1.size() >= 1 && tk1_1.size() <= 2 
 				&& tk2_1.size() >= 1 && tk2_1.size() <= 2 
 				&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
 				&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
-				&& tk1_1to2p5.size() <= 1 && tk2_1to2p5.size() <= 1 
-				&& !(tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 0)
+				&& tk1_1to1p5.size() <= 1 && tk2_1to1p5.size() <= 1 
+				&& !(tk1_1to1p5.size() == 0 && tk2_1to1p5.size() == 0)
 				){
 					double m1(0), m2(0);		
 					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 					m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
-					histM1_side_1to2p5->Fill(m1);
-					histM2_side_1to2p5->Fill(m2);
-
 					// Fill 2D m1 vs m2 plot only if at least one muon has a soft track
 					// Fill symmetrically to increase stats
-					histM1vsM2_side_1to2p5->Fill(m1,m2);
+					histM1vsM2_side_1to1p5->Fill(m1,m2);
 					// if (getMassBin(m1) != getMassBin(m2)){
-					histM1vsM2_side_1to2p5->Fill(m2,m1);
+					histM1vsM2_side_1to1p5->Fill(m2,m1);
 					// }
 
 					// Fill 1D plot for the various m2 bins
-					// histM1_side_1to2p5->Fill(m1);
-					// histM2_side_1to2p5->Fill(m2);
+					// histM1_side_1to1p5->Fill(m1);
+					// histM2_side_1to1p5->Fill(m2);
 					if(m2 < 1.) {
-						histM1_side_1to2p5_0to1->Fill(m1);
-						histMu1Pt_side_1to2p5_0to1->Fill(mu1->PT);
+						histM1_side_1to1p5_0to1->Fill(m1);
+						histMu1Pt_side_1to1p5_0to1->Fill(mu1->PT);
 					} else if (m2 < 2.) {
-						histM1_side_1to2p5_1to2->Fill(m1);
-						histMu1Pt_side_1to2p5_1to2->Fill(mu1->PT);
+						histM1_side_1to1p5_1to2->Fill(m1);
+						histMu1Pt_side_1to1p5_1to2->Fill(mu1->PT);
 					} else if (m2 < 3.) {
-						histM1_side_1to2p5_2to3->Fill(m1);
-						histMu1Pt_side_1to2p5_2to3->Fill(mu1->PT);
+						histM1_side_1to1p5_2to3->Fill(m1);
+						histMu1Pt_side_1to1p5_2to3->Fill(mu1->PT);
 					} else {
-						histM1_side_1to2p5_3toInf->Fill(m1);
-						histMu1Pt_side_1to2p5_3toInf->Fill(mu1->PT);
+						histM1_side_1to1p5_3toInf->Fill(m1);
+						histMu1Pt_side_1to1p5_3toInf->Fill(mu1->PT);
 					}
 
-					if (m1 < 3.2 && m1 > 3.){
-						int nJPSi = countParticle(branchAll, 443);
-						histN_JPsi_side_1to2p5->Fill(nJPSi);
-					}
-
-			} // end of sideband 1to2p5 
-
+			} // end of sideband 1to1p5 for 2D plot
+			
 			// SIDEBAND - 1D plot for mu1 
 			// mu1 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
-			// Also has 0 or 1 soft track, 1 < pT < 2.5, within ∆R < 0.5.
+			// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
 			// No sign requirement.
 			// No track requirements on mu2, all it has to do is pass the mu selection above.
-			// if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to2p5.size() <= 1){
+			// if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to1p5.size() <= 1){
 			// 	double m1(0);		
 			// 	m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
-			// 	histM1_side_1to2p5->Fill(m1);
+			// 	histM1_side_1to1p5->Fill(m1);
 			// }
 
 			// SIDEBAND - 1D plot for mu2
 			// mu2 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
-			// Also has 0 or 1 soft track, 1 < pT < 2.5, within ∆R < 0.5.
+			// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
 			// No sign requirement.
 			// No track requirements on mu1, all it has to do is pass the mu selection above.
-			// if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to2p5.size() <= 1){
+			// if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to1p5.size() <= 1){
 			// 	double m2(0);		
 			// 	m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
-			// 	histM2_side_1to2p5->Fill(m2);
+			// 	histM2_side_1to1p5->Fill(m2);
 			// }
+		} // end of do1to1p5
 
-			////////////////////////////////////////////////////
-			// SIDEBAND REGION - for soft tracks 1 < pT < 1.5 //
-			////////////////////////////////////////////////////
-			//
-			if (do1to1p5) { 
-				// For 2D plot of N(m1,m2):
-				// Each muon must have exactly 1 OS tk with pT > 2.5 within ∆R < 0.5.
-				// And *at least* one muon has 1 additional soft track with 1 < pT < 1.5,
-				// within dR < 0.5. No sign requirement on additional soft track.
-				if (   tk1_1.size() >= 1 && tk1_1.size() <= 2 
-					&& tk2_1.size() >= 1 && tk2_1.size() <= 2 
-					&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
-					&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
-					&& tk1_1to1p5.size() <= 1 && tk2_1to1p5.size() <= 1 
-					&& !(tk1_1to1p5.size() == 0 && tk2_1to1p5.size() == 0)
-					){
-						double m1(0), m2(0);		
-						m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
-						m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
-
-						// Fill 2D m1 vs m2 plot only if at least one muon has a soft track
-						// Fill symmetrically to increase stats
-						histM1vsM2_side_1to1p5->Fill(m1,m2);
-						// if (getMassBin(m1) != getMassBin(m2)){
-						histM1vsM2_side_1to1p5->Fill(m2,m1);
-						// }
-
-						// Fill 1D plot for the various m2 bins
-						// histM1_side_1to1p5->Fill(m1);
-						// histM2_side_1to1p5->Fill(m2);
-						if(m2 < 1.) {
-							histM1_side_1to1p5_0to1->Fill(m1);
-							histMu1Pt_side_1to1p5_0to1->Fill(mu1->PT);
-						} else if (m2 < 2.) {
-							histM1_side_1to1p5_1to2->Fill(m1);
-							histMu1Pt_side_1to1p5_1to2->Fill(mu1->PT);
-						} else if (m2 < 3.) {
-							histM1_side_1to1p5_2to3->Fill(m1);
-							histMu1Pt_side_1to1p5_2to3->Fill(mu1->PT);
-						} else {
-							histM1_side_1to1p5_3toInf->Fill(m1);
-							histMu1Pt_side_1to1p5_3toInf->Fill(mu1->PT);
-						}
-
-				} // end of sideband 1to1p5 for 2D plot
-				
-				// SIDEBAND - 1D plot for mu1 
-				// mu1 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
-				// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
-				// No sign requirement.
-				// No track requirements on mu2, all it has to do is pass the mu selection above.
-				// if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to1p5.size() <= 1){
-				// 	double m1(0);		
-				// 	m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
-				// 	histM1_side_1to1p5->Fill(m1);
-				// }
-
-				// SIDEBAND - 1D plot for mu2
-				// mu2 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
-				// Also has 0 or 1 soft track, 1 < pT < 1.5, within ∆R < 0.5.
-				// No sign requirement.
-				// No track requirements on mu1, all it has to do is pass the mu selection above.
-				// if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to1p5.size() <= 1){
-				// 	double m2(0);		
-				// 	m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
-				// 	histM2_side_1to1p5->Fill(m2);
-				// }
-			} // end of do1to1p5
-		} // end of muon selection
 	} // end of event loop
 
 	// Create sum of m1 and m2 1D hists and rebin
