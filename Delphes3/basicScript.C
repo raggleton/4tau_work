@@ -1,10 +1,10 @@
 #include "commonFunctions.h"
+#include "cuts.h"
 // #include <boost/program_options.hpp>
 
 using std::cout;
 using std::endl;
 
-// namespace po = boost::program_options;
 
 /**
  * Template script for Delphes analysis. Use with makeScript.sh
@@ -22,7 +22,8 @@ void basicScript(int argc, char* argv[])
 	bool doMu           = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
 	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
 	bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
-	
+	double deltaR       = pOpts.getdR(); // dR(mu-mu) value to use
+
 	// Create chain of root trees
 	TChain chain("Delphes");
 	addInputFiles(&chain, &pOpts);
@@ -36,15 +37,14 @@ void basicScript(int argc, char* argv[])
 	// and use https://cp3.irmp.ucl.ac.be/projects/delphes/wiki/WorkBook/RootTreeDescription
 	// TClonesArray *branchMuon = treeReader->UseBranch("Muon");
 	TClonesArray *branchTracks   = treeReader->UseBranch("Track");
-	TClonesArray *branchGenMuons = treeReader->UseBranch("OnlyGenMuons");
+	// TClonesArray *branchGenMuons = treeReader->UseBranch("OnlyGenMuons");
+	TClonesArray *branchGenMuons = treeReader->UseBranch("GenMuon");
 	// TClonesArray *branchStable   = treeReader->UseBranch("StableParticle");
 	TClonesArray *branchAll      = treeReader->UseBranch("AllParticle");
 
-	// Book histograms
-	// TH1D *histNTracks1OS       = new TH1D("hNTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
+	// Book histograms here
 	// TH1D *histNTracks1         = new TH1D("hNTracks1" ,"Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
 	// TH1D *histNTracks2OS       = new TH1D("hNTracks2OS" ,"Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
-	// TH1D *histNTracks2         = new TH1D("hNTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
 
 	///////////////////////
 	// Loop over events //
@@ -102,9 +102,6 @@ void basicScript(int argc, char* argv[])
 			// tau2aMom = tau2a->P4();
 			// tau2bMom = tau2b->P4();
 
-			// histDRa1->Fill(tau1aMom.DeltaR(tau1bMom));
-			// histDRa2->Fill(tau2aMom.DeltaR(tau2bMom));
-			
 			GenParticle *charged1a = getChargedObject(branchAll, tau1a);
 			GenParticle *charged1b = getChargedObject(branchAll, tau1b);
 			GenParticle *charged2a = getChargedObject(branchAll, tau2a);
@@ -115,10 +112,10 @@ void basicScript(int argc, char* argv[])
 			if (charged1a && charged1b && charged2a && charged2b){
 				
 				// To hold mu and tracks from each tau
-				GenParticle* muTruth1;
-				GenParticle* trackTruth1;
-				GenParticle* muTruth2;
-				GenParticle* trackTruth2;
+				GenParticle* muTruth1(nullptr);
+				GenParticle* trackTruth1(nullptr);
+				GenParticle* muTruth2(nullptr);
+				GenParticle* trackTruth2(nullptr);
 
 				// Assign charged products to be mu or track
 				bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, *charged1a, *charged1b);				
@@ -153,49 +150,57 @@ void basicScript(int argc, char* argv[])
 							trackTruth2 = tempTk;
 						}
 					}
-					// cout << m1 << "     " << m2 << endl;
-					// if(m2 < 1.)
-					// 	histM1_truth_0to1->Fill(m1);
-					// else if (m2 < 2.)
-					// 	histM1_truth_1to2->Fill(m1);
-					// else if (m2 < 3.)
-					// 	histM1_truth_2to3->Fill(m1);
-					// else
-					// 	histM1_truth_3toInf->Fill(m1);
+
+					// Can use truth mu/track pairs for further analysis
+
+					// Cleanup - Dirty!
+					if (!muTruth1) delete muTruth1;
+					if (!trackTruth1) delete trackTruth1;
+					if (!muTruth2) delete muTruth2;
+					if (!trackTruth2) delete trackTruth2;
 				}
-			} 
+			} else {
+				throw runtime_error("Not all prongs found!");
+			} // end if(charged1a....)
 		} // end if(doSignal)
 
-
-		//////////////////////////////////////////////////////////////////////
-		// Now, do more general MC stuff:                                   //
-		// get the two highest pT muons in the event, store their pT        //
-		// and pointers to the GenParticles                                 //
-		//////////////////////////////////////////////////////////////////////
+	
+		/////////////////////////////////////////////////////////////////////////
+		// Now, get the two highest pT muons in the event that pass selection, // 
+		// store pointers to the Track particles and 4-momenta                 //
+		// (Use tracks for muons as store more info about position)
+		/////////////////////////////////////////////////////////////////////////
 		
-		GenParticle *cand(nullptr),*mu1(nullptr), *mu2(nullptr);
-
-		double muLeadingPT = 0.;
-		double muSubLeadingPT = 0.;
-		// Get highest pT muon
+		// Fill vectors with muons, based on pT
+		std::vector<Track*> muons10to17;
+		std::vector<Track*> muons17toInf;
 		for (int i = 0; i < branchGenMuons->GetEntries(); i++){
-			cand = (GenParticle*) branchGenMuons->At(i);
-			if (cand->PT > muLeadingPT) {
-				mu1 = cand;
-				muLeadingPT = cand->PT;
-			}
-		}
-		// Get 2nd highest pT muon
-		for(int j = 0; j < branchGenMuons->GetEntries(); j++){
-			cand = (GenParticle*) branchGenMuons->At(j);
-			if ((cand->PT > muSubLeadingPT) && (cand->PT != mu1->PT)) {
-				mu2 = cand;
-				muSubLeadingPT = cand->PT;
+			Track* cand = (Track*) branchGenMuons->At(i);
+			if (cand->PT > 17) {
+				muons17toInf.push_back(cand);
+			} else if (cand->PT > 10) {
+				muons10to17.push_back(cand);
 			}
 		}
 
-		// Now randomly swap mu1 - mu2 if desired
-		GenParticle *origMu1(nullptr), *origMu2(nullptr);
+		// Check to see if we can skip the event if not enough muons
+		if (!(muons17toInf.size() >= 1 && (muons17toInf.size() + muons10to17.size()) >= 2)) continue;
+
+		// Sort both vectors by descending pT
+		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<Track>);
+		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<Track>);
+
+
+		// Make pairs, see if they pass all cuts (SS, eta, deltaR, dZ, d0)
+		// If they do, store in mu1 and mu2 (mu1 has higher pT)
+		std::pair<Track*, Track*> p = testMuons(muons17toInf, muons10to17, &checkMuons, deltaR);
+		Track* mu1 = p.first;
+		Track* mu2 = p.second;
+
+		if (!(p.first && p.second)) continue;
+
+		// Now randomly swap mu1 - mu2
+		Track *origMu1(nullptr), *origMu2(nullptr);
 		origMu1 = mu1;
 		origMu2 = mu2;
 		if (swapMuRandomly){
@@ -211,24 +216,12 @@ void basicScript(int argc, char* argv[])
 		mu1Mom = mu1->P4();
 		mu2Mom = mu2->P4();
 
-		////////////////////
-		// Muon selection //
-		////////////////////
-		
-		if ((muLeadingPT < 17.)
-		|| (muSubLeadingPT < 10.)
-		|| ((mu1->Charge) != (mu2->Charge))
-		|| (fabs(origMu1->Eta) > 2.1)
-		|| (fabs(origMu2->Eta) > 2.4)
-		|| ((mu1Mom.DeltaR(mu2Mom)) < 2.)
-		){
-			continue;
-		}
+		// Plot some muon quantities
 
 		/////////////////////////////////
 		// Look at tracks around muons //
 		/////////////////////////////////
-
+		
 		// Vectors of tracks with pT > 1, within dR < 0.5 of respective muons + other cuts
 		// so tk1 is the track nearest to muon1, (may or may not be highest pT, depends if random swapping is on)
 		std::vector<Track*> tk1_1;
@@ -241,46 +234,35 @@ void basicScript(int argc, char* argv[])
 		// same but with pT > 2.5, OS to muon
 		std::vector<Track*> tk1_2p5_OS;
 		std::vector<Track*> tk2_2p5_OS;
+		
+		// same but with 1 < pT < 2.5 (for sideband)
+		std::vector<Track*> tk1_1to2p5;
+		std::vector<Track*> tk2_1to2p5;
 
 		Track *candTk(nullptr);
+		bool atLeastTk2p5 = false; // to monitor if theres a tk with pT > 2.5
+		bool atLeastTk2p5OS = false; // same but for OS tk-muon
 		for(int a = 0; a < branchTracks->GetEntries(); a++){
 			candTk = (Track*) branchTracks->At(a);
 
 			if (   (candTk->PT != mu1->PT) // Check it isn't the same object as the muons!
 				&& (candTk->PT != mu2->PT)
-				&& (candTk->PT > 1.)
-				&& (fabs(candTk->Z) < 1.) //dz < 1mm
-				&& ((pow(candTk->X,2)+pow(candTk->Y,2)) < 1.) //dxy < 1mm
-				&& (fabs(candTk->Eta)<2.4)
+				&& checkTrackLoose(candTk)
 			){
 				// Store track in suitable vector
-				double dR1 = (candTk->P4()).DeltaR(mu1Mom);
-				double dR2 = (candTk->P4()).DeltaR(mu2Mom);
+				fillTrackVectors(candTk, mu1, mu2, &tk1_1, &tk2_1);
 
-				if (dR1 < 0.5){
-					tk1_1.push_back(candTk);
-				}
-				if (dR2 < 0.5){
-					tk2_1.push_back(candTk);
-				}
+				if (checkTrackTight(candTk)){
+					atLeastTk2p5 = true;
 
-				if (candTk->PT > 2.5){
+					fillTrackVectors(candTk, mu1, mu2, &tk1_2p5, &tk2_2p5);
 
-					if (dR1 < 0.5){
-						tk1_2p5.push_back(candTk);
-					}
-					if (dR2 < 0.5){
-						tk2_2p5.push_back(candTk);
-					}
-					if ((candTk->Charge) * (mu1->Charge) < 0) {
-
-						if (dR1 < 0.5){
-							tk1_2p5_OS.push_back(candTk);
-						}
-						if (dR2 < 0.5){
-							tk2_2p5_OS.push_back(candTk);
-						}
+					if (checkTkMuOS(candTk, mu1)) {
+						// SIGNAL REGION TRACKS
+						fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_OS, &tk2_2p5_OS);
 					}					
+				}  else {
+					fillTrackVectors(candTk, mu1, mu2, &tk1_1to2p5, &tk2_1to2p5);
 				}
 			} // End of track selection
 		} // End of track loop
@@ -306,7 +288,11 @@ void basicScript(int argc, char* argv[])
 		tk2_2p5_OS.clear();
 	} // end of event loop
 
+	// Do any normalising, hist manipulation here...
 
+	////////////////////////////
+	// Setup filenames, paths //
+	////////////////////////////
 	std::string app("");
 	if (doSignal) {
 		app = "sig";
@@ -328,20 +314,19 @@ void basicScript(int argc, char* argv[])
 	// Get Delphes file config used - last part of directory name
 	std::string delph = getDelph(directory);
 	
+	//////////////////////////////////////////////////////////////////////
+	// Plot histograms to PDF - can do anyhting that inherits from TH1 //
+	//////////////////////////////////////////////////////////////////////
 	// drawHistAndSave(histmu1PT, "HISTE", "muLeadingPT", directory, app);
-	// drawHistAndSave(histmu2PT, "HISTE", "muSubLeadingPT", directory, app);
-	// drawHistAndSave(histTrack1Pt, "HISTE", "Track1Pt", directory, app);
-	// drawHistAndSave(histTrack2Pt, "HISTE", "Track2Pt", directory, app);
+	// drawHistAndSave(histDEtaVsDPhiMuMu, "COLZ", "DEtaVsDPhiMuMu", directory, app);
 
+	/////////////////////////
+	// Save hists to file //
+	/////////////////////////
 	// TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
 	// histNMu->Write("",TObject::kOverwrite);
-	// histmu1PT->Write("",TObject::kOverwrite);
-	// histmu2PT->Write("",TObject::kOverwrite);
-	// histmuLeadingPTSel
 	// if (doSignal){
-	// 	histDRa1->Write("",TObject::kOverwrite);
-	// 	histDRa2->Write("",TObject::kOverwrite);
 	// 	histPID->Write("",TObject::kOverwrite);
 	// }
 

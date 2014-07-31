@@ -103,111 +103,6 @@ void cutFlow(int argc, char* argv[])
 		} else continue; // skip if <2 muons!
 		it++;
 
-		{
-			//////////////////////////////////////////////////////
-			// Get the hard interaction particles for signal MC //
-			// No selection cuts applied (only >=2 muons)       //
-			//////////////////////////////////////////////////////
-			
-			// if (doSignal) {
-			// 	GenParticle *a1(nullptr), *a2(nullptr);
-			// 	// Get a0s
-			// 	for(int j = 0; j < branchAll->GetEntries(); j++){
-			// 		GenParticle *candHa = (GenParticle*) branchAll->At(j);
-			// 		// cout << j << " ID: " << candHa->PID << " status: " << candHa->Status << endl;
-				
-			// 		// if (fabs(candHa->PID)== 12|| fabs(candHa->PID)== 14|| fabs(candHa->PID)==16 ){
-			// 		// 	histNuPt->Fill(candHa->PT);
-			// 		// } 
-
-			// 		// Which is "1" and "2" is arbitrary here.
-			// 		if ((fabs(candHa->PID)==36) && (fabs(candHa->Status)==62)){
-			// 			if (a1==0){
-			// 				a1=candHa;
-			// 			} else {
-			// 				a2=candHa;
-			// 			}
-			// 		}
-			// 	}
-
-			// 	// Get the tau daughters from a1 and a2 (no pT ordering)
-			// 	GenParticle *tau1a(nullptr), *tau1b(nullptr), *tau2a(nullptr), *tau2b(nullptr);
-			// 	tau1a = (GenParticle*) branchAll->At(a1->D1);
-			// 	tau1b = (GenParticle*) branchAll->At(a1->D2);
-			// 	tau2a = (GenParticle*) branchAll->At(a2->D1);
-			// 	tau2b = (GenParticle*) branchAll->At(a2->D2);
-
-			// 	// TLorentzVector tau1aMom,tau1bMom, tau2aMom, tau2bMom;
-			// 	// tau1aMom = tau1a->P4();
-			// 	// tau1bMom = tau1b->P4();
-			// 	// tau2aMom = tau2a->P4();
-			// 	// tau2bMom = tau2b->P4();
-
-			// 	// histDRa1->Fill(tau1aMom.DeltaR(tau1bMom));
-			// 	// histDRa2->Fill(tau2aMom.DeltaR(tau2bMom));
-				
-			// 	GenParticle *charged1a = getChargedObject(branchAll, tau1a);
-			// 	GenParticle *charged1b = getChargedObject(branchAll, tau1b);
-			// 	GenParticle *charged2a = getChargedObject(branchAll, tau2a);
-			// 	GenParticle *charged2b = getChargedObject(branchAll, tau2b);
-				
-			// 	// This selects events where each tau only has 1 charged product...
-			// 	// dunno what to do about evts where the tau decays into charged things *including* muon
-			// 	if (charged1a && charged1b && charged2a && charged2b){
-					
-			// 		// To hold mu and tracks from each tau
-			// 		GenParticle* muTruth1;
-			// 		GenParticle* trackTruth1;
-			// 		GenParticle* muTruth2;
-			// 		GenParticle* trackTruth2;
-
-			// 		// Assign charged products to be mu or track
-			// 		bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, *charged1a, *charged1b);				
-			// 		bool truth2HasMu = assignMuonAndTrack(muTruth2, trackTruth2, *charged2a, *charged2b);
-
-			// 		// NOTE: muons are NOT pT ordered
-
-			// 		if (!truth1HasMu || !truth2HasMu) {
-			// 			cout << "Problem, no truth mu for 1 and/or 2!" << endl;
-			// 		} else { 
-						
-			// 			// Do m1 distribution in bins of m2 - for MC truth (is it actually correlated?)
-			// 			double m1(0.);
-			// 			double m2(0.);
-						
-			// 			// Assign m1 to higher pT muon
-			// 			if (muTruth1->PT > muTruth2->PT) {
-			// 				m1 = (muTruth1->P4()+trackTruth1->P4()).M();
-			// 				m2 = (muTruth2->P4()+trackTruth2->P4()).M();
-			// 			} else {
-			// 				m2 = (muTruth1->P4()+trackTruth1->P4()).M();
-			// 				m1 = (muTruth2->P4()+trackTruth2->P4()).M();
-			// 			}
-
-			// 			// Randomly swap trk-mu pairs 1<->2 if desired
-			// 			if(swapMuRandomly){
-			// 				double randNum = (double)rand() / RAND_MAX;
-			// 				if (randNum > 0.5){
-			// 					double tmp = m2;
-			// 					m2 = m1;
-			// 					m1 = tmp;
-			// 				}
-			// 			}
-
-			// 			cout << m1 << "     " << m2 << endl;
-			// 			// if(m2 < 1.)
-			// 			// 	histM1_truth_0to1->Fill(m1);
-			// 			// else if (m2 < 2.)
-			// 			// 	histM1_truth_1to2->Fill(m1);
-			// 			// else if (m2 < 3.)
-			// 			// 	histM1_truth_2to3->Fill(m1);
-			// 			// else
-			// 			// 	histM1_truth_3toInf->Fill(m1);
-			// 		}
-			// 	} 
-			// } // end if(doSignal)// MC truth stuff - not used
-		}
-
 		//////////////////////////////////////////////////////////////////////
 		// Now, do more general MC stuff:                                   //
 		// get the two highest pT muons in the event, store their pT        //
@@ -332,34 +227,16 @@ void cutFlow(int argc, char* argv[])
 				&& (candTk->PT != mu2->PT)
 				&& checkTrackLoose(candTk)
 			){
-
 				// Store track in suitable vector
-				double dR1 = (candTk->P4()).DeltaR(mu1Mom);
-				double dR2 = (candTk->P4()).DeltaR(mu2Mom);
-
-				if (dR1 < 0.5){
-					tk1_1.push_back(candTk);
-				}
-				if (dR2 < 0.5){
-					tk2_1.push_back(candTk);
-				}
+				fillTrackVectors(candTk, mu1, mu2, &tk1_1, &tk2_1);
 
 				// For 1-prong candidates, need tighter pT and IP cuts
-				if (checkTrackPTTight(candTk)
-					&& checkTrackIPTight(candTk)){
-					// if (dR1 < 0.5){
-					// 	tk1_2p5.push_back(candTk);
-					// }
-					// if (dR2 < 0.5){
-					// 	tk2_2p5.push_back(candTk);
-					// }
-					if ((candTk->Charge) * (mu1->Charge) < 0) {
-						if (dR1 < 0.5){
-							tk1_2p5_OS.push_back(candTk);
-						}
-						if (dR2 < 0.5){
-							tk2_2p5_OS.push_back(candTk);
-						}
+				if (checkTrackTight(candTk)){
+					// fillTrackVectors(candTk, mu1, mu2, &tk1_2p5, &tk2_2p5);
+					
+					// Check tk-mu OS. Only test mu1, as mu1 & 2 are SS
+					if (checkTkMuOS(candTk, mu1)) {
+						fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_OS, &tk2_2p5_OS);
 					}					
 				}
 

@@ -448,49 +448,25 @@ void massPlots(int argc, char* argv[])
 				&& (candTk->PT != mu2->PT)
 				&& checkTrackLoose(candTk)
 			){
-				// Store track in suitable vector
-				double dR1 = (candTk->P4()).DeltaR(mu1Mom);
-				double dR2 = (candTk->P4()).DeltaR(mu2Mom);
 
-				if (dR1 < 0.5){
-					tk1_1.push_back(candTk);
-				}
-				if (dR2 < 0.5){
-					tk2_1.push_back(candTk);
-				}
+				// Store track in suitable vector
+				fillTrackVectors(candTk, mu1, mu2, &tk1_1, &tk2_1);
 
 				// 1 prong candiate must have pT >2.5, 
 				// d_z < 0.04cm, d_0 < 0.02cm
-				if (checkTrackTight(candTk)){
-					if (dR1 < 0.5){
-						tk1_2p5.push_back(candTk);
-					}
-					if (dR2 < 0.5){
-						tk2_2p5.push_back(candTk);
-					}
-					if ((candTk->Charge) * (mu1->Charge) < 0) {
-						if (dR1 < 0.5){
-							tk1_2p5_OS.push_back(candTk);
-						}
-						if (dR2 < 0.5){
-							tk2_2p5_OS.push_back(candTk);
-						}
+				if (checkTrackTight(candTk)) {
+
+					fillTrackVectors(candTk, mu1, mu2, &tk1_2p5, & tk2_2p5);
+
+					if (checkTkMuOS(candTk, mu1)) {
+						fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_OS, &tk2_2p5_OS);
 					}					
 				} else {
-					if (dR1 < 0.5){
-						tk1_1to2p5.push_back(candTk);
-					}
-					if (dR2 < 0.5){
-						tk2_1to2p5.push_back(candTk);
-					}
+					fillTrackVectors(candTk, mu1, mu2, &tk1_1to2p5, &tk2_1to2p5);
+
 					if (do1to1p5){
-						if (candTk->PT < 1.5){
-							if (dR1 < 0.5){
-								tk1_1to1p5.push_back(candTk);
-							}
-							if (dR2 < 0.5){
-								tk2_1to1p5.push_back(candTk);
-							}
+						if (candTk->PT < 1.5) {
+							fillTrackVectors(candTk, mu1, mu2, &tk1_1to1p5, &tk2_1to1p5);
 						}
 					}
 				}

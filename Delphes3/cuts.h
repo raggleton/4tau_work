@@ -63,9 +63,14 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
 	return p;
 }
 
-/*
+/**
  * This is like the above function but adds an extra argument for specifying 
- * the deltaR(mu-mu) cut for the checkMuons function
+ * the deltaR(mu-mu) cut for the checkMuons function.
+ * @param  muons17toInf  std::vector of muons with pT > 17 GeV, descending pT order
+ * @param  muons10to17   std::vector of muons with 17 > pT > 10 GeV, descending pT order
+ * @param  checkMuons    function to test muons against, which is dependent on deltaR param
+ * @param  deltaR        deltaR(mu-mu) cut to use
+ * @return   std::pair of highest-pT muons passing cuts.
  */
 std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf, 
 		  std::vector<Track*> muons10to17, 
@@ -281,7 +286,7 @@ bool checkTrackEta(Track* candTk) {
 
 /**
  * Check track against loose pT cuts, loose IP cut, and eta cut/
-  * @param  candTk Pointer to track object
+ * @param  candTk Pointer to track object
  * @return        TRUE if track passes cuts, FALSE otherwise
  */
 bool checkTrackLoose(Track* candTk) {
@@ -296,7 +301,7 @@ bool checkTrackLoose(Track* candTk) {
 
 /**
  * Check track against tight pT cuts, Tight IP cut, and eta cut/
-  * @param  candTk Pointer to track object
+ * @param  candTk Pointer to track object
  * @return        TRUE if track passes cuts, FALSE otherwise
  */
 bool checkTrackTight(Track* candTk) {
@@ -307,6 +312,46 @@ bool checkTrackTight(Track* candTk) {
 	} else {
 		return false;
 	}
+}
+
+
+/////////////////////
+// TRACK-MUON CUTS //
+/////////////////////
+
+/**
+ * Calculates deltaR(tk-mu) between candTk and mu1, and candTk and mu2. 
+ * If either is < deltaR param (default = 0.5) then fill the relevant vector
+ * with pointer to that track.
+ * @param candTk Track to compare against muons
+ * @param mu1    One muon
+ * @param mu2    Other muon
+ * @param tks1   vector of track pointers, where dR(tk-mu1) < deltaR
+ * @param tks2   vector of track pointers, where dR(tk-mu2) < deltaR
+ * @param deltaR Optional deltaR cut for tk-mu. Default = 0.5
+ */
+void fillTrackVectors(Track* candTk, Track* mu1, Track* mu2, 
+				 std::vector<Track*>* tks1, std::vector<Track*>* tks2, 
+				 double deltaR = 0.5) {
+	
+	double dR1 = (candTk->P4()).DeltaR(mu1->P4());
+	double dR2 = (candTk->P4()).DeltaR(mu2->P4());
+	if (dR1 < deltaR) {
+		tks1->push_back(candTk);
+	} 
+	if (dR2 < deltaR) {
+		tks2->push_back(candTk);
+	}
+}
+
+/**
+ * Check to see if track and muon have opposite charges
+ * @param  candTk Track
+ * @param  mu     Muon
+ * @return        TRUE if opposite charge, FALSE otherwise
+ */
+bool checkTkMuOS(Track* candTk, Track* mu) {
+	return ((candTk->Charge) * (mu->Charge)) < 0; 
 }
 
 /////////////////

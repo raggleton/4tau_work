@@ -269,8 +269,6 @@ void mainAnalysis(int argc, char* argv[])
 		// (Use tracks for muons as store more info about position)
 		/////////////////////////////////////////////////////////////////////////
 		
-		// Track *candTk(nullptr);
-
 		// Fill vectors with muons, based on pT
 		std::vector<Track*> muons10to17;
 		std::vector<Track*> muons17toInf;
@@ -363,12 +361,7 @@ void mainAnalysis(int argc, char* argv[])
 				double dR1 = (candTk->P4()).DeltaR(mu1Mom);
 				double dR2 = (candTk->P4()).DeltaR(mu2Mom);
 
-				if (dR1 < 0.5){
-					tk1_1.push_back(candTk);
-				}
-				if (dR2 < 0.5){
-					tk2_1.push_back(candTk);
-				}
+				fillTrackVectors(candTk, mu1, mu2, &tk1_1, &tk2_1);
 
 				if (checkTrackTight(candTk)){
 
@@ -379,33 +372,21 @@ void mainAnalysis(int argc, char* argv[])
 					histTkEtaVsPhi1->Fill(fabs(candTk->Eta - mu1Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu1Mom)));
 					histTkEtaVsPhi2->Fill(fabs(candTk->Eta - mu2Mom.Eta()),fabs((candTk->P4()).DeltaPhi(mu2Mom)));
 
-					if (dR1 < 0.5){
-						tk1_2p5.push_back(candTk);
-					}
-					if (dR2 < 0.5){
-						tk2_2p5.push_back(candTk);
-					}
-					if ((candTk->Charge) * (mu1->Charge) < 0) {
+					fillTrackVectors(candTk, mu1, mu2, &tk1_2p5, &tk2_2p5);
+
+					if (checkTkMuOS(candTk, mu1)) {
 						histNTracks1OS->Fill(dR1);
 						histNTracks2OS->Fill(dR2);
 						atLeastTk2p5OS = true;
 
-						if (dR1 < 0.5){
-							tk1_2p5_OS.push_back(candTk);
-						}
-						if (dR2 < 0.5){
-							tk2_2p5_OS.push_back(candTk);
-						}
+						fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_OS, &tk2_2p5_OS);
+
 					}					
 				}  else {
 					tk1_1to2p5_alldR.push_back(candTk);
 					tk2_1to2p5_alldR.push_back(candTk);
-					if (dR1 < 0.5){
-						tk1_1to2p5.push_back(candTk);
-					}
-					if (dR2 < 0.5){
-						tk2_1to2p5.push_back(candTk);
-					}
+					fillTrackVectors(candTk, mu1, mu2, &tk1_1to2p5, &tk2_1to2p5);
+
 				}
 			} // End of track selection
 		} // End of track loop
