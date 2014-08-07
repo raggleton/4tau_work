@@ -48,7 +48,7 @@ void mainAnalysis(int argc, char* argv[])
 	// Book histograms  //
 	//////////////////////
 	
-	// Track distributions
+	// Track distributions (pT > 2.5)
 	TH1D *histNTracks1           = new TH1D("hNTracks1" ,"Number of tracks about mu1, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
 	TH1D *histNTracks2           = new TH1D("hNTracks2" ,"Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
 	TH1D *histNTracks1OS         = new TH1D("hNTracks1OS" ,"Number of tracks about mu1, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
@@ -58,6 +58,11 @@ void mainAnalysis(int argc, char* argv[])
 	TH1D *histNTracksCum2        = new TH1D("hNTracksCum2" ,"Cumulative Number of tracks about mu2, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); Average N_{trk} about #mu_{2}", 50,0,5);
 	TH1D *histNTracksCum1OS      = new TH1D("hNTracksCum1OS" ,"Cumulative Number of tracks about mu1, OS,p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{1}-track); Average N_{trk} about #mu_{1}", 50,0,5);
 	TH1D *histNTracksCum2OS      = new TH1D("hNTracksCum2OS" ,"Cumulative Number of tracks about mu2, OS, p_{T}(trk)>2.5 GeV, muon selection;#Delta R (#mu_{2}-track); Average N_{trk} about #mu_{2}", 50,0,5);
+	
+	// Track distributions (pT > 1)
+	TH1D *histNTracksAll1           = new TH1D("hNTracksAll1" ,"Number of tracks about mu1, p_{T}(trk)>1 GeV;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
+	TH1D *histNTracksAll2           = new TH1D("hNTracksAll2" ,"Number of tracks about mu2, p_{T}(trk)>1 GeV;#Delta R (#mu_{2}-track); A.U.", 50,0,5);
+
 
 	// Soft track distributions, for events where you already have 1 track with pT > 2.5
 	TH1D *histNSoftTracks1       = new TH1D("hNSoftTracks1" ,"Number of tracks about mu1, p_{T}(trk) = (1-2.5)GeV, muon selection, 1 OS trk with pT > 2.5 GeV;#Delta R (#mu_{1}-track); A.U.", 50,0,5);
@@ -113,6 +118,7 @@ void mainAnalysis(int argc, char* argv[])
 	// int nMu(0);
 	int n2p5(0), n2p5OS(0); // count # muons with 1+ tracks with pT > 2.5 for SS+OS, and OS
 	int nOnly2p5(0), nOnly2p5OS(0); // count # muons with 1 tracks with  pT > 2.5 for SS+OS, and OS
+	int n1(0);
 	int nMuPass(0);
 
 	//////////////////////
@@ -331,6 +337,10 @@ void mainAnalysis(int argc, char* argv[])
 		std::vector<Track*> tk1_1;
 		std::vector<Track*> tk2_1;
 
+		// same but all dR
+		std::vector<Track*> tk1_1_alldR;
+		std::vector<Track*> tk2_1_alldR;
+
 		// same but with pT >2.5
 		std::vector<Track*> tk1_2p5;
 		std::vector<Track*> tk2_2p5;
@@ -348,6 +358,7 @@ void mainAnalysis(int argc, char* argv[])
 		std::vector<Track*> tk2_1to2p5_alldR;
 		
 		Track *candTk(nullptr);
+		bool atLeastTk1 = false;
 		bool atLeastTk2p5 = false; // to monitor if theres a tk with pT > 2.5
 		bool atLeastTk2p5OS = false; // same but for OS tk-muon
 		for(int a = 0; a < branchTracks->GetEntries(); a++){
@@ -362,6 +373,7 @@ void mainAnalysis(int argc, char* argv[])
 				double dR2 = (candTk->P4()).DeltaR(mu2Mom);
 
 				fillTrackVectors(candTk, mu1, mu2, &tk1_1, &tk2_1);
+				fillTrackVectors(candTk, mu1, mu2, &tk1_1_alldR, &tk2_1_alldR, 5);
 
 				if (checkTrackTight(candTk)){
 
@@ -392,6 +404,7 @@ void mainAnalysis(int argc, char* argv[])
 		} // End of track loop
 
 		// Count # muons that contribute to track distribution plots
+		// if (atLeastTk1) n1++;
 		if (atLeastTk2p5) n2p5++;
 		if (atLeastTk2p5OS) n2p5OS++;
 
@@ -484,7 +497,8 @@ void mainAnalysis(int argc, char* argv[])
 		// Slightly different region - for additional track investigations
 		// For soft track distributions
 		// ATM it uses signal region. Not put in the signal region bit above, as subject to future modification
-		if (tk1_1.size() == 1 && tk2_1.size() == 1 && tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1){
+		if (tk1_1.size() >= 1 && tk2_1.size() >= 1 
+			&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1){
 			
 			nOnly2p5OS++;
 			if (tk1_1to2p5_alldR.size() > 0){
@@ -501,7 +515,23 @@ void mainAnalysis(int argc, char* argv[])
 						histNSoftTracks2OS->Fill((softTk->P4()).DeltaR(mu2Mom));
 				}
 			}
+		}
 
+		// another sideband to plot all tracks with pT > 1
+		if (tk1_1.size() >= 1 && tk2_1.size() >= 1 	
+			&& tk1_2p5_OS.size() >= 1 && tk2_2p5_OS.size() >= 1){
+			
+			n1++;
+			if (tk1_1_alldR.size() > 0){
+				for (auto tk: tk1_1_alldR) {
+					histNTracksAll1->Fill(tk->P4().DeltaR(mu1Mom));
+				}
+			}
+			if (tk2_1_alldR.size() > 0){
+				for (auto tk: tk2_1_alldR) {
+					histNTracksAll2->Fill(tk->P4().DeltaR(mu1Mom));
+				}
+			}
 		}
 
 	} // end of event loop
@@ -517,13 +547,20 @@ void mainAnalysis(int argc, char* argv[])
 	TH1D* histNSoftTracksAbs1OS = (TH1D*)histNSoftTracks1OS->Clone("hNSoftTracksAbs1OS");
 	TH1D* histNSoftTracksAbs2OS = (TH1D*)histNSoftTracks2OS->Clone("hNSoftTracksAbs2OS");
 
+	TH1D* histNTracksAllAbs1   = (TH1D*)histNTracksAll1->Clone("hNTracksAllAbs1");
+	TH1D* histNTracksAllAbs2   = (TH1D*)histNTracksAll2->Clone("hNTracksAllAbs2");
+
 	// Rescale some hists
 	// Abs # of tracks per muon
 	histNTracksAbs1->Scale(1./n2p5);
 	histNTracksAbs1OS->Scale(1./n2p5OS);
 	histNTracksAbs2->Scale(1./n2p5);
 	histNTracksAbs2OS->Scale(1./n2p5OS);
-
+	
+	histNTracksAllAbs1->Scale(1./n1);
+	histNTracksAllAbs2->Scale(1./n1);
+	histNTracksAllAbs1->SetYTitle("Ave. N_{trk} per #mu_{1}");
+	histNTracksAllAbs2->SetYTitle("Ave. N_{trk} per #mu_{2}");
 
 	histNTracksAbs1->SetYTitle("Ave. N_{trk} per #mu_{1}");
 	histNTracksAbs2->SetYTitle("Ave. N_{trk} per #mu_{2}");
@@ -545,6 +582,9 @@ void mainAnalysis(int argc, char* argv[])
 	normaliseHist(histNTracks2);
 	normaliseHist(histNTracks1OS);
 	normaliseHist(histNTracks2OS);
+
+	normaliseHist(histNTracksAll1);
+	normaliseHist(histNTracksAll2);
 
 	normaliseHist(histNSoftTracks1);
 	normaliseHist(histNSoftTracks2);
@@ -574,6 +614,7 @@ void mainAnalysis(int argc, char* argv[])
 		histNSoftTracksCum2OS->SetBinContent(i,histNSoftTracksCum2OS->GetBinContent(i-1) + histNSoftTracksAbs2OS->GetBinContent(i));
 	}
 
+	cout << "# muons with 1+ track with pT >1 GeV: " << n1 << endl;
 	cout << "# muons with 1+ track with pT >2.5 GeV: " << n2p5 << endl;
 	cout << "# muons with 1+ OS track with pT > 2.5GeV: " << n2p5OS << endl;
 	cout << "nMuPass: " << nMuPass << endl;
@@ -634,6 +675,12 @@ void mainAnalysis(int argc, char* argv[])
 	drawHistAndSave(histNTracksCum1OS, "HISTE", "NTracksCum1_OS", directory, app);
 	drawHistAndSave(histNTracksCum2OS, "HISTE", "NTracksCum2_OS", directory, app);
 
+	// All track with pT > 1
+	drawHistAndSave(histNTracksAll1, "HISTE", "NTracks1All_NS", directory, app);
+	drawHistAndSave(histNTracksAll2, "HISTE", "NTracks2All_NS", directory, app);
+	drawHistAndSave(histNTracksAllAbs1, "HISTE", "NTracks1AllAbs_NS", directory, app);
+	drawHistAndSave(histNTracksAllAbs2, "HISTE", "NTracks2AllAbs_NS", directory, app);
+	
 	// Soft tracks around muon
 	drawHistAndSave(histNSoftTracks1, "HISTE", "NSoftTracks1_NS", directory, app);
 	drawHistAndSave(histNSoftTracks2, "HISTE", "NSoftTracks2_NS", directory, app);
@@ -713,6 +760,10 @@ void mainAnalysis(int argc, char* argv[])
 	histNTracksCum2->Write("",TObject::kOverwrite);
 	histNTracksCum1OS->Write("",TObject::kOverwrite);
 	histNTracksCum2OS->Write("",TObject::kOverwrite);
+	histNTracksAll1->Write("",TObject::kOverwrite);
+	histNTracksAll2->Write("",TObject::kOverwrite);
+	histNTracksAllAbs1->Write("",TObject::kOverwrite);
+	histNTracksAllAbs2->Write("",TObject::kOverwrite);
 
 	histNSoftTracks1->Write("",TObject::kOverwrite);
 	histNSoftTracks2->Write("",TObject::kOverwrite);
