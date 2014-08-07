@@ -157,10 +157,11 @@ int main(int argc, char* argv[]) {
   int lastiEvent  = 0; // for outputting to screen every outputEvery events
   int outputEvery = 5; 
   bool printEvent = true;
+  int counter = 0;
   while(iEvent < nEvent) {
     bool wantedHLT = false;
     bool wantedNoHLT = false;
-
+    counter++;
     if ((iEvent % outputEvery == 0) && (iEvent!= lastiEvent)){
       lastiEvent = iEvent;
       cout << "iEvent: " << iEvent << " - " << getCurrentTime() << endl;
@@ -180,7 +181,6 @@ int main(int argc, char* argv[]) {
     int nMuNeg(0), nMuPos(0);
     std::vector<double> muPtVec;
     
-    int iRepeat = 0; // count repeated decays of same event
     
     for (int i = 0; i < event.size(); ++i) {
       int id = event[i].id();  
@@ -195,6 +195,7 @@ int main(int argc, char* argv[]) {
       }
     }
     
+    int iRepeat = 0; // count repeated decays of same event
     // Unless user wants any # muons in their events, 
     // we continually hadronise until we get 2+ muons
     if (!pOpts.getNotMuOnly()){
@@ -228,6 +229,7 @@ int main(int argc, char* argv[]) {
 
       // if (DEBUG) event.list();
       nRepeats.fill(iRepeat);
+      counter += iRepeat;
     }
 
     // Check whether SS pair(s) present.
@@ -299,7 +301,7 @@ int main(int argc, char* argv[]) {
   pythia.stat();
   cout << muPt << nMuInEvent << nMuInEvent2plus << nMuInEventHLT << muPtNoHLT << nRepeats << endl;
   cout << "Number of events with pair of SS muon: " << nWithSSMuPair << endl;
-
+  cout << counter << endl;
   // Done.
   // if(userProcess == qcdscatter) {
     // delete scatterHook;
