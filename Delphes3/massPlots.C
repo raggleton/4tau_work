@@ -79,6 +79,16 @@ int countParticle(TClonesArray* branchAll, int PID) {
 	return nParticle;
 }
 
+/**
+ * makes clone fo hist, appends "suffix" to hist name, 
+ * write to currently open file
+ */
+template <typename T>
+void makeCopySave(T* h, std::string suffix="_unnormalised") {
+	T* h_clone = (T*) h->Clone((h->GetName()+suffix).c_str());
+	h_clone->Write("", TObject::kOverwrite);
+}
+
 void massPlots(int argc, char* argv[])
 {
 	// setTDRStyle();
@@ -795,19 +805,18 @@ void massPlots(int argc, char* argv[])
 
 	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 	cout << "Writing to " << outFile->GetName() << endl;
-	// Do some normalizing
-	TH1D* histM1_side_1to2p5_clone = (TH1D*) histM1_side_1to2p5->Clone((histM1_side_1to2p5->GetName()+std::string("_unnormalised")).c_str());
-	histM1_side_1to2p5_clone->Write("", TObject::kOverwrite);
-	TH1D* histM2_side_1to2p5_clone = (TH1D*) histM2_side_1to2p5->Clone((histM2_side_1to2p5->GetName()+std::string("_unnormalised")).c_str());
-	histM2_side_1to2p5_clone->Write("", TObject::kOverwrite);
-	TH1D* histM_side_1to2p5_clone = (TH1D*) histM_side_1to2p5->Clone((histM_side_1to2p5->GetName()+std::string("_unnormalised")).c_str());
-	histM_side_1to2p5_clone->Write("", TObject::kOverwrite);
-	TH2D* histM1vsM2_side_1to2p5_clone = (TH2D*) histM1vsM2_side_1to2p5->Clone((histM1vsM2_side_1to2p5->GetName()+std::string("_unnormalised")).c_str());
-	histM1vsM2_side_1to2p5_clone->Write("", TObject::kOverwrite);
 	
+	// Do some normalizing, make copies beforehand for combination plots
+	makeCopySave(histM1_side_1to2p5);
 	normaliseHist(histM1_side_1to2p5);
+	
+	makeCopySave(histM2_side_1to2p5);
 	normaliseHist(histM2_side_1to2p5);
+	
+	makeCopySave(histM_side_1to2p5);
 	normaliseHist(histM_side_1to2p5);
+	
+	makeCopySave(histM1vsM2_side_1to2p5);
 	normaliseHist(histM1vsM2_side_1to2p5);
 
 	if (do1to1p5) {
@@ -817,31 +826,30 @@ void massPlots(int argc, char* argv[])
 		normaliseHist(histM1vsM2_side_1to1p5);
 	}
 
-	TH1D* histM1_clone = (TH1D*) histM1->Clone((histM1->GetName()+std::string("_unnormalised")).c_str());
-	histM1_clone->Write("", TObject::kOverwrite);
+	makeCopySave(histM1);
 	normaliseHist(histM1);
-	TH1D* histM1_fine_clone = (TH1D*) histM1_fine->Clone((histM1_fine->GetName()+std::string("_unnormalised")).c_str());
-	histM1_fine_clone->Write("", TObject::kOverwrite);
+
+	makeCopySave(histM1_fine);
 	normaliseHist(histM1_fine);
-	TH1D* histM1_rebin_clone = (TH1D*) histM1_rebin->Clone((histM1_rebin->GetName()+std::string("_unnormalised")).c_str());
-	histM1_rebin_clone->Write("", TObject::kOverwrite);
+
+	makeCopySave(histM1_rebin);
 	normaliseHist(histM1_rebin);
-	TH1D* histM2_clone = (TH1D*) histM2->Clone((histM2->GetName()+std::string("_unnormalised")).c_str());
-	histM2_clone->Write("", TObject::kOverwrite);
+
+	makeCopySave(histM2);
 	normaliseHist(histM2);
-	TH1D* histM2_fine_clone = (TH1D*) histM2_fine->Clone((histM2_fine->GetName()+std::string("_unnormalised")).c_str());
-	histM2_fine_clone->Write("", TObject::kOverwrite);
+
+	makeCopySave(histM2_fine);
 	normaliseHist(histM2_fine);
-	TH1D* histM2_rebin_clone = (TH1D*) histM2_rebin->Clone((histM2_rebin->GetName()+std::string("_unnormalised")).c_str());
-	histM2_rebin_clone->Write("", TObject::kOverwrite);
+
+	makeCopySave(histM2_rebin);
 	normaliseHist(histM2_rebin);
-	TH1D* histM_clone = (TH1D*) histM->Clone((histM->GetName()+std::string("_unnormalised")).c_str());
-	histM_clone->Write("", TObject::kOverwrite);
+
+	makeCopySave(histM);
 	normaliseHist(histM);
-	TH2D* histM1vsM2_clone = (TH2D*) histM1vsM2->Clone((histM1vsM2->GetName()+std::string("_unnormalised")).c_str());
-	histM1vsM2_clone->Write("", TObject::kOverwrite);
+
+	makeCopySave(histM1vsM2);
 	normaliseHist(histM1vsM2);
-	
+
 	// Testing ones
 	normaliseHist(histN_JPsi);
 	normaliseHist(histN_JPsi_side_1to2p5);
