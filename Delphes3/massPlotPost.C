@@ -120,6 +120,8 @@ int main() {
 
 	TH1::SetDefaultSumw2();
 	TCanvas* c1 = new TCanvas("c1");
+	std::string directory = "../Combined";
+	std::string app = "";
 
 	////////////////////////////
 	// Open files, get hists //
@@ -144,8 +146,9 @@ int main() {
 	// Make Data 1D hist //
 	////////////////////////////
 	TH1D* histCorr1D_side_1to2p5_Data = (TH1D*) histCorr1D_side_1to2p5_Robin_QCDb->Clone("hCorr1D_side_1to2p5_Data");
-	double arrContents[] = {1.00, 1.02, 0.95, 1.21, 0.96, 0.93, 0.97, 1.1, 1.1, 1.03};
-	double arrErrors[] = {0.05, 0.03, 0.05, 0.08, 0.04, 0.05, 0.07, 0.13, 0.12, 0.22};
+	// double arrContents[] = {1.00, 1.02, 0.95, 1.21, 0.96, 0.93, 0.97, 1.1, 1.1, 1.03};
+	double arrContents[] = {0.95, 1.02, 1.02, 1.10, 1.01, 0.96, 0.93, 1.07, 0.98, 0.91};
+	double arrErrors[]   = {0.04, 0.03, 0.05, 0.07, 0.03, 0.05, 0.06, 0.12, 0.10, 0.19};
 	for (unsigned i = 1; i <= histCorr1D_side_1to2p5_Robin_QCDb->GetNbinsX(); i++) {
 		histCorr1D_side_1to2p5_Data->SetBinContent(i,arrContents[i-1]);
 		histCorr1D_side_1to2p5_Data->SetBinError(i,arrErrors[i-1]);
@@ -154,29 +157,37 @@ int main() {
 	//////////////////////////////////////////
 	// Plot individual components together //
 	//////////////////////////////////////////
+	histCorr1D_side_1to2p5_Robin_QCDb->SetLineWidth(2);
 	histCorr1D_side_1to2p5_Robin_QCDScatter->SetLineColor(kGreen+2);
+	histCorr1D_side_1to2p5_Robin_QCDScatter->SetLineWidth(2);
 	histCorr1D_side_1to2p5_Robin_QCDScatter->SetMarkerColor(kGreen+2);
 	// histCorr1D_side_1to2p5_Robin_QCDc->SetLineColor(kOrange+2);
 	// histCorr1D_side_1to2p5_Robin_QCDc->SetMarkerColor(kOrange+2);
 	histCorr1D_side_1to2p5_Data->SetLineColor(kRed);
+	histCorr1D_side_1to2p5_Data->SetLineWidth(2);
 	histCorr1D_side_1to2p5_Data->SetMarkerColor(kRed);
 	THStack stack("stack","");
 	stack.Add(histCorr1D_side_1to2p5_Robin_QCDb);
-	stack.Add(histCorr1D_side_1to2p5_Robin_QCDScatter);
+	// stack.Add(histCorr1D_side_1to2p5_Robin_QCDScatter);
 	// stack.Add(histCorr1D_side_1to2p5_Robin_QCDc);
 	stack.Add(histCorr1D_side_1to2p5_Data);
 	stack.Draw("EPNOSTACK");
 	(stack.GetHistogram())->SetXTitle("Bin");
 	(stack.GetHistogram())->SetYTitle("Correlation coefficient");
-	stack.SetMaximum(1.7);
-	stack.SetMinimum(0.3);
+	stack.GetHistogram()->GetXaxis()->SetTitleSize(0.04);
+    stack.GetHistogram()->GetXaxis()->SetLabelSize(0.06);
+    stack.GetHistogram()->GetYaxis()->SetTitleSize(0.04);
+    stack.GetHistogram()->GetYaxis()->SetLabelSize(0.04);
+    stack.GetHistogram()->GetYaxis()->SetTitleOffset(1.2);
+	stack.SetMaximum(2.0);
+	stack.SetMinimum(0.0);
 
 	// Add a legend
-	TLegend leg(0.6,0.7,0.88,0.88);
+	TLegend leg(0.12,0.6,0.4,0.88);
 	leg.SetFillColor(kWhite);
 	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDb,"QCD MC (b#bar{b})","lp");
 	// leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDc,"QCDc","lp");
-	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDScatter,"#splitlines{QCD MC (q-g scatter)}{q = b, #bar{b}, c, #bar{c}}","lp");
+	// leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDScatter,"#splitline{QCD MC (q-g scatter),}{q = b, #bar{b}, c, #bar{c}}","lp");
 	leg.AddEntry(histCorr1D_side_1to2p5_Data,"Data","lp");
 	leg.Draw();
 
@@ -191,6 +202,13 @@ int main() {
 
 	// Default canvas has name c1
 	c1->SetTicks(1,1); // Put tick marks on top x and right y axes
+	c1->SaveAs("../Combined/histCorr1D_side_1to2p5_qcdb_data.pdf");
+
+	stack.Add(histCorr1D_side_1to2p5_Robin_QCDScatter);
+	stack.Draw("EPNOSTACK");
+	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDScatter,"#splitline{QCD MC (q-g scatter),}{q = b, #bar{b}, c, #bar{c}}","lp");
+	leg.Draw();
+	line->Draw();
 	c1->SaveAs("../Combined/histCorr1D_side_1to2p5.pdf");
 
 	//////////////////////////////////////////////////////////////////
@@ -206,8 +224,8 @@ int main() {
 	plots1D.push_back(histM_side_1to2p5_unscaled_QCDScatter);
 
 	TH2D* histM1vsM2_side_1to2p5_unscaled_QCDb = (TH2D*) fQCDb->Get("hM1vsM2_side_1to2p5_unnormalised");
-	TH2D* histM1vsM2_side_1to2p5_unscaled_QCDSCatter = (TH2D*) fQCDScatter->Get("hM1vsM2_side_1to2p5_unnormalised");
-	std::vector<TH2D*> plots1D;
+	TH2D* histM1vsM2_side_1to2p5_unscaled_QCDScatter = (TH2D*) fQCDScatter->Get("hM1vsM2_side_1to2p5_unnormalised");
+	std::vector<TH2D*> plots2D;
 	plots2D.push_back(histM1vsM2_side_1to2p5_unscaled_QCDb);
 	plots2D.push_back(histM1vsM2_side_1to2p5_unscaled_QCDScatter);
 
@@ -220,10 +238,12 @@ int main() {
 
 	// Create combination 2D plot (numerator)
 	TH2D* histM1vsM2_side_1to2p5 = (TH2D*) combinePlots(plots2D, scalingFactors);
+	drawHistAndSave(histM1vsM2_side_1to2p5, "COLZTEXTE", "histM1vsM2_side_1to2p5_unscaled", directory, app);
 	normaliseHist(histM1vsM2_side_1to2p5);
 
 	// Create combination 1D sideband plot (denominator)
 	TH1D* histM_side_1to2p5 = (TH1D*) combinePlots(plots1D, scalingFactors);
+	drawHistAndSave(histM_side_1to2p5, "HISTE", "histM_side_1to2p5_unscaled", directory, app);
 	normaliseHist(histM_side_1to2p5);
 
 	// Create 2D from 1D x 1D
@@ -257,12 +277,12 @@ int main() {
 		}
 	}
 
-	std::string directory = "../Combined";
-	std::string app = "";
 	drawHistAndSave(histM1vsM2_side_1to2p5, "colzTEXTE","M1vsM2_side_1to2p5", directory, app);
 	drawHistAndSave(histM1timesM1_side_1to2p5, "colzTEXTE","M1timesM1_side_1to2p5", directory, app);
 	drawHistAndSave(histM_side_1to2p5, "HISTE", "M_side_1to2p5", directory, app);
 	drawHistAndSave(histM1vsM2_correlations_side_1to2p5, "colzTEXTE","M1vsM2_correlations_side_1to2p5", directory, app);
+	histCorr1D_side_1to2p5_combo->SetMaximum(2.0);
+	histCorr1D_side_1to2p5_combo->SetMinimum(0);
 	drawHistAndSave(histCorr1D_side_1to2p5_combo, "e1", "Correlations1D_side_1to2p5", directory, app);
 
 	// Plot alongside Data
@@ -272,6 +292,7 @@ int main() {
 	stack2.Add(histCorr1D_side_1to2p5_Data);
 	histCorr1D_side_1to2p5_Data->SetLineWidth(2);
 	stack2.Draw("EPNOSTACK");
+
 	(stack2.GetHistogram())->SetXTitle("Bin");
 	(stack2.GetHistogram())->SetTitleSize(0.04,"X");
 	(stack2.GetHistogram())->SetLabelSize(0.06,"X");
@@ -279,14 +300,14 @@ int main() {
 	(stack2.GetHistogram())->SetYTitle("Correlation coefficient");
 	(stack2.GetHistogram())->SetTitleSize(0.04,"Y");
 	cout << (stack2.GetHistogram())->GetMaximum() << endl;
-	(stack2).SetMaximum(1.6);
-	(stack2).SetMinimum(0.5);
+	(stack2).SetMaximum(2.0);
+	(stack2).SetMinimum(0);
 	stack2.Draw("EPNOSTACK");
 
 	// Add a legend
-	TLegend leg2(0.55,0.67,0.88,0.88);
+	TLegend leg2(0.15,0.67,0.48,0.88);
 	leg2.SetFillColor(kWhite);
-	leg2.AddEntry(histCorr1D_side_1to2p5_combo,"#splitline{Gen. level QCD MC}{(b#bar{b} + q-g scatter)}","lp");
+	leg2.AddEntry(histCorr1D_side_1to2p5_combo,"#splitline{Gen. level QCD MC}{(b#bar{b} + q-g scatter, q = b, #bar{b}, c, #bar{c})}","lp");
 	// leg2.AddEntry(histCorr1D_side_1to2p5_combo_Robin_QCDc,"QCDc","lp");
 	leg2.AddEntry(histCorr1D_side_1to2p5_Data,"Data","lp");
 	leg2.Draw();
