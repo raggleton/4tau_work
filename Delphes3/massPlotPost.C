@@ -124,21 +124,21 @@ int main() {
 	////////////////////////////
 	// Open files, get hists //
 	////////////////////////////
-	TFile* fQCDb = TFile::Open("../QCDb_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg_muRand_HLT_dR1.root","READ");
-	TFile* fQCDScatter = TFile::Open("../QCDScatter_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg_muRand_HLT_dR1.root","READ");
-	TFile* fQCDc = TFile::Open("../QCDc_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg_muRand_HLT_dR1.root","READ");
+	TFile* fQCDb = TFile::Open("../QCDb_HLT_bare/output_bare_bg_muRand_HLT_dR1.root","READ");
+	TFile* fQCDScatter = TFile::Open("../QCDbcScatter_HLT_bare/output_bare_bg_muRand_HLT_dR1.root","READ");
+	// TFile* fQCDc = TFile::Open("../QCDc_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg_muRand_HLT_dR1.root","READ");
 
 	std::vector<TFile*> files;
 	files.push_back(fQCDb);
 	files.push_back(fQCDScatter);
-	files.push_back(fQCDc);
+	// files.push_back(fQCDc);
 
 	TH1D* histCorr1D_side_1to2p5_Robin_QCDb = (TH1D*) fQCDb->Get("hCorr1D_side_1to2p5");
 	TH1D* histCorr1D_side_1to2p5_Robin_QCDScatter = (TH1D*) fQCDScatter->Get("hCorr1D_side_1to2p5");
-	TH1D* histCorr1D_side_1to2p5_Robin_QCDc = (TH1D*) fQCDc->Get("hCorr1D_side_1to2p5");
+	// TH1D* histCorr1D_side_1to2p5_Robin_QCDc = (TH1D*) fQCDc->Get("hCorr1D_side_1to2p5");
 	histCorr1D_side_1to2p5_Robin_QCDb->SetStats(kFALSE);
 	histCorr1D_side_1to2p5_Robin_QCDScatter->SetStats(kFALSE);
-	histCorr1D_side_1to2p5_Robin_QCDc->SetStats(kFALSE);
+	// histCorr1D_side_1to2p5_Robin_QCDc->SetStats(kFALSE);
 	
 	////////////////////////////
 	// Make Data 1D hist //
@@ -156,8 +156,8 @@ int main() {
 	//////////////////////////////////////////
 	histCorr1D_side_1to2p5_Robin_QCDScatter->SetLineColor(kGreen+2);
 	histCorr1D_side_1to2p5_Robin_QCDScatter->SetMarkerColor(kGreen+2);
-	histCorr1D_side_1to2p5_Robin_QCDc->SetLineColor(kOrange+2);
-	histCorr1D_side_1to2p5_Robin_QCDc->SetMarkerColor(kOrange+2);
+	// histCorr1D_side_1to2p5_Robin_QCDc->SetLineColor(kOrange+2);
+	// histCorr1D_side_1to2p5_Robin_QCDc->SetMarkerColor(kOrange+2);
 	histCorr1D_side_1to2p5_Data->SetLineColor(kRed);
 	histCorr1D_side_1to2p5_Data->SetMarkerColor(kRed);
 	THStack stack("stack","");
@@ -176,7 +176,7 @@ int main() {
 	leg.SetFillColor(kWhite);
 	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDb,"QCD MC (b#bar{b})","lp");
 	// leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDc,"QCDc","lp");
-	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDScatter,"QCD MC (q-g scatter)","lp");
+	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDScatter,"#splitlines{QCD MC (q-g scatter)}{q = b, #bar{b}, c, #bar{c}}","lp");
 	leg.AddEntry(histCorr1D_side_1to2p5_Data,"Data","lp");
 	leg.Draw();
 
@@ -197,43 +197,26 @@ int main() {
 	// Now combine QCD plots - need to reweight for cross-sections //
 	//////////////////////////////////////////////////////////////////
 
-	std::vector<TH2D*> plots2D;
+	// Need to redo whole correlation coefficient calculation as we have to scale according to # events
+	// So get raw #, scale to lumi&xsec, then add, normalise and do as normal.
+	TH1D* histM_side_1to2p5_unscaled_QCDb = (TH1D*) fQCDb->Get("hM_side_1to2p5_unnormalised");
+	TH1D* histM_side_1to2p5_unscaled_QCDScatter = (TH1D*) fQCDScatter->Get("hM_side_1to2p5_unnormalised");
 	std::vector<TH1D*> plots1D;
+	plots1D.push_back(histM_side_1to2p5_unscaled_QCDb);
+	plots1D.push_back(histM_side_1to2p5_unscaled_QCDScatter);
 
-	for (unsigned i = 0; i < files.size(); i++) {
-		plots2D.push_back((TH2D*)files[i]->Get("hM1vsM2_side_1to2p5"));
-		plots1D.push_back((TH1D*)files[i]->Get("hM_side_1to2p5"));
-	}
+	TH2D* histM1vsM2_side_1to2p5_unscaled_QCDb = (TH2D*) fQCDb->Get("hM1vsM2_side_1to2p5_unnormalised");
+	TH2D* histM1vsM2_side_1to2p5_unscaled_QCDSCatter = (TH2D*) fQCDScatter->Get("hM1vsM2_side_1to2p5_unnormalised");
+	std::vector<TH2D*> plots1D;
+	plots2D.push_back(histM1vsM2_side_1to2p5_unscaled_QCDb);
+	plots2D.push_back(histM1vsM2_side_1to2p5_unscaled_QCDScatter);
 
 	///////////////////////////////
 	// SET SCALING FACTORS HERE //
 	///////////////////////////////
 	std::vector<double> scalingFactors;
-	// each of these is the factor that scales to lumi and cross-section
-	// (lumi 19.7 here, but doesn't matter as we normalise everything)
-	// scale factor = lumi * xsec/# generated *before* HLT cuts 
-	// (so NOT the number in the ROOT file)
-	double lumi = 19.7E12;
-	// cross-sections (mb)
-	std::map <std::string, double> xsec;
-	xsec["QCDb"] = 1.593E-03;
-	xsec["QCDc"] = 1.696E-03;
-	xsec["QCDScatter"] = 1.016E-02;
-	// # generated before HLT cuts
-	std::map <std::string, double> nGen;
-	nGen["QCDb"] = 122683636.;
-	nGen["QCDc"] = 0;
-	nGen["QCDScatter"] = 228669692;
-
-	scalingFactors.push_back(lumi*xsec["QCDb"]/nGen["QCDb"]); // QCDb
-	cout << "QCDb scaling: " << lumi*xsec["QCDb"]/nGen["QCDb"] << endl;
-	scalingFactors.push_back(lumi*xsec["QCDScatter"]/nGen["QCDScatter"]); // QCD scatter
-	cout << "QCD scatter scaling: " << lumi*xsec["QCDScatter"]/nGen["QCDScatter"] << endl;
-	// scalingFactors.push_back(lumi*xsec["QCDc"]/nGen["QCDc"]); // QCDc
-	scalingFactors.push_back(0); // QCDc
-
-	// check we haven't fluffed up vectors.
-	if (plots2D.size() != scalingFactors.size()) return(-1);
+	scalingFactors.push_back(2.9475); // QCDb
+	scalingFactors.push_back(3.9073E+01); // QCDscatter
 
 	// Create combination 2D plot (numerator)
 	TH2D* histM1vsM2_side_1to2p5 = (TH2D*) combinePlots(plots2D, scalingFactors);

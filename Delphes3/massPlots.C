@@ -762,7 +762,49 @@ void massPlots(int argc, char* argv[])
 	printIntegral(histM);
 	printIntegral(histM1vsM2);
 
+	/////////////////
+	// PLOT THINGS //
+	/////////////////
+	std::string app(""); // text to append on end of plot filenames
+
+	if (doSignal) {
+		app = "sig";
+	} else {
+		app = "bg";
+	}
+	if (swapMuRandomly){
+		app += "_muRand";
+	}
+	if (doHLT) {
+		app += "_HLT";
+	} else {
+		app += "_NoHLT";
+	}
+
+	app += "_dR";
+	app += boost::lexical_cast<std::string>(deltaR);
+
+	if (source == test)
+		app += "_TEST";
+
+	// Get directory that input file was in - put plots in there
+	std::string directory = getDirectory(chain.GetFile());
+
+	// Get Delphes file config used - last part of directory name
+	std::string delph = getDelph(directory);
+
+	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
+	cout << "Writing to " << outFile->GetName() << endl;
 	// Do some normalizing
+	TH1D* histM1_side_1to2p5_clone = (TH1D*) histM1_side_1to2p5->Clone((histM1_side_1to2p5->GetName()+std::string("_unnormalised")).c_str());
+	histM1_side_1to2p5_clone->Write("", TObject::kOverwrite);
+	TH1D* histM2_side_1to2p5_clone = (TH1D*) histM2_side_1to2p5->Clone((histM2_side_1to2p5->GetName()+std::string("_unnormalised")).c_str());
+	histM2_side_1to2p5_clone->Write("", TObject::kOverwrite);
+	TH1D* histM_side_1to2p5_clone = (TH1D*) histM_side_1to2p5->Clone((histM_side_1to2p5->GetName()+std::string("_unnormalised")).c_str());
+	histM_side_1to2p5_clone->Write("", TObject::kOverwrite);
+	TH2D* histM1vsM2_side_1to2p5_clone = (TH2D*) histM1vsM2_side_1to2p5->Clone((histM1vsM2_side_1to2p5->GetName()+std::string("_unnormalised")).c_str());
+	histM1vsM2_side_1to2p5_clone->Write("", TObject::kOverwrite);
+	
 	normaliseHist(histM1_side_1to2p5);
 	normaliseHist(histM2_side_1to2p5);
 	normaliseHist(histM_side_1to2p5);
@@ -775,13 +817,29 @@ void massPlots(int argc, char* argv[])
 		normaliseHist(histM1vsM2_side_1to1p5);
 	}
 
+	TH1D* histM1_clone = (TH1D*) histM1->Clone((histM1->GetName()+std::string("_unnormalised")).c_str());
+	histM1_clone->Write("", TObject::kOverwrite);
 	normaliseHist(histM1);
+	TH1D* histM1_fine_clone = (TH1D*) histM1_fine->Clone((histM1_fine->GetName()+std::string("_unnormalised")).c_str());
+	histM1_fine_clone->Write("", TObject::kOverwrite);
 	normaliseHist(histM1_fine);
+	TH1D* histM1_rebin_clone = (TH1D*) histM1_rebin->Clone((histM1_rebin->GetName()+std::string("_unnormalised")).c_str());
+	histM1_rebin_clone->Write("", TObject::kOverwrite);
 	normaliseHist(histM1_rebin);
+	TH1D* histM2_clone = (TH1D*) histM2->Clone((histM2->GetName()+std::string("_unnormalised")).c_str());
+	histM2_clone->Write("", TObject::kOverwrite);
 	normaliseHist(histM2);
+	TH1D* histM2_fine_clone = (TH1D*) histM2_fine->Clone((histM2_fine->GetName()+std::string("_unnormalised")).c_str());
+	histM2_fine_clone->Write("", TObject::kOverwrite);
 	normaliseHist(histM2_fine);
+	TH1D* histM2_rebin_clone = (TH1D*) histM2_rebin->Clone((histM2_rebin->GetName()+std::string("_unnormalised")).c_str());
+	histM2_rebin_clone->Write("", TObject::kOverwrite);
 	normaliseHist(histM2_rebin);
+	TH1D* histM_clone = (TH1D*) histM->Clone((histM->GetName()+std::string("_unnormalised")).c_str());
+	histM_clone->Write("", TObject::kOverwrite);
 	normaliseHist(histM);
+	TH2D* histM1vsM2_clone = (TH2D*) histM1vsM2->Clone((histM1vsM2->GetName()+std::string("_unnormalised")).c_str());
+	histM1vsM2_clone->Write("", TObject::kOverwrite);
 	normaliseHist(histM1vsM2);
 	
 	// Testing ones
@@ -853,36 +911,7 @@ void massPlots(int argc, char* argv[])
 		}
 	}
 
-	/////////////////
-	// PLOT THINGS //
-	/////////////////
-	std::string app(""); // text to append on end of plot filenames
 
-	if (doSignal) {
-		app = "sig";
-	} else {
-		app = "bg";
-	}
-	if (swapMuRandomly){
-		app += "_muRand";
-	}
-	if (doHLT) {
-		app += "_HLT";
-	} else {
-		app += "_NoHLT";
-	}
-
-	app += "_dR";
-	app += boost::lexical_cast<std::string>(deltaR);
-
-	if (source == test)
-		app += "_TEST";
-
-	// Get directory that input file was in - put plots in there
-	std::string directory = getDirectory(chain.GetFile());
-
-	// Get Delphes file config used - last part of directory name
-	std::string delph = getDelph(directory);
 
 	// m1, mu1 pT in bins of m2
 	// -------------------------------
@@ -952,7 +981,6 @@ void massPlots(int argc, char* argv[])
 	//////////////////////////
 	// Write hists to file //
 	//////////////////////////
-	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
 	histM1->Write("",TObject::kOverwrite);
 	histM1_fine->Write("",TObject::kOverwrite);
