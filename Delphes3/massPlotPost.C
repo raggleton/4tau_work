@@ -12,6 +12,7 @@
 #include "THStack.h"
 #include "TStyle.h"
 #include "TLine.h"
+#include "TPaveText.h"
 
 using std::cout;
 using std::endl;
@@ -128,19 +129,18 @@ int main() {
 	////////////////////////////
 	TFile* fQCDb = TFile::Open("../QCDb_HLT_bare/output_bare_bg_muRand_HLT_dR1.root","READ");
 	TFile* fQCDScatter = TFile::Open("../QCDbcScatter_HLT_bare/output_bare_bg_muRand_HLT_dR1.root","READ");
-	// TFile* fQCDc = TFile::Open("../QCDc_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg_muRand_HLT_dR1.root","READ");
+	TFile* fSignal = TFile::Open("../Signal_1prong_HLT_bare/output_bare_sig_muRand_HLT_dR1.root","READ");
 
 	std::vector<TFile*> files;
 	files.push_back(fQCDb);
 	files.push_back(fQCDScatter);
-	// files.push_back(fQCDc);
 
 	TH1D* histCorr1D_side_1to2p5_Robin_QCDb = (TH1D*) fQCDb->Get("hCorr1D_side_1to2p5");
 	TH1D* histCorr1D_side_1to2p5_Robin_QCDScatter = (TH1D*) fQCDScatter->Get("hCorr1D_side_1to2p5");
-	// TH1D* histCorr1D_side_1to2p5_Robin_QCDc = (TH1D*) fQCDc->Get("hCorr1D_side_1to2p5");
+	TH1D* histCorr1D_side_1to2p5_Robin_Signal = (TH1D*) fSignal->Get("hCorr1D_side_1to2p5");
 	histCorr1D_side_1to2p5_Robin_QCDb->SetStats(kFALSE);
 	histCorr1D_side_1to2p5_Robin_QCDScatter->SetStats(kFALSE);
-	// histCorr1D_side_1to2p5_Robin_QCDc->SetStats(kFALSE);
+	histCorr1D_side_1to2p5_Robin_Signal->SetStats(kFALSE);
 	
 	////////////////////////////
 	// Make Data 1D hist //
@@ -158,35 +158,37 @@ int main() {
 	// Plot individual components together //
 	//////////////////////////////////////////
 	histCorr1D_side_1to2p5_Robin_QCDb->SetLineWidth(2);
+	histCorr1D_side_1to2p5_Robin_QCDb->SetMarkerStyle(21);
 	histCorr1D_side_1to2p5_Robin_QCDScatter->SetLineColor(kGreen+2);
 	histCorr1D_side_1to2p5_Robin_QCDScatter->SetLineWidth(2);
+	// histCorr1D_side_1to2p5_Robin_QCDScatter->SetLineStyle(2);
 	histCorr1D_side_1to2p5_Robin_QCDScatter->SetMarkerColor(kGreen+2);
-	// histCorr1D_side_1to2p5_Robin_QCDc->SetLineColor(kOrange+2);
-	// histCorr1D_side_1to2p5_Robin_QCDc->SetMarkerColor(kOrange+2);
-	histCorr1D_side_1to2p5_Data->SetLineColor(kRed);
+	histCorr1D_side_1to2p5_Robin_QCDScatter->SetMarkerStyle(22);
+	histCorr1D_side_1to2p5_Data->SetLineColor(kGreen+2);
 	histCorr1D_side_1to2p5_Data->SetLineWidth(2);
-	histCorr1D_side_1to2p5_Data->SetMarkerColor(kRed);
+	histCorr1D_side_1to2p5_Data->SetMarkerColor(kGreen+2);
 	THStack stack("stack","");
 	stack.Add(histCorr1D_side_1to2p5_Robin_QCDb);
 	// stack.Add(histCorr1D_side_1to2p5_Robin_QCDScatter);
-	// stack.Add(histCorr1D_side_1to2p5_Robin_QCDc);
 	stack.Add(histCorr1D_side_1to2p5_Data);
 	stack.Draw("EPNOSTACK");
 	(stack.GetHistogram())->SetXTitle("Bin");
 	(stack.GetHistogram())->SetYTitle("Correlation coefficient");
-	stack.GetHistogram()->GetXaxis()->SetTitleSize(0.04);
-    stack.GetHistogram()->GetXaxis()->SetLabelSize(0.06);
-    stack.GetHistogram()->GetYaxis()->SetTitleSize(0.04);
-    stack.GetHistogram()->GetYaxis()->SetLabelSize(0.04);
-    stack.GetHistogram()->GetYaxis()->SetTitleOffset(1.2);
+	stack.GetHistogram()->GetXaxis()->SetTitleSize(0.05);
+	// stack.GetHistogram()->GetXaxis()->SetTitleOffset(0.05);
+    stack.GetHistogram()->GetXaxis()->SetLabelSize(0.07);
+    
+    stack.GetHistogram()->GetYaxis()->SetTitleSize(0.05);
+    stack.GetHistogram()->GetYaxis()->SetLabelSize(0.05);
+    // stack.GetHistogram()->GetYaxis()->SetTitleOffset(1.2);
 	stack.SetMaximum(2.0);
 	stack.SetMinimum(0.0);
 
 	// Add a legend
-	TLegend leg(0.12,0.6,0.4,0.88);
+	// TLegend leg(0.12,0.6,0.4,0.88);
+	TLegend leg(0.6,0.67,0.88,0.88);
 	leg.SetFillColor(kWhite);
-	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDb,"QCD MC (b#bar{b})","lp");
-	// leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDc,"QCDc","lp");
+	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDb,"QCD b#bar{b} MC","lp");
 	// leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDScatter,"#splitline{QCD MC (q-g scatter),}{q = b, #bar{b}, c, #bar{c}}","lp");
 	leg.AddEntry(histCorr1D_side_1to2p5_Data,"Data","lp");
 	leg.Draw();
@@ -200,15 +202,35 @@ int main() {
 	line->SetLineStyle(2);
 	line->Draw();
 
+	TPaveText t(0.15, 0.7, 0.4, 0.8, "NDC");
+	t.AddText("Control region A");
+    t.SetFillColor(kWhite);
+    t.SetBorderSize(0);
+    t.Draw();
+
 	// Default canvas has name c1
 	c1->SetTicks(1,1); // Put tick marks on top x and right y axes
 	c1->SaveAs("../Combined/histCorr1D_side_1to2p5_qcdb_data.pdf");
 
+	THStack* stack_sig = (THStack*) stack.Clone("stack_sig");
+	histCorr1D_side_1to2p5_Robin_Signal->SetLineColor(kOrange);
+	histCorr1D_side_1to2p5_Robin_Signal->SetLineWidth(2);
+	histCorr1D_side_1to2p5_Robin_Signal->SetMarkerColor(kOrange);
+	stack_sig->Add(histCorr1D_side_1to2p5_Robin_Signal);
+	stack_sig->Draw("EPNOSTACK");
+	TLegend* leg_sig = (TLegend*) leg.Clone();
+	leg_sig->AddEntry(histCorr1D_side_1to2p5_Robin_Signal, "#splitline{Signal MC}{m_{#varphi} = 8 GeV}","lp");
+	leg_sig->Draw();
+	line->Draw();
+	t.Draw();
+	c1->SaveAs("../Combined/histCorr1D_side_1to2p5_signal_qcdb_data.pdf");
+
 	stack.Add(histCorr1D_side_1to2p5_Robin_QCDScatter);
 	stack.Draw("EPNOSTACK");
-	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDScatter,"#splitline{QCD MC (q-g scatter),}{q = b, #bar{b}, c, #bar{c}}","lp");
+	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDScatter,"#splitline{QCD q-g scatter MC}{q = b, #bar{b}, c, #bar{c}}","lp");
 	leg.Draw();
 	line->Draw();
+	t.Draw();
 	c1->SaveAs("../Combined/histCorr1D_side_1to2p5.pdf");
 
 	//////////////////////////////////////////////////////////////////
@@ -234,7 +256,8 @@ int main() {
 	///////////////////////////////
 	std::vector<double> scalingFactors;
 	scalingFactors.push_back(2.9475); // QCDb
-	scalingFactors.push_back(3.9073E+01); // QCDscatter
+	scalingFactors.push_back(3.7623); // QCDscatter
+	// scalingFactors.push_back(3.9073E+01); // QCDscatter
 
 	// Create combination 2D plot (numerator)
 	TH2D* histM1vsM2_side_1to2p5 = (TH2D*) combinePlots(plots2D, scalingFactors);
@@ -305,15 +328,15 @@ int main() {
 	stack2.Draw("EPNOSTACK");
 
 	// Add a legend
-	TLegend leg2(0.15,0.67,0.48,0.88);
+	TLegend leg2(0.5,0.67,0.88,0.88);
 	leg2.SetFillColor(kWhite);
 	leg2.AddEntry(histCorr1D_side_1to2p5_combo,"#splitline{Gen. level QCD MC}{(b#bar{b} + q-g scatter, q = b, #bar{b}, c, #bar{c})}","lp");
-	// leg2.AddEntry(histCorr1D_side_1to2p5_combo_Robin_QCDc,"QCDc","lp");
 	leg2.AddEntry(histCorr1D_side_1to2p5_Data,"Data","lp");
 	leg2.Draw();
 	
 	line->Draw();
 
 	c1->SetTicks(1,1);
+	t.Draw();
 	c1->SaveAs("../Combined/histCorr1D_side_1to2p5_combo_allQCD.pdf");
 }
