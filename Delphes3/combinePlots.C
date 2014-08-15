@@ -6,7 +6,7 @@
 // outputName  = name for output (needs .pdf, .png etc)
 // 
 void combineHists( TFile* fSig, TFile* fBg, TFile* fBg2, std::string histName, std::string plotOpt, std::string outputName, int rebin=1){
-
+	gStyle->SetHistLineWidth(2);
 	TCanvas c1;
 	TH1D* hSig = fSig->Get(histName.c_str());
 	TH1D* hBg  = fBg->Get(histName.c_str());
@@ -31,7 +31,7 @@ void combineHists( TFile* fSig, TFile* fBg, TFile* fBg2, std::string histName, s
 	st.SetTitle(hSig->GetTitle());
 	st.Draw((plotOpt+"NOSTACK").c_str());
 	TLegend leg(0.75,0.75,0.88,0.88);
-	leg.SetFillColor(kWhite);
+	leg.SetFillStyle(0);
 	leg.SetLineColor(kWhite);
 	leg.AddEntry(hSig,"Signal","l");
 	leg.AddEntry(hBg,"Bg","l");
@@ -44,7 +44,7 @@ void combineHists( TFile* fSig, TFile* fBg, TFile* fBg2, std::string histName, s
 }
 
 void combineHists( TFile* fSig, TFile* fBg, std::string histName, std::string plotOpt, std::string outputName){
-
+	gStyle->SetHistLineWidth(2);
 	TCanvas c1;
 	TH1D* hSig = fSig->Get(histName.c_str());
 	TH1D* hBg  = fBg->Get(histName.c_str());
@@ -62,7 +62,7 @@ void combineHists( TFile* fSig, TFile* fBg, std::string histName, std::string pl
 	st.SetTitle(hSig->GetTitle());
 	st.Draw((plotOpt+"NOSTACK").c_str());
 	TLegend leg(0.75,0.75,0.88,0.88);
-	leg.SetFillColor(kWhite);
+	leg.SetFillStyle(0);
 	leg.SetLineColor(kWhite);
 	leg.AddEntry(hSig,"Signal","l");
 	leg.AddEntry(hBg,"Bg","l");
@@ -80,7 +80,7 @@ void combinePlots(){
 	////////////////////////
 	
 	gStyle->SetOptStat("");
-
+	gStyle->SetHistLineWidth(2);
 	// TFile fSig("Signal_1prong_500K_bare/output_bare_sig_HLT.root","READ");
 	// TFile fBg("QCDb_mu_pthatmin20_Mu17_Mu8_bare/output_bare_bg_HLT.root","READ");
 	

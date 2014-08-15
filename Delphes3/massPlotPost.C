@@ -78,7 +78,7 @@ void drawHistAndSave(TH1* h,
 
 	gStyle->SetOptStat(""); // display name and # entries only
 	gStyle->SetPaintTextFormat(".3g"); // set text format to be printed
-	
+	gStyle->SetHistLineWidth(2);
 	// setTDRStyle();
 
 	TH1::SetDefaultSumw2();
@@ -117,6 +117,7 @@ void drawHistAndSave(TH1* h,
 int main() {
 	gStyle->SetOptStat(""); // DOES NOTHING AS HIST ALREADY HAS OPT STATS!!!!
 	gStyle->SetLegendBorderSize(0);
+	gStyle->SetHistLineWidth(2);
 	gStyle->SetLegendFillColor(kWhite);
 
 	TH1::SetDefaultSumw2();
@@ -175,8 +176,8 @@ int main() {
 	(stack.GetHistogram())->SetXTitle("Bin");
 	(stack.GetHistogram())->SetYTitle("Correlation coefficient");
 	stack.GetHistogram()->GetXaxis()->SetTitleSize(0.05);
-	// stack.GetHistogram()->GetXaxis()->SetTitleOffset(0.05);
     stack.GetHistogram()->GetXaxis()->SetLabelSize(0.07);
+	// stack.GetHistogram()->GetXaxis()->SetTitleOffset(0.05);
     
     stack.GetHistogram()->GetYaxis()->SetTitleSize(0.05);
     stack.GetHistogram()->GetYaxis()->SetLabelSize(0.05);
@@ -187,7 +188,7 @@ int main() {
 	// Add a legend
 	// TLegend leg(0.12,0.6,0.4,0.88);
 	TLegend leg(0.6,0.67,0.88,0.88);
-	leg.SetFillColor(kWhite);
+	leg.SetFillStyle(0);
 	leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDb,"QCD b#bar{b} MC","lp");
 	// leg.AddEntry(histCorr1D_side_1to2p5_Robin_QCDScatter,"#splitline{QCD MC (q-g scatter),}{q = b, #bar{b}, c, #bar{c}}","lp");
 	leg.AddEntry(histCorr1D_side_1to2p5_Data,"Data","lp");
@@ -256,7 +257,7 @@ int main() {
 	///////////////////////////////
 	std::vector<double> scalingFactors;
 	scalingFactors.push_back(2.9475); // QCDb
-	scalingFactors.push_back(3.7623); // QCDscatter
+	scalingFactors.push_back(3.7250); // QCDscatter
 	// scalingFactors.push_back(3.9073E+01); // QCDscatter
 
 	// Create combination 2D plot (numerator)
@@ -310,27 +311,32 @@ int main() {
 
 	// Plot alongside Data
 	THStack stack2("stack2","");
-	stack2.Add(histCorr1D_side_1to2p5_combo);
 	histCorr1D_side_1to2p5_combo->SetLineWidth(2);
+	histCorr1D_side_1to2p5_combo->SetMarkerStyle(21);
+	stack2.Add(histCorr1D_side_1to2p5_combo);
 	stack2.Add(histCorr1D_side_1to2p5_Data);
 	histCorr1D_side_1to2p5_Data->SetLineWidth(2);
 	stack2.Draw("EPNOSTACK");
 
 	(stack2.GetHistogram())->SetXTitle("Bin");
-	(stack2.GetHistogram())->SetTitleSize(0.04,"X");
-	(stack2.GetHistogram())->SetLabelSize(0.06,"X");
-	(stack2.GetHistogram())->SetLabelSize(0.04,"Y");
+	(stack2.GetHistogram())->SetTitleSize(0.05,"X");
+	(stack2.GetHistogram())->SetLabelSize(0.07,"X");
+	(stack2.GetHistogram())->SetLabelSize(0.05,"Y");
 	(stack2.GetHistogram())->SetYTitle("Correlation coefficient");
-	(stack2.GetHistogram())->SetTitleSize(0.04,"Y");
+	(stack2.GetHistogram())->SetTitleSize(0.05,"Y");
 	cout << (stack2.GetHistogram())->GetMaximum() << endl;
 	(stack2).SetMaximum(2.0);
 	(stack2).SetMinimum(0);
 	stack2.Draw("EPNOSTACK");
 
 	// Add a legend
-	TLegend leg2(0.5,0.67,0.88,0.88);
-	leg2.SetFillColor(kWhite);
-	leg2.AddEntry(histCorr1D_side_1to2p5_combo,"#splitline{Gen. level QCD MC}{(b#bar{b} + q-g scatter, q = b, #bar{b}, c, #bar{c})}","lp");
+	TLegend leg2(0.53,0.63,0.87,0.9);
+	// leg2.SetFillColor(kWhite);
+	leg2.SetFillStyle(0);
+	TH1D blank("","",1,0,1);
+	leg2.AddEntry(histCorr1D_side_1to2p5_combo,"Gen. level QCD MC","lp");
+	leg2.AddEntry(&blank,"(b#bar{b} + q-g scatter,","");
+	leg2.AddEntry(&blank,"q = b, #bar{b}, c, #bar{c})","");
 	leg2.AddEntry(histCorr1D_side_1to2p5_Data,"Data","lp");
 	leg2.Draw();
 	
