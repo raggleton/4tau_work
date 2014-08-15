@@ -11,11 +11,23 @@ using std::endl;
 /**
  * Main analysis script to make plots, except for those pertianing to mass distributions or correlation coefficiants (see massPlots.C) 
  */
+
+/**
+ * makes clone fo hist, appends "suffix" to hist name, 
+ * write to currently open file
+ */
+template <typename T>
+void makeCopySave(T* h, std::string suffix="_unnormalised") {
+	T* h_clone = (T*) h->Clone((h->GetName()+suffix).c_str());
+	h_clone->Write("", TObject::kOverwrite);
+}
+
 void mainAnalysis(int argc, char* argv[])
 {
 	TH1::SetDefaultSumw2();
 
 	gSystem->Load("libDelphes");
+	gStyle->SetHistLineWidth(2);
 
 	ProgramOpts pOpts(argc, argv);
 
@@ -577,18 +589,60 @@ void mainAnalysis(int argc, char* argv[])
 	histNSoftTracksAbs1OS->SetYTitle("Ave. OS N_{trk} per #mu_{1}");
 	histNSoftTracksAbs2OS->SetYTitle("Ave. OS N_{trk} per #mu_{2}");
 
+
+	////////////////////////
+	// Draw hists to PDF //
+	////////////////////////
+
+	TCanvas c;
+	std::string app("");
+	if (doSignal) {
+		app = "sig";
+	} else {
+		app = "bg";
+	}
+	if (swapMuRandomly)
+		app += "_muRand";
+	
+	if (doHLT)
+		app += "_HLT";
+	else
+		app += "_NoHLT";
+
+	app += "_dR";
+	app += boost::lexical_cast<std::string>(deltaR);
+
+	// Get directory that input file was in - put plots in there
+	std::string directory = getDirectory(chain.GetFile());
+	// Get Delphes file config used - last part of directory name
+	std::string delph = getDelph(directory);
+
+	TFile* outFile = TFile::Open((directory+"/output_main_"+delph+"_"+app+".root").c_str(),"UPDATE");
+	cout << "Writing to " << outFile->GetName() << endl;
+
 	// AU scaling
+	// save unnormalised version to file
+	makeCopySave(histNTracks1);
 	normaliseHist(histNTracks1);
+	makeCopySave(histNTracks2);
 	normaliseHist(histNTracks2);
+	makeCopySave(histNTracks1OS);
 	normaliseHist(histNTracks1OS);
+	makeCopySave(histNTracks2OS);
 	normaliseHist(histNTracks2OS);
 
+	makeCopySave(histNTracksAll1);
 	normaliseHist(histNTracksAll1);
+	makeCopySave(histNTracksAll2);
 	normaliseHist(histNTracksAll2);
 
+	makeCopySave(histNSoftTracks1);
 	normaliseHist(histNSoftTracks1);
+	makeCopySave(histNSoftTracks2);
 	normaliseHist(histNSoftTracks2);
+	makeCopySave(histNSoftTracks1OS);
 	normaliseHist(histNSoftTracks1OS);
+	makeCopySave(histNSoftTracks2OS);
 	normaliseHist(histNSoftTracks2OS);
 
 	// Cumulative plots
@@ -619,29 +673,6 @@ void mainAnalysis(int argc, char* argv[])
 	cout << "# muons with 1+ OS track with pT > 2.5GeV: " << n2p5OS << endl;
 	cout << "nMuPass: " << nMuPass << endl;
 
-	////////////////////////
-	// Draw hists to PDF //
-	////////////////////////
-
-	TCanvas c;
-	std::string app("");
-	if (doSignal) {
-		app = "sig";
-	} else {
-		app = "bg";
-	}
-	if (swapMuRandomly)
-		app += "_muRand";
-	
-	if (doHLT)
-		app += "_HLT";
-	else
-		app += "_NoHLT";
-
-	// Get directory that input file was in - put plots in there
-	std::string directory = getDirectory(chain.GetFile());
-	// Get Delphes file config used - last part of directory name
-	std::string delph = getDelph(directory);
 
 
 	// app += "_samePtEta";
@@ -735,7 +766,6 @@ void mainAnalysis(int argc, char* argv[])
 	///////////////////////////////
 	// Write hists to ROOT file //
 	///////////////////////////////
-	TFile* outFile = TFile::Open((directory+"/output_"+delph+"_"+app+".root").c_str(),"UPDATE");
 
 	histMu1Pt->Write("",TObject::kOverwrite);
 	histMu2Pt->Write("",TObject::kOverwrite);
