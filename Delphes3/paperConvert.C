@@ -3,42 +3,58 @@
 
 
 // Convert plots to paper format - no title, bigger fonts etc
-void combineHists( TFile* fSig, TFile* fBg, TFile* fBg2, std::string histName, std::string plotOpt, std::string outputName, int rebin=1){
+void combineHists( TFile* fSig, TFile* fBg, TFile* fBg2, std::string histName, std::string plotOpt, std::string outputName, std::vector<double> scalingFactors, std::string label, std::string yTitle="DEFAULT"){
     // for 3 hists - sig and 2 bg
     TCanvas c1;
     TH1D* hSig = fSig->Get(histName.c_str());
-    TH1D* hBg  = fBg->Get(histName.c_str());
-    TH1D* hBg2  = fBg2->Get(histName.c_str());
     hSig->SetLineColor(kRed);
     hSig->SetMarkerSize(0);
     doSignalHist(hSig);
-    hSig->Rebin(rebin);
+    
+    // Make combined BG hist
+    // Need to rescale carefully
+    std::vector<TFile*> files;
+    files.push_back(fBg);
+    files.push_back(fBg2);
+    // TH1D* hBg = combine(files, histName, scalingFactors);
+    TH1D* hBgA = fBg->Get(histName.c_str());
+    TH1D* hBgB =  fBg2->Get(histName.c_str());
+    TH1D* hBg = (TH1D*) hBgA->Clone();
+    double total = scalingFactors[0]+scalingFactors[1];
+    hBg->Scale(scalingFactors[0]/total);
+    hBg->Add(hBgB, scalingFactors[1]/total);
     hBg->SetMarkerSize(0);
-    hBg->SetMarkerStyle(21);
-    hBg->SetLineStyle(2);
-    hBg->Rebin(rebin);
-    hBg2->SetMarkerSize(0);
-    hBg2->SetLineColor(kGreen+2);
-    hBg2->SetMarkerStyle(22);
-    hBg2->Rebin(rebin);
+    doAltBGHist(hBg);
+    
     THStack st("h","");
     st.Add(hSig);
     st.Add(hBg);
-    st.Add(hBg2);
-    // hSig->Draw(plotOpt.c_str());
-    // hBg->Draw((plotOpt+"SAME").c_str());
     st.Draw((plotOpt+"NOSTACK").c_str());
     st.GetXaxis()->SetTitle(hSig->GetXaxis()->GetTitle());
-    st.GetYaxis()->SetTitle(hSig->GetYaxis()->GetTitle());
-    st.SetTitle(hSig->GetTitle());
+    if (yTitle == "DEFAULT") {
+        st.GetYaxis()->SetTitle(hSig->GetYaxis()->GetTitle());
+    } else {
+        st.GetYaxis()->SetTitle(yTitle.c_str());
+    }
+    setAltOffsetSizes(&st.GetHistogram());
+    st.SetTitle("");
     st.Draw((plotOpt+"NOSTACK").c_str());
-    TLegend leg(0.75,0.75,0.88,0.88);
-    leg.SetFillColor(kWhite);
-    leg.SetLineColor(kWhite);
-    leg.AddEntry(hSig,"Signal","l");
-    leg.AddEntry(hBg,"Bg","l");
-    leg.AddEntry(hBg2,"Bg2","l");
-    leg.Draw();
+
+    TLegend* l_all = new TLegend(0.65,0.6,0.89,0.89);
+    l_all->AddEntry(hBg,"Gen. level QCD MC","lp");
+    l_all->AddEntry((TObject*)0,"(b#bar{b} + q-g scatter,",""); //null pointers for blank entries
+    l_all->AddEntry((TObject*)0,"q = b, #bar{b}, c, #bar{c})","");
+    l_all->AddEntry(hSig, "Signal MC", "lp");
+    l_all->AddEntry((TObject*)0,"m_{#varphi} = 8 GeV", "");
+    doStandardLegend(l_all);
+    l_all->Draw();
+
+    TPaveText t(0.15, 0.75, 0.5, 0.85, "NDC");
+    t.AddText(label.c_str());
+    doStandardText(&t);
+    if (label != "") {
+        t.Draw();
+    }
     c1.SaveAs(outputName.c_str());
 
     if (!hSig) delete hSig;
@@ -216,18 +232,18 @@ TH1D* combineRebin10bins(std::vector<TFile*> files, std::string histName, std::v
     return hNew;
 }
 
-// TH1D* combine(std::vector<TFile*> files, std::string histName, std::vector<double> scalingFactors) {
-//     TH1::SetDefaultSumw2();
-//     const std::vector<double> massBins {0,1,2,3,10};
-//     const int nBinsX = massBins.size()-1;
-//     TH1D* h = (TH1D*)files[0]->Get(histName.c_str())->Clone(files[0]->Get(histName.c_str())->GetName());
-//     h->Scale(scalingFactors[0]);
-//     for (unsigned i = 1; i < files.size(); i++) {
-//         TH1D* hTmp = (TH1D*)files[i]->Get(histName.c_str());
-//         h->Add(hTmp, scalingFactors[i]);
-//     }
-//     return h;
-// }
+
+TH1D* combine(std::vector<TFile*> files, std::string histName, std::vector<double> scalingFactors) {
+    TH1::SetDefaultSumw2();
+    // Get 1st hist in list
+    TH1D* h = (TH1D*)files[0]->Get(histName.c_str())->Clone(files[0]->Get(histName.c_str())->GetName());
+    h->Scale(scalingFactors[0]);
+    for (unsigned i = 1; i < files.size(); i++) {
+        TH1D* hTmp = (TH1D*) (files[i]->Get(histName.c_str()));
+        h->Add(hTmp, scalingFactors[i]);
+    }
+    return h;
+}
 
 /////////////////
 // MAIN SCRIPT //
@@ -466,12 +482,12 @@ void paperConvert() {
     // c1->SaveAs("Combined/Corr_side.pdf");
 
     // track distributions
-    combineHists(f_sig_main, f_bg_main2, "hNTracks1", "HISTE", "Combined/combined_NTrack1_muRand.pdf", "Tracks with p_{T} > 2.5 GeV");
-    combineHists(f_sig_main, f_bg_main2, "hNTracksAbs1", "HISTE", "Combined/combined_NTrackAbs1_muRand.pdf", "Tracks with p_{T} > 2.5 GeV");
-    combineHists(f_sig_main, f_bg_main2, "hNTracksAll1", "HISTE", "Combined/combined_NTrackAll1_muRand.pdf", "Tracks with p_{T} > 1 GeV");
-    combineHists(f_sig_main, f_bg_main2, "hNTracksAllAbs1", "HISTE", "Combined/combined_NTrackAllAbs1_muRand.pdf", "Tracks with p_{T} > 1 GeV");
-    combineHists(f_sig_main, f_bg_main2, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf", "Tracks with 2.5 > p_{T} > 1 GeV");
-    combineHists(f_sig_main, f_bg_main2, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf", "Tracks with 2.5 > p_{T} > 1 GeV");
+    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNTracks1", "HISTE", "Combined/combined_NTrack1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV");
+    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNTracksAbs1", "HISTE", "Combined/combined_NTrackAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV", "Average number of tracks per #mu_{1} / bin");
+    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNTracksAll1", "HISTE", "Combined/combined_NTrackAll1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV");
+    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNTracksAllAbs1", "HISTE", "Combined/combined_NTrackAllAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV", "Average number of tracks per #mu_{1} / bin");
+    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf", scalingFactors, "Tracks with 2.5 > p_{T} > 1 GeV");
+    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf", scalingFactors, "Tracks with 2.5 > p_{T} > 1 GeV", "Average number of tracks per #mu_{1} / bin");
 
 
     // cleanup
