@@ -257,7 +257,7 @@ int main() {
 	///////////////////////////////
 	std::vector<double> scalingFactors;
 	scalingFactors.push_back(2.9475); // QCDb
-	scalingFactors.push_back(3.7250); // QCDscatter
+	scalingFactors.push_back(2.6577); // QCDscatter
 	// scalingFactors.push_back(3.9073E+01); // QCDscatter
 
 	// Create combination 2D plot (numerator)

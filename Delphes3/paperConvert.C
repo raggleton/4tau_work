@@ -1,4 +1,7 @@
 #include <vector>
+
+
+
 // Convert plots to paper format - no title, bigger fonts etc
 void combineHists( TFile* fSig, TFile* fBg, TFile* fBg2, std::string histName, std::string plotOpt, std::string outputName, int rebin=1){
     // for 3 hists - sig and 2 bg
@@ -47,6 +50,7 @@ void combineHists( TFile* fSig, TFile* fBg, std::string histName, std::string pl
     TCanvas c1;
     TH1D* hSig = fSig->Get(histName.c_str());
     TH1D* hBg  = fBg->Get(histName.c_str());
+    cout << "signal: " << hSig->Integral()  << " bg: " << hBg->Integral() << endl;
     hSig->SetMarkerSize(0);
     doSignalHist(hSig);
     hBg->SetMarkerSize(0);
@@ -94,11 +98,13 @@ void doSignalHist(TH1 *h) {
 void doBGHist(TH1 *h) {
     doStandardHist(h);
     h->SetMarkerStyle(21);
+    h->SetMarkerColor(h->GetLineColor());
 }
 
 void doAltBGHist(TH1 *h) {
     doStandardHist(h);
     h->SetMarkerStyle(21);
+    // h->SetMarkerColor(kBlue);
     h->SetLineStyle(2);
 }
 
@@ -120,6 +126,7 @@ void setAltOffsetSizes(TH1 *h) {
 void doStandardLegend(TLegend *leg) {
     leg->SetFillStyle(0);
     leg->SetLineColor(kWhite);
+    leg->SetLineWidth(0);
 }
 
 void doStandardText(TPaveText *t) {
@@ -130,7 +137,10 @@ void doStandardText(TPaveText *t) {
 void setMassAUTitles(TH1 *h) {
     h->SetXTitle("m(#mu-tk) [GeV]");
     h->SetYTitle("A.U.");
+    // h->SetMaximum(1);
+    h->SetMinimum(0);
 }
+
 
 TH1D* addScaleRebin(std::vector<TH1D*> plots, std::vector<double> scalingFactors) {
     TH1::SetDefaultSumw2();
@@ -156,6 +166,72 @@ TH1D* addScale(std::vector<TH1D*> plots, std::vector<double> scalingFactors) {
     return h;
 }
 
+void normaliseHist(TH1* h) {
+    TH1::SetDefaultSumw2();
+
+    if (h->Integral() != 0) {
+        h->Scale(1./h->Integral());
+    }
+}
+
+TH1D* combineRebin4Bins(std::vector<TFile*> files, std::string histName, std::vector<double> scalingFactors) {
+    TH1::SetDefaultSumw2();
+    std::vector<double> massBins;
+    massBins.push_back(0);
+    massBins.push_back(1);
+    massBins.push_back(2);
+    massBins.push_back(3);
+    massBins.push_back(10);
+    int nBinsX = massBins.size()-1;
+    // Get 1st hist in list
+    TH1D* h = (TH1D*)files[0]->Get(histName.c_str())->Clone(files[0]->Get(histName.c_str())->GetName());
+    h->Scale(scalingFactors[0]);
+    
+    for (unsigned i = 1; i < files.size(); i++) {
+        TH1D* hTmp = (TH1D*) (files[i]->Get(histName.c_str()));
+        h->Add(hTmp, scalingFactors[i]);
+    }
+    // /files[0]->Get(histName.c_str())->GetTitle()
+    TH1D* hNew = h->Rebin(nBinsX, files[0]->Get(histName.c_str())->GetTitle(), &massBins[0]);
+    return hNew;
+}
+
+TH1D* combineRebin10bins(std::vector<TFile*> files, std::string histName, std::vector<double> scalingFactors) {
+    TH1::SetDefaultSumw2();
+    std::vector<double> massBins;
+    for (int a = 0; a <= 10; a++) {
+        massBins.push_back(a);
+    }
+    int nBinsX = massBins.size()-1;
+    // Get 1st hist in list
+    TH1D* h = (TH1D*)files[0]->Get(histName.c_str())->Clone(files[0]->Get(histName.c_str())->GetName());
+    h->Scale(scalingFactors[0]);
+    
+    for (unsigned i = 1; i < files.size(); i++) {
+        TH1D* hTmp = (TH1D*) (files[i]->Get(histName.c_str()));
+        h->Add(hTmp, scalingFactors[i]);
+    }
+    // /files[0]->Get(histName.c_str())->GetTitle()
+    TH1D* hNew = h->Rebin(nBinsX, files[0]->Get(histName.c_str())->GetTitle(), &massBins[0]);
+    return hNew;
+}
+
+// TH1D* combine(std::vector<TFile*> files, std::string histName, std::vector<double> scalingFactors) {
+//     TH1::SetDefaultSumw2();
+//     const std::vector<double> massBins {0,1,2,3,10};
+//     const int nBinsX = massBins.size()-1;
+//     TH1D* h = (TH1D*)files[0]->Get(histName.c_str())->Clone(files[0]->Get(histName.c_str())->GetName());
+//     h->Scale(scalingFactors[0]);
+//     for (unsigned i = 1; i < files.size(); i++) {
+//         TH1D* hTmp = (TH1D*)files[i]->Get(histName.c_str());
+//         h->Add(hTmp, scalingFactors[i]);
+//     }
+//     return h;
+// }
+
+/////////////////
+// MAIN SCRIPT //
+/////////////////
 void paperConvert() {
     gStyle->SetHistLineWidth(2);
     gStyle->SetOptStat("");
@@ -164,38 +240,65 @@ void paperConvert() {
     TFile *f_sig_main = TFile::Open("Signal_1prong_HLT_bare/output_bare_sig_muRand_HLT.root", "READ");
     TFile *f_sig_mass1 = TFile::Open("Signal_1prong_HLT_bare/output_bare_sig_muRand_HLT_dR1.root", "READ");
     TFile *f_sig_mass2 = TFile::Open("Signal_1prong_HLT_bare/output_bare_sig_muRand_HLT_dR2.root", "READ");
-    TFile *f_bg_main = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT.root", "READ");
-    TFile *f_bg_main = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT.root", "READ");
+    TFile *f_bg_main1 = TFile::Open("QCDb_HLT_bare/output_main_bare_bg_muRand_HLT_dR1.root", "READ");
+    TFile *f_bg_main2 = TFile::Open("QCDb_HLT_bare/output_main_bare_bg_muRand_HLT_dR2.root", "READ");
     TFile *f_bg_mass1 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_dR1.root", "READ");
     TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_dR2.root", "READ");
+    TFile *f_scatter_main1 = TFile::Open("QCDbcScatter_HLT_bare/output_main_bare_bg_muRand_HLT_dR1.root", "READ");
+    TFile *f_scatter_main2 = TFile::Open("QCDbcScatter_HLT_bare/output_main_bare_bg_muRand_HLT_dR2.root", "READ");
+    TFile *f_scatter_mass1 = TFile::Open("QCDbcScatter_HLT_bare/output_bare_bg_muRand_HLT_dR1.root", "READ");
+    TFile *f_scatter_mass2 = TFile::Open("QCDbcScatter_HLT_bare/output_bare_bg_muRand_HLT_dR2.root", "READ");
 
 
     ////////////////
     // Signal region plots
     ////////////////
-    
+    std::vector<TFile*> filesdR2;
+    filesdR2.push_back(f_bg_mass2);
+    filesdR2.push_back(f_scatter_mass2);
+
+    // bbbar only
     TH1D* hM1_bare_bg_muRand_HLT_dR2 = (TH1D*) f_bg_mass2->Get("hM1");
     TH1D* hM2_bare_bg_muRand_HLT_dR2 = (TH1D*) f_bg_mass2->Get("hM2");
     TH1D* hM_bare_bg_muRand_HLT_dR2 = (TH1D*)hM1_bare_bg_muRand_HLT_dR2->Clone();
     hM_bare_bg_muRand_HLT_dR2->Add(hM2_bare_bg_muRand_HLT_dR2);
+    normaliseHist(hM_bare_bg_muRand_HLT_dR2); // as we added m1 + m2
     setMassAUTitles(hM_bare_bg_muRand_HLT_dR2);
     doBGHist(hM_bare_bg_muRand_HLT_dR2);
     setAltOffsetSizes(hM_bare_bg_muRand_HLT_dR2);
     hM_bare_bg_muRand_HLT_dR2->Draw("HISTE");
-    hM_bare_bg_muRand_HLT_dR2->Scale(0.5); // as we added m1 + m2
     c1->SaveAs("Combined/M_10bins_bare_bg_muRand_HLT_dR2.pdf");
 
+    std::vector<double> scalingFactors;
+    scalingFactors.push_back(2.9475);
+    scalingFactors.push_back(2.6577);
+
+    // // bbbar + scatter
+    TH1D* hM1_bg_dR2 = combineRebin10bins(filesdR2, "hM1_unnormalised", scalingFactors);
+    TH1D* hM2_bg_dR2 = combineRebin10bins(filesdR2, "hM2_unnormalised", scalingFactors);
+    TH1D* hM_bg_dR2 = (TH1D*) hM1_bg_dR2->Clone() ;
+    hM_bg_dR2->Add(hM2_bg_dR2);
+    normaliseHist(hM_bg_dR2);
+    setMassAUTitles(hM_bg_dR2);
+    doBGHist(hM_bg_dR2);
+    setAltOffsetSizes(hM_bg_dR2);
+    hM_bg_dR2->Draw("HISTE");
+    c1->SaveAs("Combined/M_10bins_bare_bg_both_muRand_HLT_dR2.pdf");
+
+    // signal
     TH1D* hM1_bare_sig_muRand_HLT_dR2 = (TH1D*) f_sig_mass2->Get("hM1");
     TH1D* hM2_bare_sig_muRand_HLT_dR2 = (TH1D*) f_sig_mass2->Get("hM2");
     TH1D* hM_bare_sig_muRand_HLT_dR2 = (TH1D*)hM1_bare_sig_muRand_HLT_dR2->Clone();
     hM_bare_sig_muRand_HLT_dR2->Add(hM2_bare_sig_muRand_HLT_dR2);
+    normaliseHist(hM_bare_sig_muRand_HLT_dR2);
     setMassAUTitles(hM_bare_sig_muRand_HLT_dR2);
     doSignalHist(hM_bare_sig_muRand_HLT_dR2);
     setAltOffsetSizes(hM_bare_sig_muRand_HLT_dR2);
     hM_bare_sig_muRand_HLT_dR2->Draw("HISTE");
-    hM_bare_sig_muRand_HLT_dR2->Scale(0.5);
     c1->SaveAs("Combined/M_10bins_bare_sig_muRand_HLT_dR2.pdf");
 
+
+    // bbbar + signal
     THStack st("st","");
     st.Add(hM_bare_bg_muRand_HLT_dR2);
     st.Add(hM_bare_sig_muRand_HLT_dR2);
@@ -204,157 +307,184 @@ void paperConvert() {
     l.AddEntry(hM_bare_sig_muRand_HLT_dR2, "#splitline{Signal MC}{m_{#varphi} = 8 GeV}", "lp");
     doStandardLegend(&l);
     st.Draw("NOSTACK HISTE");
-    st.GetHistogram()->SetXTitle("m(#mu-tk) [GeV]");
-    st.GetHistogram()->SetYTitle("A.U.");
+    setMassAUTitles(st.GetHistogram());
     setAltOffsetSizes(st.GetHistogram());    
     l.Draw();
     c1->SaveAs("Combined/M_10bins_bare_both_muRand_HLT_dR2.pdf");
 
+    // bbbar + scatter + signal
+    THStack st_all("st_all","");
+    st_all.Add(hM_bg_dR2);
+    st_all.Add(hM_bare_sig_muRand_HLT_dR2);
+    TLegend l_all(0.53,0.5,0.87,0.89);
+    l_all.AddEntry(hM_bg_dR2,"Gen. level QCD MC","lp");
+    TH1D blank("","",1,0,1);
+    blank.SetLineColor(kWhite);
+    blank.SetMarkerColor(kWhite);
+    l_all.AddEntry(&blank,"#splitline{(b#bar{b} + q-g scatter}{q = b, #bar{b}, c, #bar{c})}","");
+    // l_all.AddEntry(&blank,"q = b, #bar{b}, c, #bar{c})","");
+    l_all.AddEntry(hM_bare_sig_muRand_HLT_dR2, "#splitline{Signal MC}{m_{#varphi} = 8 GeV}", "lp");
+    doStandardLegend(&l_all);
+    st_all.Draw("NOSTACKHISTE");
+    setMassAUTitles(st_all.GetHistogram());
+    setAltOffsetSizes(st_all.GetHistogram());    
+    l_all.Draw();
+    // c1->SaveAs("Combined/M_10bins_bare_all_muRand_HLT_dR2.pdf");
+/*
     ////////////
     // sideband plots
     ////////////
     
-    TH1D* hM1_side_bg_muRand_HLT_dR2 = (TH1D*) f_bg_mass1->Get("hM1_side_1to2p5");
-    hM1_side_bg_muRand_HLT_dR2->Rebin(5);
-    TH1D* hM2_side_bg_muRand_HLT_dR2 = (TH1D*) f_bg_mass1->Get("hM2_side_1to2p5");
-    hM2_side_bg_muRand_HLT_dR2->Rebin(5);
-    TH1D* hM_side_bg_muRand_HLT_dR2 = (TH1D*)hM1_side_bg_muRand_HLT_dR2->Clone();
-    hM_side_bg_muRand_HLT_dR2->Add(hM2_side_bg_muRand_HLT_dR2);
-    setMassAUTitles(hM_side_bg_muRand_HLT_dR2);
-    doBGHist(hM_side_bg_muRand_HLT_dR2);
-    setAltOffsetSizes(hM_side_bg_muRand_HLT_dR2);
-    hM_side_bg_muRand_HLT_dR2->Draw("HISTE");
-    hM_side_bg_muRand_HLT_dR2->Scale(0.5); // as we added m1 + m2
+    std::vector<TFile*> filesdR1;
+    filesdR1.push_back(f_bg_mass1);
+    filesdR1.push_back(f_scatter_mass1);
+
+    // bbbar
+    TH1D* hM1_side_bg_muRand_HLT_dR1 = (TH1D*) f_bg_mass1->Get("hM1_side_1to2p5");
+    hM1_side_bg_muRand_HLT_dR1->Rebin(5);
+    TH1D* hM2_side_bg_muRand_HLT_dR1 = (TH1D*) f_bg_mass1->Get("hM2_side_1to2p5");
+    hM2_side_bg_muRand_HLT_dR1->Rebin(5);
+    TH1D* hM_side_bg_muRand_HLT_dR1 = (TH1D*)hM1_side_bg_muRand_HLT_dR1->Clone();
+    hM_side_bg_muRand_HLT_dR1->Add(hM2_side_bg_muRand_HLT_dR1);
+    normaliseHist(hM_side_bg_muRand_HLT_dR1);
+    setMassAUTitles(hM_side_bg_muRand_HLT_dR1);
+    doBGHist(hM_side_bg_muRand_HLT_dR1);
+    setAltOffsetSizes(hM_side_bg_muRand_HLT_dR1);
+    hM_side_bg_muRand_HLT_dR1->Draw("HISTE");
     c1->SaveAs("Combined/M_10bins_side_bg_muRand_HLT_dR1.pdf");
 
-    TH1D* hM1_side_sig_muRand_HLT_dR2 = (TH1D*) f_sig_mass1->Get("hM1_side_1to2p5");
-    hM1_side_sig_muRand_HLT_dR2->Rebin(5);
-    TH1D* hM2_side_sig_muRand_HLT_dR2 = (TH1D*) f_sig_mass1->Get("hM2_side_1to2p5");
-    hM2_side_sig_muRand_HLT_dR2->Rebin(5);
-    TH1D* hM_side_sig_muRand_HLT_dR2 = (TH1D*)hM1_side_sig_muRand_HLT_dR2->Clone();
-    hM_side_sig_muRand_HLT_dR2->Add(hM2_side_sig_muRand_HLT_dR2);
-    setMassAUTitles(hM_side_sig_muRand_HLT_dR2);
-    doSignalHist(hM_side_sig_muRand_HLT_dR2);
-    setAltOffsetSizes(hM_side_sig_muRand_HLT_dR2);
-    hM_side_sig_muRand_HLT_dR2->Draw("HISTE");
-    hM_side_sig_muRand_HLT_dR2->Scale(0.5);
+    // // bbbar + scatter
+    TH1D* hM1_side_bg_dR1 = combineRebin10bins(filesdR1, "hM1_side_1to2p5_unnormalised", scalingFactors);
+    TH1D* hM2_side_bg_dR1 = combineRebin10bins(filesdR1, "hM1_side_1to2p5_unnormalised", scalingFactors);
+    TH1D* hM_side_bg_dR1 = (TH1D*) hM1_side_bg_dR1->Clone();
+    hM_side_bg_dR1->Add(hM2_side_bg_dR1);
+    normaliseHist(hM_side_bg_dR1);
+    setMassAUTitles(hM_side_bg_dR1);
+    doBGHist(hM_side_bg_dR1);
+    setAltOffsetSizes(hM_side_bg_dR1);
+    hM_side_bg_dR1->Draw("HISTE");
+    c1->SaveAs("Combined/M_10bins_side_bg_both_muRand_HLT_dR1.pdf");
+
+    // signal
+    TH1D* hM1_side_sig_muRand_HLT_dR1 = (TH1D*) f_sig_mass1->Get("hM1_side_1to2p5");
+    hM1_side_sig_muRand_HLT_dR1->Rebin(5);
+    TH1D* hM2_side_sig_muRand_HLT_dR1 = (TH1D*) f_sig_mass1->Get("hM2_side_1to2p5");
+    hM2_side_sig_muRand_HLT_dR1->Rebin(5);
+    TH1D* hM_side_sig_muRand_HLT_dR1 = (TH1D*)hM1_side_sig_muRand_HLT_dR1->Clone();
+    hM_side_sig_muRand_HLT_dR1->Add(hM2_side_sig_muRand_HLT_dR1);
+    normaliseHist(hM_side_sig_muRand_HLT_dR1);
+    setMassAUTitles(hM_side_sig_muRand_HLT_dR1);
+    doSignalHist(hM_side_sig_muRand_HLT_dR1);
+    setAltOffsetSizes(hM_side_sig_muRand_HLT_dR1);
+    hM_side_sig_muRand_HLT_dR1->Draw("HISTE");
     c1->SaveAs("Combined/M_10bins_side_sig_muRand_HLT_dR1.pdf");
 
-    THStack st("st","");
-    st.Add(hM_side_bg_muRand_HLT_dR2);
-    st.Add(hM_side_sig_muRand_HLT_dR2);
-    st.Draw("NOSTACK HISTE");
-    st.GetHistogram()->SetXTitle("m(#mu-tk) [GeV]");
-    st.GetHistogram()->SetYTitle("A.U.");
-    setAltOffsetSizes(st.GetHistogram());    
+    // bbar + signal
+    THStack st_side("st_side","");
+    st_side.Add(hM_side_bg_muRand_HLT_dR1);
+    st_side.Add(hM_side_sig_muRand_HLT_dR1);
+    st_side.Draw("NOSTACK HISTE");
+    setMassAUTitles(st_side.GetHistogram());
+    setAltOffsetSizes(st_side.GetHistogram());    
     l.Draw();
     c1->SaveAs("Combined/M_10bins_side_both_muRand_HLT_dR1.pdf");
+    
+    // bbar + scatter + signal
+    THStack st_side_all("st_side_all","");
+    st_side_all.Add(hM_side_bg_dR1);
+    st_side_all.Add(hM_side_sig_muRand_HLT_dR1);
+    st_side_all.Draw("NOSTACK HISTE");
+    setMassAUTitles(st_side_all.GetHistogram());
+    setAltOffsetSizes(st_side_all.GetHistogram());    
+    l_all.Draw();
+    c1->SaveAs("Combined/M_10bins_side_all_muRand_HLT_dR1.pdf");
 
     ///////////////////////
     // Correlation plots //
     ///////////////////////
-    TH1D* hCorr_bare_sig = (TH1D*) f_sig_mass2->Get("hCorr1D");
-    TH1D* hCorr_side_sig = (TH1D*) f_sig_mass1->Get("hCorr1D_side_1to2p5");
-    TH1D* hCorr_bare_bg = (TH1D*) f_bg_mass2->Get("hCorr1D");
-    TH1D* hCorr_side_bg = (TH1D*) f_bg_mass1->Get("hCorr1D_side_1to2p5");
+    // TH1D* hCorr_bare_sig = (TH1D*) f_sig_mass2->Get("hCorr1D");
+    // TH1D* hCorr_side_sig = (TH1D*) f_sig_mass1->Get("hCorr1D_side_1to2p5");
+    // TH1D* hCorr_bare_bg = (TH1D*) f_bg_mass2->Get("hCorr1D");
+    // TH1D* hCorr_side_bg = (TH1D*) f_bg_mass1->Get("hCorr1D_side_1to2p5");
     
-    TPaveText t(0.15, 0.7, 0.4, 0.8, "NDC");
-    t.AddText("Signal region");
-    t.SetFillColor(kWhite);
-    t.SetBorderSize(0);
+    // TPaveText t(0.15, 0.7, 0.4, 0.8, "NDC");
+    // t.AddText("Signal region");
+    // t.SetFillColor(kWhite);
+    // t.SetBorderSize(0);
 
-    hCorr_bare_sig->SetMaximum(2);
-    hCorr_side_sig->SetMaximum(2);
-    hCorr_bare_bg->SetMaximum(2);
-    hCorr_side_bg->SetMaximum(2);
+    // hCorr_bare_sig->SetMaximum(2);
+    // hCorr_side_sig->SetMaximum(2);
+    // hCorr_bare_bg->SetMaximum(2);
+    // hCorr_side_bg->SetMaximum(2);
 
-    hCorr_bare_sig->SetLabelSize(0.07, "X");
-    hCorr_bare_sig->SetLabelSize(0.05, "Y");
-    hCorr_bare_sig->SetTitleSize(0.05, "X");
-    // hCorr_bare_sig->SetTitleOffset(0.05, "X");
-    hCorr_bare_sig->SetTitleSize(0.07, "Y");
-    hCorr_bare_sig->SetTitleSize(0.05, "Y");
-    // hCorr_bare_sig->SetTitleOffset(0.05, "Y");
-    hCorr_side_sig->SetLabelSize(0.07, "X");
-    hCorr_side_sig->SetLabelSize(0.05, "Y");
-    hCorr_side_sig->SetTitleSize(0.05, "X");
-    // hCorr_side_sig->SetTitleOffset(0.05, "X");
-    hCorr_side_sig->SetTitleSize(0.05, "Y");
-    // hCorr_side_sig->SetTitleOffset(0.05, "Y");
-    hCorr_bare_bg->SetLabelSize(0.07, "X");
-    hCorr_bare_bg->SetLabelSize(0.05, "Y");
-    hCorr_bare_bg->SetTitleSize(0.05, "X");
-    // hCorr_bare_bg->SetTitleOffset(0.05, "X");
-    hCorr_bare_bg->SetTitleSize(0.05, "Y");
-    // hCorr_bare_bg->SetTitleOffset(0.05, "Y");
-    hCorr_side_bg->SetLabelSize(0.07, "X");
-    hCorr_side_bg->SetLabelSize(0.05, "Y");
-    hCorr_side_bg->SetTitleSize(0.05, "X");
-    // hCorr_side_bg->SetTitleOffset(0.05, "X");
-    hCorr_side_bg->SetTitleSize(0.05, "Y");
-    // hCorr_side_bg->SetTitleOffset(0.05, "Y");
+    // setOffsetSizes(hCorr_bare_sig);
+    // setOffsetSizes(hCorr_side_sig);
+    // setOffsetSizes(hCorr_bare_bg);
+    // setOffsetSizes(hCorr_side_bg);
     
-    TLine line(0,1,10,1);
-    line.SetLineStyle(2);
-    line.SetLineColor(12);
-    line.SetLineWidth(2);
+    // TLine line(0,1,10,1);
+    // line.SetLineStyle(2);
+    // line.SetLineColor(12);
+    // line.SetLineWidth(2);
     
-    hCorr_bare_sig->SetLineColor(kRed);
-    hCorr_bare_sig->SetLineWidth(2);
-    hCorr_bare_sig->SetMarkerColor(kRed);
-    hCorr_bare_sig->Draw();
-    line.Draw();
-    t.Draw();
-    c1->SetTicks(1,1);
-    c1->SaveAs("Combined/Corr_bare_sig.pdf");
+    // doSignalHist(hCorr_bare_sig);
+    // hCorr_bare_sig->Draw();
+    // line.Draw();
+    // t.Draw();
+    // c1->SetTicks(1,1);
+    // c1->SaveAs("Combined/Corr_bare_sig.pdf");
     
-    hCorr_bare_bg->SetLineWidth(2);
-    // hCorr_bare_bg->SetLineStyle(2);
-    hCorr_bare_bg->SetMarkerStyle(21);
-    hCorr_bare_bg->Draw();
-    line.Draw();
-    t.Draw();
-    c1->SetTicks(1,1);
-    c1->SaveAs("Combined/Corr_bare_bg.pdf");
+    // doBGHist(hCorr_bare_bg);
+    // hCorr_bare_bg->Draw();
+    // line.Draw();
+    // t.Draw();
+    // c1->SetTicks(1,1);
+    // c1->SaveAs("Combined/Corr_bare_bg.pdf");
     
-    hCorr_bare_bg->Draw();
-    hCorr_bare_sig->Draw("SAME");
-    line.Draw();
-    l.Draw();
-    t.Draw();
-    c1->SetTicks(1,1);
-    c1->SaveAs("Combined/Corr_bare.pdf");
+    // hCorr_bare_bg->Draw();
+    // hCorr_bare_sig->Draw("SAME");
+    // line.Draw();
+    // l.Draw();
+    // t.Draw();
+    // c1->SetTicks(1,1);
+    // c1->SaveAs("Combined/Corr_bare.pdf");
 
-    hCorr_side_sig->SetLineColor(kRed);
-    hCorr_side_sig->SetMarkerColor(kRed);
-    hCorr_side_sig->Draw();
-    line.Draw();
-    c1->SaveAs("Combined/Corr_side_sig.pdf");
+    // doSignalHist(hCorr_side_sig);
+    // hCorr_side_sig->Draw();
+    // line.Draw();
+    // c1->SaveAs("Combined/Corr_side_sig.pdf");
     
-    hCorr_side_bg->Draw();
-    line.Draw();
-    c1->SaveAs("Combined/Corr_side_bg.pdf");
+    // doBGHist(hCorr_side_bg);
+    // hCorr_side_bg->Draw();
+    // line.Draw();
+    // c1->SaveAs("Combined/Corr_side_bg.pdf");
     
-    hCorr_side_sig->Draw();
-    hCorr_side_bg->Draw("SAME");
-    line.Draw();
-    l.Draw();
-    c1->SaveAs("Combined/Corr_side.pdf");
+    // hCorr_side_sig->Draw();
+    // hCorr_side_bg->Draw("SAME");
+    // line.Draw();
+    // l.Draw();
+    // c1->SaveAs("Combined/Corr_side.pdf");
 
     // track distributions
-    combineHists(f_sig_main, f_bg_main, "hNTracks1", "HISTE", "Combined/combined_NTrack1_muRand.pdf", "Tracks with p_{T} > 2.5 GeV");
-    combineHists(f_sig_main, f_bg_main, "hNTracksAbs1", "HISTE", "Combined/combined_NTrackAbs1_muRand.pdf", "Tracks with p_{T} > 2.5 GeV");
-    combineHists(f_sig_main, f_bg_main, "hNTracksAll1", "HISTE", "Combined/combined_NTrackAll1_muRand.pdf", "Tracks with p_{T} > 1 GeV");
-    combineHists(f_sig_main, f_bg_main, "hNTracksAllAbs1", "HISTE", "Combined/combined_NTrackAllAbs1_muRand.pdf", "Tracks with p_{T} > 1 GeV");
-    combineHists(f_sig_main, f_bg_main, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf", "Tracks with 2.5 > p_{T} > 1 GeV");
-    combineHists(f_sig_main, f_bg_main, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf", "Tracks with 2.5 > p_{T} > 1 GeV");
+    combineHists(f_sig_main, f_bg_main2, "hNTracks1", "HISTE", "Combined/combined_NTrack1_muRand.pdf", "Tracks with p_{T} > 2.5 GeV");
+    combineHists(f_sig_main, f_bg_main2, "hNTracksAbs1", "HISTE", "Combined/combined_NTrackAbs1_muRand.pdf", "Tracks with p_{T} > 2.5 GeV");
+    combineHists(f_sig_main, f_bg_main2, "hNTracksAll1", "HISTE", "Combined/combined_NTrackAll1_muRand.pdf", "Tracks with p_{T} > 1 GeV");
+    combineHists(f_sig_main, f_bg_main2, "hNTracksAllAbs1", "HISTE", "Combined/combined_NTrackAllAbs1_muRand.pdf", "Tracks with p_{T} > 1 GeV");
+    combineHists(f_sig_main, f_bg_main2, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf", "Tracks with 2.5 > p_{T} > 1 GeV");
+    combineHists(f_sig_main, f_bg_main2, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf", "Tracks with 2.5 > p_{T} > 1 GeV");
 
 
     // cleanup
     f_sig_main->Close();
     f_sig_mass2->Close();
     f_sig_mass2->Close();
-    f_bg_main->Close();
+    f_bg_main1->Close();
+    f_bg_main2->Close();
     f_bg_mass1->Close();
     f_bg_mass2->Close();
+    f_scatter_main1->Close();
+    f_scatter_main2->Close();
+    f_scatter_mass1->Close();
+    f_scatter_mass2->Close();
+*/
 }
