@@ -299,38 +299,38 @@ void paperConvert() {
 
 
     // bbbar + signal
-    THStack st("st","");
-    st.Add(hM_bare_bg_muRand_HLT_dR2);
-    st.Add(hM_bare_sig_muRand_HLT_dR2);
-    TLegend l(0.67,0.67, 0.88,0.88);
-    l.AddEntry(hM_bare_bg_muRand_HLT_dR2, "QCD b#bar{b} MC", "lp");
-    l.AddEntry(hM_bare_sig_muRand_HLT_dR2, "#splitline{Signal MC}{m_{#varphi} = 8 GeV}", "lp");
-    doStandardLegend(&l);
-    st.Draw("NOSTACK HISTE");
-    setMassAUTitles(st.GetHistogram());
-    setAltOffsetSizes(st.GetHistogram());    
-    l.Draw();
+    THStack* st = new THStack("st","");
+    st->Add(hM_bare_bg_muRand_HLT_dR2);
+    st->Add(hM_bare_sig_muRand_HLT_dR2);
+    TLegend* l = new TLegend(0.67, 0.67, 0.88, 0.88);
+    l->AddEntry(hM_bare_bg_muRand_HLT_dR2, "QCD b#bar{b} MC", "lp");
+    l->AddEntry(hM_bare_sig_muRand_HLT_dR2, "#splitline{Signal MC}{m_{#varphi} = 8 GeV}", "lp");
+    doStandardLegend(l);
+    st->Draw("NOSTACK HISTE");
+    setMassAUTitles(st->GetHistogram());
+    setAltOffsetSizes(st->GetHistogram());    
+    l->Draw();
     c1->SaveAs("Combined/M_10bins_bare_both_muRand_HLT_dR2.pdf");
 
     // bbbar + scatter + signal
-    THStack st_all("st_all","");
-    st_all.Add(hM_bg_dR2);
-    st_all.Add(hM_bare_sig_muRand_HLT_dR2);
-    TLegend l_all(0.53,0.5,0.87,0.89);
-    l_all.AddEntry(hM_bg_dR2,"Gen. level QCD MC","lp");
-    TH1D blank("","",1,0,1);
-    blank.SetLineColor(kWhite);
-    blank.SetMarkerColor(kWhite);
-    l_all.AddEntry(&blank,"#splitline{(b#bar{b} + q-g scatter}{q = b, #bar{b}, c, #bar{c})}","");
-    // l_all.AddEntry(&blank,"q = b, #bar{b}, c, #bar{c})","");
-    l_all.AddEntry(hM_bare_sig_muRand_HLT_dR2, "#splitline{Signal MC}{m_{#varphi} = 8 GeV}", "lp");
-    doStandardLegend(&l_all);
-    st_all.Draw("NOSTACKHISTE");
-    setMassAUTitles(st_all.GetHistogram());
-    setAltOffsetSizes(st_all.GetHistogram());    
-    l_all.Draw();
-    // c1->SaveAs("Combined/M_10bins_bare_all_muRand_HLT_dR2.pdf");
-/*
+    TCanvas* c = new TCanvas();
+    THStack* st_all = new THStack("st_all","");
+    st_all->Add(hM_bg_dR2);
+    st_all->Add(hM_bare_sig_muRand_HLT_dR2);
+    TLegend* l_all = new TLegend(0.55,0.56,0.89,0.89);
+    l_all->AddEntry(hM_bg_dR2,"Gen. level QCD MC","lp");
+    l_all->AddEntry((TObject*)0,"(b#bar{b} + q-g scatter,",""); //null pointers for blank entries
+    l_all->AddEntry((TObject*)0,"q = b, #bar{b}, c, #bar{c})","");
+    l_all->AddEntry(hM_bare_sig_muRand_HLT_dR2, "Signal MC", "lp");
+    l_all->AddEntry((TObject*)0,"m_{#varphi} = 8 GeV", "");
+    doStandardLegend(l_all);
+    st_all->Draw("NOSTACKHISTE");
+    setMassAUTitles(st_all->GetHistogram());
+    setAltOffsetSizes(st_all->GetHistogram());    
+    l_all->Draw();
+    c->SaveAs("Combined/M_10bins_bare_all_muRand_HLT_dR2.pdf");
+
+
     ////////////
     // sideband plots
     ////////////
@@ -380,23 +380,23 @@ void paperConvert() {
     c1->SaveAs("Combined/M_10bins_side_sig_muRand_HLT_dR1.pdf");
 
     // bbar + signal
-    THStack st_side("st_side","");
-    st_side.Add(hM_side_bg_muRand_HLT_dR1);
-    st_side.Add(hM_side_sig_muRand_HLT_dR1);
-    st_side.Draw("NOSTACK HISTE");
-    setMassAUTitles(st_side.GetHistogram());
-    setAltOffsetSizes(st_side.GetHistogram());    
-    l.Draw();
+    THStack* st_side = new THStack("st_side","");
+    st_side->Add(hM_side_bg_muRand_HLT_dR1);
+    st_side->Add(hM_side_sig_muRand_HLT_dR1);
+    st_side->Draw("NOSTACK HISTE");
+    setMassAUTitles(st_side->GetHistogram());
+    setAltOffsetSizes(st_side->GetHistogram());    
+    l->Draw();
     c1->SaveAs("Combined/M_10bins_side_both_muRand_HLT_dR1.pdf");
     
     // bbar + scatter + signal
-    THStack st_side_all("st_side_all","");
-    st_side_all.Add(hM_side_bg_dR1);
-    st_side_all.Add(hM_side_sig_muRand_HLT_dR1);
-    st_side_all.Draw("NOSTACK HISTE");
-    setMassAUTitles(st_side_all.GetHistogram());
-    setAltOffsetSizes(st_side_all.GetHistogram());    
-    l_all.Draw();
+    THStack* st_side_all = new THStack("st_side_all","");
+    st_side_all->Add(hM_side_bg_dR1);
+    st_side_all->Add(hM_side_sig_muRand_HLT_dR1);
+    st_side_all->Draw("NOSTACK HISTE");
+    setMassAUTitles(st_side_all->GetHistogram());
+    setAltOffsetSizes(st_side_all->GetHistogram());    
+    l_all->Draw();
     c1->SaveAs("Combined/M_10bins_side_all_muRand_HLT_dR1.pdf");
 
     ///////////////////////
@@ -486,5 +486,5 @@ void paperConvert() {
     f_scatter_main2->Close();
     f_scatter_mass1->Close();
     f_scatter_mass2->Close();
-*/
+
 }
