@@ -305,7 +305,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 		if(doHLT) {
 			cout << "Doing QCDScatter with HLT cuts" << endl;
 			addFileFromFolder(chain, "QCDbcScatter_HLT_bare/", "QCDbcScatter_HLT_250_", 1, 200);
-			addFileFromFolder(chain, "QCDbcScatter_HLT_bare/", "QCDbcScatter_HLT_500_", 201, 600);
+			addFileFromFolder(chain, "QCDbcScatter_HLT_bare/", "QCDbcScatter_HLT_500_", 201, 800);
 		}
 	
 	////////////////////
