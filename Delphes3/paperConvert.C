@@ -121,7 +121,7 @@ void doAltBGHist(TH1 *h) {
     doStandardHist(h);
     h->SetMarkerStyle(21);
     // h->SetMarkerColor(kBlue);
-    h->SetLineStyle(2);
+    h->SetLineStyle(3);
 }
 
 void setOffsetSizes(TH1 *h) {
@@ -253,7 +253,8 @@ void paperConvert() {
     gStyle->SetOptStat("");
     TH1::SetDefaultSumw2();
 
-    TFile *f_sig_main = TFile::Open("Signal_1prong_HLT_bare/output_bare_sig_muRand_HLT.root", "READ");
+    TFile *f_sig_main1 = TFile::Open("Signal_1prong_HLT_bare/output_main_bare_sig_muRand_HLT_dR1.root", "READ");
+    TFile *f_sig_main2 = TFile::Open("Signal_1prong_HLT_bare/output_main_bare_sig_muRand_HLT_dR2.root", "READ");
     TFile *f_sig_mass1 = TFile::Open("Signal_1prong_HLT_bare/output_bare_sig_muRand_HLT_dR1.root", "READ");
     TFile *f_sig_mass2 = TFile::Open("Signal_1prong_HLT_bare/output_bare_sig_muRand_HLT_dR2.root", "READ");
     TFile *f_bg_main1 = TFile::Open("QCDb_HLT_bare/output_main_bare_bg_muRand_HLT_dR1.root", "READ");
@@ -329,7 +330,6 @@ void paperConvert() {
     c1->SaveAs("Combined/M_10bins_bare_both_muRand_HLT_dR2.pdf");
 
     // bbbar + scatter + signal
-    TCanvas* c = new TCanvas();
     THStack* st_all = new THStack("st_all","");
     st_all->Add(hM_bg_dR2);
     st_all->Add(hM_bare_sig_muRand_HLT_dR2);
@@ -344,7 +344,7 @@ void paperConvert() {
     setMassAUTitles(st_all->GetHistogram());
     setAltOffsetSizes(st_all->GetHistogram());    
     l_all->Draw();
-    c->SaveAs("Combined/M_10bins_bare_all_muRand_HLT_dR2.pdf");
+    c1->SaveAs("Combined/M_10bins_bare_all_muRand_HLT_dR2.pdf");
 
 
     ////////////
@@ -482,16 +482,17 @@ void paperConvert() {
     // c1->SaveAs("Combined/Corr_side.pdf");
 
     // track distributions
-    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNTracks1", "HISTE", "Combined/combined_NTrack1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV");
-    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNTracksAbs1", "HISTE", "Combined/combined_NTrackAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV", "Average number of tracks per #mu_{1} / bin");
-    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNTracksAll1", "HISTE", "Combined/combined_NTrackAll1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV");
-    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNTracksAllAbs1", "HISTE", "Combined/combined_NTrackAllAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV", "Average number of tracks per #mu_{1} / bin");
-    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf", scalingFactors, "Tracks with 2.5 > p_{T} > 1 GeV");
-    combineHists(f_sig_main, f_bg_main2, f_scatter_main2, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf", scalingFactors, "Tracks with 2.5 > p_{T} > 1 GeV", "Average number of tracks per #mu_{1} / bin");
+    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracks1", "HISTE", "Combined/combined_NTrack1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV");
+    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAbs1", "HISTE", "Combined/combined_NTrackAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV", "Average number of tracks per #mu_{1} / bin");
+    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAll1", "HISTE", "Combined/combined_NTrackAll1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV");
+    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAllAbs1", "HISTE", "Combined/combined_NTrackAllAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV", "Average number of tracks per #mu_{1} / bin");
+    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf", scalingFactors, "Tracks with 2.5 > p_{T} > 1 GeV");
+    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf", scalingFactors, "Tracks with 2.5 > p_{T} > 1 GeV", "Average number of tracks per #mu_{1} / bin");
 
 
     // cleanup
-    f_sig_main->Close();
+    f_sig_main1->Close();
+    f_sig_main2->Close();
     f_sig_mass2->Close();
     f_sig_mass2->Close();
     f_bg_main1->Close();
