@@ -208,7 +208,7 @@ void normaliseHist(TH1* h) {
     }
 }
 
-std::vector<double> generateBins() {
+std::vector<double> generate4Bins() {
     std::vector<double> massBins;
     massBins.push_back(0);
     massBins.push_back(1);
@@ -218,9 +218,17 @@ std::vector<double> generateBins() {
     return massBins;
 }
 
+std::vector<double> generate10Bins() {
+    std::vector<double> massBins;
+    for (int i = 0; i <= 10; i++) {
+        massBins.push_back(i);
+    }
+    return massBins;
+}
+
 TH1D* combineRebin4Bins(std::vector<TFile*> files, std::string histName, std::vector<double> scalingFactors) {
     TH1::SetDefaultSumw2();
-    std::vector<double> massBins = generateBins();
+    std::vector<double> massBins = generate4Bins();
     // massBins.push_back(0);
     // massBins.push_back(1);
     // massBins.push_back(2);
@@ -242,7 +250,7 @@ TH1D* combineRebin4Bins(std::vector<TFile*> files, std::string histName, std::ve
 
 TH1D* combineRebin10bins(std::vector<TFile*> files, std::string histName, std::vector<double> scalingFactors) {
     TH1::SetDefaultSumw2();
-    std::vector<double> massBins = generateBins();
+    std::vector<double> massBins = generate10Bins();
     int nBinsX = massBins.size()-1;
     // Get 1st hist in list
     TH1D* h = (TH1D*)files[0]->Get(histName.c_str())->Clone(files[0]->Get(histName.c_str())->GetName());
@@ -317,7 +325,7 @@ TH2D* combineScale(std::vector<TH2D*> hists, std::vector<double> scalingFactors)
 ///////////////////////////
 
 TH1D* dataCorr_side() {
-    std::vector<double> massBins = generateBins();
+    std::vector<double> massBins = generate4Bins();
     TH1D* histCorr1D_side_1to2p5_Data = new TH1D("hCorr_side_data","",10,0,10);
     double arrContents[] = {0.95, 1.02, 1.02, 1.10, 1.01, 0.96, 0.93, 1.07, 0.98, 0.91};
     double arrErrors[]   = {0.04, 0.03, 0.05, 0.07, 0.03, 0.05, 0.06, 0.12, 0.10, 0.19};
@@ -344,7 +352,7 @@ TH2D* create2Dfrom1D(std::vector<double> bins, TH1D* h) {
 TH1D* unique1DBinsFrom2D(TH2D* h2D, int nUniqueBins) {
     TH1D* h1D = new TH1D("","",nUniqueBins,0,nUniqueBins);
     int counter = 1;
-    int nBinsX = generateBins().size()-1;
+    int nBinsX = generate4Bins().size()-1;
     for (int i = 1; i <= nBinsX; i++) {
         for (int j = i; j <= nBinsX; j++) {
             std::string binLabel = "(" + intToString(i) + "," + intToString(j) + ")";
@@ -367,7 +375,7 @@ void setCorrTitlesMaxMin(TH1D* h) {
 TH1D* createCorrelationPlot(TH2D* numerator2D, TH1D* denominator1D) {
     TH1::SetDefaultSumw2();
     normaliseHist(denominator1D);
-    std::vector<double> massBins = generateBins();
+    std::vector<double> massBins = generate4Bins();
     TH2D* denominator2D = create2Dfrom1D(massBins, denominator1D);
     normaliseHist(numerator2D);
     TH2D* corr2D = (TH2D*) numerator2D->Clone();
@@ -417,6 +425,9 @@ void paperConvert() {
     TFile *f_scatter_mass1 = TFile::Open("QCDbcScatter_HLT_bare/output_bare_bg_muRand_HLT_dR1.root", "READ");
     TFile *f_scatter_mass2 = TFile::Open("QCDbcScatter_HLT_bare/output_bare_bg_muRand_HLT_dR2.root", "READ");
 
+    ///////////////////
+    // 1D MASS PLOTS //
+    ///////////////////
 
     ////////////////
     // Signal region plots
@@ -425,10 +436,15 @@ void paperConvert() {
     filesdR2.push_back(f_bg_mass2);
     filesdR2.push_back(f_scatter_mass2);
 
-    TPaveText* t_signal = new TPaveText(0.15, 0.7, 0.4, 0.8, "NDC");
+    TPaveText* t_signal = new TPaveText(0.6, 0.47, 0.85, 0.58, "NDC");
     t_signal->AddText("Signal region");
     t_signal->SetFillColor(kWhite);
     t_signal->SetBorderSize(0);
+    
+    TPaveText* t_side = new TPaveText(0.6, 0.47, 0.84, 0.57, "NDC");
+    t_side->AddText("Control region A");
+    t_side->SetFillColor(kWhite);
+    t_side->SetBorderSize(0);
 
     // bbbar only
     TH1D* hM1_bare_bg_muRand_HLT_dR2 = (TH1D*) f_bg_mass2->Get("hM1");
@@ -440,6 +456,7 @@ void paperConvert() {
     doBGHist(hM_bare_bg_muRand_HLT_dR2);
     setAltTitleLabelSizes(hM_bare_bg_muRand_HLT_dR2);
     hM_bare_bg_muRand_HLT_dR2->Draw("HISTE");
+    t_signal->Draw();
     c1->SaveAs("Combined/M_10bins_bare_bg_muRand_HLT_dR2.pdf");
 
     std::vector<double> scalingFactors;
@@ -456,6 +473,7 @@ void paperConvert() {
     doBGHist(hM_bg_dR2);
     setAltTitleLabelSizes(hM_bg_dR2);
     hM_bg_dR2->Draw("HISTE");
+    t_signal->Draw();
     c1->SaveAs("Combined/M_10bins_bare_bg_both_muRand_HLT_dR2.pdf");
 
     // signal
@@ -468,6 +486,7 @@ void paperConvert() {
     doSignalHist(hM_bare_sig_muRand_HLT_dR2);
     setAltTitleLabelSizes(hM_bare_sig_muRand_HLT_dR2);
     hM_bare_sig_muRand_HLT_dR2->Draw("HISTE");
+    t_signal->Draw();
     c1->SaveAs("Combined/M_10bins_bare_sig_muRand_HLT_dR2.pdf");
 
 
@@ -483,13 +502,15 @@ void paperConvert() {
     setMassAUTitles(st->GetHistogram());
     setAltTitleLabelSizes(st->GetHistogram());    
     l->Draw();
+    t_signal->Draw();
+
     c1->SaveAs("Combined/M_10bins_bare_both_muRand_HLT_dR2.pdf");
 
     // bbbar + scatter + signal
     THStack* st_all = new THStack("st_all","");
     st_all->Add(hM_bg_dR2);
     st_all->Add(hM_bare_sig_muRand_HLT_dR2);
-    TLegend* l_all = new TLegend(0.52,0.6,0.86,0.89);
+    TLegend* l_all = new TLegend(0.52,0.62,0.86,0.89);
     l_all->AddEntry(hM_bg_dR2,"Gen. level QCD MC","lp");
     l_all->AddEntry((TObject*)0,"(b#bar{b} + q-g scatter,",""); //null pointers for blank entries
     l_all->AddEntry((TObject*)0,"q = b, #bar{b}, c, #bar{c})","");
@@ -500,9 +521,10 @@ void paperConvert() {
     setMassAUTitles(st_all->GetHistogram());
     setAltTitleLabelSizes(st_all->GetHistogram());    
     l_all->Draw();
-    c1->SaveAs("Combined/M_10bins_bare_all_muRand_HLT_dR2.pdf");
+    t_signal->Draw();
+    c1->SaveAs("Combined/M_10bins_bare_allMC_muRand_HLT_dR2.pdf");
 
-
+    
     ////////////
     // sideband plots
     ////////////
@@ -523,6 +545,7 @@ void paperConvert() {
     doBGHist(hM_side_bg_muRand_HLT_dR1);
     setAltTitleLabelSizes(hM_side_bg_muRand_HLT_dR1);
     hM_side_bg_muRand_HLT_dR1->Draw("HISTE");
+    t_side->Draw();
     c1->SaveAs("Combined/M_10bins_side_bg_muRand_HLT_dR1.pdf");
 
     // // bbbar + scatter
@@ -535,6 +558,7 @@ void paperConvert() {
     doBGHist(hM_side_bg_dR1);
     setAltTitleLabelSizes(hM_side_bg_dR1);
     hM_side_bg_dR1->Draw("HISTE");
+    t_side->Draw();
     c1->SaveAs("Combined/M_10bins_side_bg_both_muRand_HLT_dR1.pdf");
 
     // signal
@@ -549,6 +573,7 @@ void paperConvert() {
     doSignalHist(hM_side_sig_muRand_HLT_dR1);
     setAltTitleLabelSizes(hM_side_sig_muRand_HLT_dR1);
     hM_side_sig_muRand_HLT_dR1->Draw("HISTE");
+    t_side->Draw();
     c1->SaveAs("Combined/M_10bins_side_sig_muRand_HLT_dR1.pdf");
 
     // bbar + signal
@@ -559,6 +584,7 @@ void paperConvert() {
     setMassAUTitles(st_side->GetHistogram());
     setAltTitleLabelSizes(st_side->GetHistogram());    
     l->Draw();
+    t_side->Draw();
     c1->SaveAs("Combined/M_10bins_side_both_muRand_HLT_dR1.pdf");
     
     // bbar + scatter + signal
@@ -569,11 +595,12 @@ void paperConvert() {
     setMassAUTitles(st_side_all->GetHistogram());
     setAltTitleLabelSizes(st_side_all->GetHistogram());    
     l_all->Draw();
+    t_side->Draw();
     c1->SaveAs("Combined/M_10bins_side_allMC_muRand_HLT_dR1.pdf");
 
 
     ///////////////////////
-    // Correlation plots //
+    // CORRELATION PLOTS //
     ///////////////////////
     //signal mc
     TH1D* hCorr_bare_sig = (TH1D*) f_sig_mass2->Get("hCorr1D");
@@ -603,19 +630,35 @@ void paperConvert() {
     t_signal->SetFillColor(kWhite);
     t_signal->SetBorderSize(0);
 
-    hCorr_bare_sig->SetMaximum(2);
-    hCorr_side_sig->SetMaximum(2);
-    hCorr_bare_b->SetMaximum(2);
-    hCorr_side_b->SetMaximum(2);
-    hCorr_bare_scatter->SetMaximum(2);
-    hCorr_side_scatter->SetMaximum(2);
+    t_side = new TPaveText(0.15, 0.7, 0.4, 0.8, "NDC");
+    t_side->AddText("Control region A");
+    t_side->SetFillColor(kWhite);
+    t_side->SetBorderSize(0);
 
+    // set title sizes, titles, max, min, etc
     setTitleLabelSizes(hCorr_bare_sig);
+    doSignalHist(hCorr_bare_sig);
+    setCorrTitlesMaxMin(hCorr_bare_sig);
+    
     setTitleLabelSizes(hCorr_side_sig);
+    doSignalHist(hCorr_side_sig);
+    setCorrTitlesMaxMin(hCorr_side_sig);
+
     setTitleLabelSizes(hCorr_bare_b);
+    doBGHist(hCorr_bare_b);
+    setCorrTitlesMaxMin(hCorr_bare_b);
+
     setTitleLabelSizes(hCorr_side_b);
+    doBGHist(hCorr_side_b);
+    setCorrTitlesMaxMin(hCorr_side_b);
+
     setTitleLabelSizes(hCorr_bare_scatter);
+    doAltBGHist(hCorr_bare_scatter);
+    setCorrTitlesMaxMin(hCorr_bare_scatter);
+    
     setTitleLabelSizes(hCorr_side_scatter);
+    doAltBGHist(hCorr_side_scatter);
+    setCorrTitlesMaxMin(hCorr_side_scatter);
     
     TLine line(0,1,10,1);
     line.SetLineStyle(2);
@@ -627,20 +670,25 @@ void paperConvert() {
     ///////////////////
     // signal region //
     ///////////////////
-    doSignalHist(hCorr_bare_sig);
-    setCorrTitlesMaxMin(hCorr_bare_sig);
+
+    // signal MC by itself
     hCorr_bare_sig->Draw();
     line.Draw();
     t_signal->Draw();
     c1->SaveAs("Combined/Corr_bare_sig.pdf");
     
-    doBGHist(hCorr_bare_b);
-    setCorrTitlesMaxMin(hCorr_bare_b);
+    // bbbar qcd by itself
     hCorr_bare_b->Draw();
     line.Draw();
     t_signal->Draw();
     c1->SaveAs("Combined/Corr_bare_b.pdf");
     
+    // bbbar + signal
+    hCorr_bare_sig->Draw("SAME");
+    l->Draw();
+    c1->SaveAs("Combined/Corr_bare_b_sig.pdf");
+
+
     // make combined corr plot for both qcd
     std::vector<TH1D*> bare_bg_hists1D;
     bare_bg_hists1D.push_back(hM1D_bare_b_unnormalised);
@@ -651,8 +699,9 @@ void paperConvert() {
     bare_bg_hists2D.push_back(hM2D_bare_b_unnormalised);
     bare_bg_hists2D.push_back(hM2D_bare_scatter_unnormalised);
     TH2D* hM2D_bare_bg = combineScale(bare_bg_hists2D, scalingFactors);
-
     TH1D* hCorr_bare_bg = createCorrelationPlot(hM2D_bare_bg, hM1D_bare_bg);
+
+    // both QCD summed together
     doBGHist(hCorr_bare_bg);
     setTitleLabelSizes(hCorr_bare_bg);
     setCorrTitlesMaxMin(hCorr_bare_bg);
@@ -661,31 +710,26 @@ void paperConvert() {
     t_signal->Draw();
     c1->SaveAs("Combined/Corr_bare_bg.pdf");
     
+    // all qcd + signal mc
     hCorr_bare_sig->Draw("SAME");
     l_all->Draw();
-    c1->SaveAs("Combined/Corr_bare_all.pdf");
+    c1->SaveAs("Combined/Corr_bare_bg_sig.pdf");
 
     //////////////////////
     // control region A //
     //////////////////////
-    TPaveText* t_side = new TPaveText(0.15, 0.7, 0.4, 0.8, "NDC");
-    t_side->AddText("Control region A");
-    t_side->SetFillColor(kWhite);
-    t_side->SetBorderSize(0);
 
-    doSignalHist(hCorr_side_sig);
-    setCorrTitlesMaxMin(hCorr_side_sig);
+    // signal MC by itself
     hCorr_side_sig->Draw();
     line.Draw();
     c1->SaveAs("Combined/Corr_side_sig.pdf");
     
-    doBGHist(hCorr_side_b);
-    setCorrTitlesMaxMin(hCorr_side_b);
+    // bbbar qcd by itself
     hCorr_side_b->Draw();
     line.Draw();
     c1->SaveAs("Combined/Corr_side_b.pdf");
 
-
+    // signal + bbbar together
     hCorr_side_sig->Draw();
     hCorr_side_b->Draw("SAME");
     line.Draw();
@@ -702,8 +746,9 @@ void paperConvert() {
     side_bg_hists2D.push_back(hM2D_side_b_unnormalised);
     side_bg_hists2D.push_back(hM2D_side_scatter_unnormalised);
     TH2D* hM2D_side_bg = combineScale(side_bg_hists2D, scalingFactors);
-
     TH1D* hCorr_side_bg = createCorrelationPlot(hM2D_side_bg, hM1D_side_bg);
+
+    // both QCD summed together
     doBGHist(hCorr_side_bg);
     setTitleLabelSizes(hCorr_side_bg);
     setCorrTitlesMaxMin(hCorr_side_bg);
@@ -712,16 +757,19 @@ void paperConvert() {
     t_side->Draw();
     c1->SaveAs("Combined/Corr_side_bg.pdf");
     
+    // signal + both QCD
     hCorr_side_sig->Draw("SAME");
     l_all->Draw();
     c1->SaveAs("Combined/Corr_side_all_MC.pdf");
 
+    // QCD + data
     hCorr_side_bg->Draw();
     TH1D* hCorr_side_data = dataCorr_side();
     doDataHist(hCorr_side_data);
     setCorrTitlesMaxMin(hCorr_side_data);
     hCorr_side_data->Draw("SAME");
     line.Draw();
+    
     TLegend* l_all_data = new TLegend(0.52,0.65,0.86,0.89);
     l_all_data->AddEntry(hM_bg_dR2,"Gen. level QCD MC","lp");
     l_all_data->AddEntry((TObject*)0,"(b#bar{b} + q-g scatter,",""); //null pointers for blank entries
@@ -729,9 +777,11 @@ void paperConvert() {
     l_all_data->AddEntry(hCorr_side_data, "Data", "lp");
     doStandardLegend(l_all_data);
     l_all_data->Draw();
+    
     t_side->Draw();
     c1->SaveAs("Combined/Corr_side_bg_data.pdf");
 
+    // bbar + data
     hCorr_side_b->Draw();
     hCorr_side_data->Draw("SAME");
     TLegend* l_b_data = new TLegend(0.52,0.65,0.86,0.89);
@@ -745,7 +795,7 @@ void paperConvert() {
 
 
     /////////////////////////
-    // track distributions //
+    // TRACK DISTRIBUTIONS //
     /////////////////////////
     combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracks1", "HISTE", "Combined/combined_NTrack1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV");
     combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAbs1", "HISTE", "Combined/combined_NTrackAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV", "Average number of tracks per #mu_{1} / bin");
