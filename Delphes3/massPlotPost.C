@@ -113,6 +113,45 @@ void drawHistAndSave(TH1* h,
 	c.SaveAs((directory+sep+filename+sep2+app+".pdf").c_str());
 }
 
+TH2D* create2Dfrom1D(std::vector<double> bins, TH1D* h) {
+	int nBins = bins.size()-1;
+	TH2D* hist2D = new TH2D("", "", nBins,&bins[0],nBins,&bins[0]);
+	for(int a = 1; a <= nBins; a++){
+		for (int b = 1; b <=nBins; b++){
+			hist2D->SetBinContent(a,b,h->GetBinContent(a)*h->GetBinContent(b));
+			hist2D->SetBinError(a,b,sqrt(pow(h->GetBinContent(b)*h->GetBinError(a),2)
+															+pow(h->GetBinContent(a)*h->GetBinError(b),2)));
+		}
+	}
+	return hist2D;
+}
+
+TH1D* unique1DBinsFrom2D(TH2D* h2D, int nUniqueBins) {
+	TH1D* h1D = new TH1D("","",nUniqueBins,0,nUniqueBins);
+	int counter = 1;
+	for (int i = 1; i <= nBinsX; i++) {
+		for (int j = i; j <= nBinsX; j++) {
+			std::string binLabel = "(" + intToString(i) + "," + intToString(j) + ")";
+			h1D->SetBinContent(counter,h2D->GetBinContent(i,j));
+			h1D->SetBinError(counter,h2D->GetBinError(i,j));
+			h1D->GetXaxis()->SetBinLabel(counter,binLabel.c_str());
+			counter++;
+		}
+	}
+	return h1D;
+}
+
+void setupCorrStuff(TH1* h){
+	h->SetXTitle("Bin");
+	h->SetTitleSize(0.05,"X");
+	h->SetLabelSize(0.07,"X");
+	h->SetLabelSize(0.05,"Y");
+	h->SetYTitle("Correlation coefficient");
+	h->SetTitleSize(0.05,"Y");
+	h->SetMaximum(2.0);
+	h->SetMinimum(0);
+}
+
 // int massPlotPost() {
 int main() {
 	gStyle->SetOptStat(""); // DOES NOTHING AS HIST ALREADY HAS OPT STATS!!!!
@@ -258,7 +297,6 @@ int main() {
 	std::vector<double> scalingFactors;
 	scalingFactors.push_back(2.9475); // QCDb
 	scalingFactors.push_back(2.6577); // QCDscatter
-	// scalingFactors.push_back(3.9073E+01); // QCDscatter
 
 	// Create combination 2D plot (numerator)
 	TH2D* histM1vsM2_side_1to2p5 = (TH2D*) combinePlots(plots2D, scalingFactors);
@@ -271,14 +309,7 @@ int main() {
 	normaliseHist(histM_side_1to2p5);
 
 	// Create 2D from 1D x 1D
-	TH2D* histM1timesM1_side_1to2p5 = new TH2D("hM1timesM2_side_1to2p5","m(sideband) #times m(sideband) (soft tk p_{T} = 1-2.5 GeV);m(#mu_{1}-tk) [GeV];m(#mu_{2}-tk) [GeV]",nBinsX,&massBins[0],nBinsX,&massBins[0]);
-	for(int a = 1; a <= nBinsX; a++){
-		for (int b = 1; b <=nBinsX; b++){
-			histM1timesM1_side_1to2p5->SetBinContent(a,b,histM_side_1to2p5->GetBinContent(a)*histM_side_1to2p5->GetBinContent(b));
-			histM1timesM1_side_1to2p5->SetBinError(a,b,sqrt(pow(histM_side_1to2p5->GetBinContent(b)*histM_side_1to2p5->GetBinError(a),2)
-															+pow(histM_side_1to2p5->GetBinContent(a)*histM_side_1to2p5->GetBinError(b),2)));
-		}
-	}
+	TH2D* histM1timesM1_side_1to2p5 = create2Dfrom1D(massBins, histM_side_1to2p5);
 
 	// Calculate new correlation coeffs & plot
 	TH2D* histM1vsM2_correlations_side_1to2p5 = (TH2D*)histM1vsM2_side_1to2p5->Clone("hM1vsM2_correlations_side_1to2p5");
@@ -287,19 +318,7 @@ int main() {
 	histM1vsM2_correlations_side_1to2p5->Divide(histM1timesM1_side_1to2p5);
 
 	// Make 1D plots of unique bins from 2D correlation plot
-	int nUniqueBins = (nBinsX+1)*nBinsX/2.;
-	TH1D* histCorr1D_side_1to2p5_combo = new TH1D("hCorr1D_side_1to2p5_combo",";Bin;Correlation coefficient",nUniqueBins,0,nUniqueBins);
-	int counter = 1;
-	for (int i = 1; i <= nBinsX; i++) {
-		for (int j = i; j <= nBinsX; j++) {
-			std::string binLabel = "(" + intToString(i) + "," + intToString(j) + ")";
-			histCorr1D_side_1to2p5_combo->SetBinContent(counter,histM1vsM2_correlations_side_1to2p5->GetBinContent(i,j));
-			histCorr1D_side_1to2p5_combo->SetBinError(counter,histM1vsM2_correlations_side_1to2p5->GetBinError(i,j));
-			histCorr1D_side_1to2p5_combo->GetXaxis()->SetBinLabel(counter,binLabel.c_str());
-			
-			counter++;
-		}
-	}
+	TH1D* histCorr1D_side_1to2p5_combo = unique1DBinsFrom2D(histM1vsM2_correlations_side_1to2p5, (nBinsX+1)*nBinsX/2.);
 
 	drawHistAndSave(histM1vsM2_side_1to2p5, "colzTEXTE","M1vsM2_side_1to2p5", directory, app);
 	drawHistAndSave(histM1timesM1_side_1to2p5, "colzTEXTE","M1timesM1_side_1to2p5", directory, app);
@@ -318,15 +337,16 @@ int main() {
 	histCorr1D_side_1to2p5_Data->SetLineWidth(2);
 	stack2.Draw("EPNOSTACK");
 
-	(stack2.GetHistogram())->SetXTitle("Bin");
-	(stack2.GetHistogram())->SetTitleSize(0.05,"X");
-	(stack2.GetHistogram())->SetLabelSize(0.07,"X");
-	(stack2.GetHistogram())->SetLabelSize(0.05,"Y");
-	(stack2.GetHistogram())->SetYTitle("Correlation coefficient");
-	(stack2.GetHistogram())->SetTitleSize(0.05,"Y");
-	cout << (stack2.GetHistogram())->GetMaximum() << endl;
-	(stack2).SetMaximum(2.0);
-	(stack2).SetMinimum(0);
+	// (stack2.GetHistogram())->SetXTitle("Bin");
+	// (stack2.GetHistogram())->SetTitleSize(0.05,"X");
+	// (stack2.GetHistogram())->SetLabelSize(0.07,"X");
+	// (stack2.GetHistogram())->SetLabelSize(0.05,"Y");
+	// (stack2.GetHistogram())->SetYTitle("Correlation coefficient");
+	// (stack2.GetHistogram())->SetTitleSize(0.05,"Y");
+	// cout << (stack2.GetHistogram())->GetMaximum() << endl;
+	// (stack2).SetMaximum(2.0);
+	// (stack2).SetMinimum(0);
+	setupCorrStuff(stack2.GetHistogram());
 	stack2.Draw("EPNOSTACK");
 
 	// Add a legend
