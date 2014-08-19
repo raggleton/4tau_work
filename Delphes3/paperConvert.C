@@ -47,7 +47,7 @@ void combineHists( TFile* fSig, TFile* fBg, TFile* fBg2, std::string histName, s
     l_all->AddEntry((TObject*)0,"(b#bar{b} + q-g scatter,",""); //null pointers for blank entries
     l_all->AddEntry((TObject*)0,"q = b, #bar{b}, c, #bar{c})","");
     l_all->AddEntry(hSig, "Signal MC", "lp");
-    l_all->AddEntry((TObject*)0,"m_{#varphi} = 8 GeV", "");
+    l_all->AddEntry((TObject*)0,"m_{#phi} = 8 GeV", "");
     doStandardLegend(l_all);
     l_all->Draw();
 
@@ -87,7 +87,7 @@ void combineHists( TFile* fSig, TFile* fBg, std::string histName, std::string pl
     st.Draw((plotOpt+"NOSTACK").c_str());
     TLegend leg(0.65,0.6, 0.85,0.85);
     doStandardLegend(&leg);
-    leg.AddEntry(hSig,"#splitline{Signal MC}{m_{#varphi} = 8 GeV}","l");
+    leg.AddEntry(hSig,"#splitline{Signal MC}{m_{#phi} = 8 GeV}","l");
     leg.AddEntry(hBg,"QCD b#bar{b} MC","l");
     leg.Draw();
 
@@ -496,7 +496,7 @@ void paperConvert() {
     st->Add(hM_bare_sig_muRand_HLT_dR2);
     TLegend* l = new TLegend(0.67, 0.67, 0.88, 0.88);
     l->AddEntry(hM_bare_bg_muRand_HLT_dR2, "QCD b#bar{b} MC", "lp");
-    l->AddEntry(hM_bare_sig_muRand_HLT_dR2, "#splitline{Signal MC}{m_{#varphi} = 8 GeV}", "lp");
+    l->AddEntry(hM_bare_sig_muRand_HLT_dR2, "#splitline{Signal MC}{m_{#phi} = 8 GeV}", "lp");
     doStandardLegend(l);
     st->Draw("NOSTACK HISTE");
     setMassAUTitles(st->GetHistogram());
@@ -515,7 +515,7 @@ void paperConvert() {
     l_all->AddEntry((TObject*)0,"(b#bar{b} + q-g scatter,",""); //null pointers for blank entries
     l_all->AddEntry((TObject*)0,"q = b, #bar{b}, c, #bar{c})","");
     l_all->AddEntry(hM_bare_sig_muRand_HLT_dR2, "Signal MC", "lp");
-    l_all->AddEntry((TObject*)0,"m_{#varphi} = 8 GeV", "");
+    l_all->AddEntry((TObject*)0,"m_{#phi} = 8 GeV", "");
     doStandardLegend(l_all);
     st_all->Draw("NOSTACKHISTE");
     setMassAUTitles(st_all->GetHistogram());
