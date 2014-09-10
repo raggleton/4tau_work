@@ -114,6 +114,13 @@ void doStandardHist(TH1 *h) {
     h->SetTitle("");
 }
 
+void doCustomHist(TH1* h, int color, int style = 1) {
+    doStandardHist(h);
+    h->SetLineColor(color);
+    h->SetMarkerColor(color);
+    h->SetMarkerStyle(style);
+}
+
 void doSignalHist(TH1 *h) {
     doStandardHist(h);
     h->SetLineColor(kRed);
@@ -442,7 +449,7 @@ void paperConvert() {
     t_signal->SetBorderSize(0);
     
     TPaveText* t_side = new TPaveText(0.6, 0.47, 0.84, 0.57, "NDC");
-    t_side->AddText("Control region A");
+    t_side->AddText("Control region B");
     t_side->SetFillColor(kWhite);
     t_side->SetBorderSize(0);
 
@@ -631,7 +638,7 @@ void paperConvert() {
     t_signal->SetBorderSize(0);
 
     t_side = new TPaveText(0.15, 0.7, 0.4, 0.8, "NDC");
-    t_side->AddText("Control region A");
+    t_side->AddText("Control region B");
     t_side->SetFillColor(kWhite);
     t_side->SetBorderSize(0);
 
@@ -716,7 +723,7 @@ void paperConvert() {
     c1->SaveAs("Combined/Corr_bare_bg_sig.pdf");
 
     //////////////////////
-    // control region A //
+    // control region B //
     //////////////////////
 
     // signal MC by itself
@@ -804,6 +811,35 @@ void paperConvert() {
     combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf", scalingFactors, "Tracks with 2.5 > p_{T} > 1 GeV");
     combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf", scalingFactors, "Tracks with 2.5 > p_{T} > 1 GeV", "Average number of tracks per #mu_{1} / bin");
 
+
+    ////////////////////////////////////////////
+    // mass shape as fn of # tracks about mu2 //
+    ////////////////////////////////////////////
+    THStack *st_Ntk2 = new THStack("","");
+    TH1D* histM1_Ntk2_2 = (TH1D*) f_bg_mass2->Get("hM1_Ntk2_2");
+    TH1D* histM1_Ntk2_3 = (TH1D*) f_bg_mass2->Get("hM1_Ntk2_3");
+    TH1D* histM1_Ntk2_4 = (TH1D*) f_bg_mass2->Get("hM1_Ntk2_4");
+    doStandardHist(hM1_bare_bg_muRand_HLT_dR2);
+    hM1_bare_bg_muRand_HLT_dR2->SetMarkerStyle(1);
+    doCustomHist(histM1_Ntk2_2, kRed);
+    doCustomHist(histM1_Ntk2_3, kBlack);
+    doCustomHist(histM1_Ntk2_4, kGreen+3);
+    st_Ntk2->Add(hM1_bare_bg_muRand_HLT_dR2);
+    st_Ntk2->Add(histM1_Ntk2_2);
+    st_Ntk2->Add(histM1_Ntk2_3);
+    st_Ntk2->Add(histM1_Ntk2_4);
+    st_Ntk2->Draw("NOSTACK E");
+    setMassAUTitles(st_Ntk2->GetHistogram());
+    st_Ntk2->GetHistogram()->SetXTitle("m_{1}(#mu-tk) [GeV]");
+    setAltTitleLabelSizes(st_Ntk2->GetHistogram());
+    TLegend* l_Ntk2 = new TLegend(0.67, 0.67, 0.88, 0.88);
+    l_Ntk2->AddEntry(hM1_bare_bg_muRand_HLT_dR2, "N_{tk,2} = 1", "l");
+    l_Ntk2->AddEntry(histM1_Ntk2_2, "N_{tk,2} = 2", "l");
+    l_Ntk2->AddEntry(histM1_Ntk2_3, "N_{tk,2} = 3", "l");
+    l_Ntk2->AddEntry(histM1_Ntk2_4, "N_{tk,2} = 4", "l");
+    doStandardLegend(l_Ntk2);
+    l_Ntk2->Draw();
+    c1->SaveAs("Combined/M1_Ntk2.pdf");
 
     // cleanup
     f_sig_main1->Close();

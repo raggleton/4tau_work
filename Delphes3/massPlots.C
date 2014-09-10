@@ -139,17 +139,25 @@ void massPlots(int argc, char* argv[])
 	// m1 & m2 1D distributions
 	// ------------------------
 
-	TH1D* histM1                       = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}",10,0,10);
-	TH1D* histM2                       = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}",10,0,10);
+	TH1D* histM1                       = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
+	TH1D* histM2                       = new TH1D("hM2", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV];A.U.",10,0,10);
 	
-	TH1D* histM1_fine                  = new TH1D("hM1Fine", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV]; N_{events}",50,0,10);
-	TH1D* histM2_fine                  = new TH1D("hM2Fine", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV]; N_{events}",50,0,10);
+	// for diff # tracks about 2nd muon
+	TH1D* histM1_Ntk2_2                = new TH1D("hM1_Ntk2_2", "Inv. Mass of 1st system, full selection with N_{tk,2} = 2; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
+	TH1D* histM1_Ntk2_3                = new TH1D("hM1_Ntk2_3", "Inv. Mass of 1st system, full selection with N_{tk,2} = 3; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
+	TH1D* histM1_Ntk2_4                = new TH1D("hM1_Ntk2_4", "Inv. Mass of 1st system, full selection with N_{tk,2} = 4; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
+	TH1D* histM1_Ntk2_2or3             = new TH1D("hM1_Ntk2_2or3", "Inv. Mass of 1st system, full selection with N_{tk,2} = 2 or 3; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
+	
+	TH1D* histM1_fine                  = new TH1D("hM1Fine", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
+	TH1D* histM2_fine                  = new TH1D("hM2Fine", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV];A.U.",50,0,10);
 
 	TH1D* histM1_side_1to2p5           = new TH1D("hM1_side_1to2p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
 	TH1D* histM2_side_1to2p5           = new TH1D("hM2_side_1to2p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 2.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
 	
 	TH1D* histM1_side_1to1p5           = new TH1D("hM1_side_1to1p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
 	TH1D* histM2_side_1to1p5           = new TH1D("hM2_side_1to1p5","m(#mu_{1}-tk) in sideband (soft tk p_{T} = 1 - 1.5 GeV);m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
+
+
 
 	//------------------
 	// m1 in bins of m2
@@ -484,18 +492,20 @@ void massPlots(int argc, char* argv[])
 		} // End of track loop
 
 
-		// Do swapping
-		// if (tk1_1.size() == 1 && tk2_1.size() == 1 
-		// && tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) {
-		// 	TLorentzVector mu1MomTmp = mu1->P4();		
-		// 	TLorentzVector tk1MomTmp = tk1_2p5_OS[0]->P4();		
-		// 	TLorentzVector sys1Mom = mu1MomTmp+tk1MomTmp;
-		// 	TLorentzVector mu2MomTmp = mu2->P4();		
-		// 	TLorentzVector tk2MomTmp = tk2_2p5_OS[0]->P4();		
-		// 	TLorentzVector sys2Mom = mu2MomTmp+tk2MomTmp;
-		// 	TLorentzVector totMom = mu1MomTmp+mu2MomTmp+tk1MomTmp+tk2MomTmp;
+		// Do some preselection here that's common to most regions of consideration
+		// 1 OS track with pT > 2.5 within ∆R < 0.5 of muon
+		if (tk1_2p5_OS.size() >= 1 && tk2_2p5_OS.size() >= 1) {
+			// sort track vectors by descending pT
+			std::sort(tk1_2p5_OS.begin(), tk1_2p5_OS.end(), sortByPT<Track>);
+			std::sort(tk2_2p5_OS.begin(), tk2_2p5_OS.end(), sortByPT<Track>);
 
-		// }
+			// do swapping?
+			TLorentzVector totMom = tk1_2p5_OS[0]->P4() + tk2_2p5_OS[0]->P4() + mu1Mom + mu2Mom;
+			TLorentzVector sys1Mom = tk1_2p5_OS[0]->P4() + mu1Mom;
+			TLorentzVector sys2Mom = tk2_2p5_OS[0]->P4() + mu2Mom;
+
+
+		}
 
 
 		/////////////////////////
@@ -577,19 +587,53 @@ void massPlots(int argc, char* argv[])
 		// 		histM1_side_3toInf->Fill(m1);
 		// }
 
+		//////////////////////////////////////////////////////////////////////
+		// SIDEBAND REGION - where mu2 has 1, 2, 3 additional soft tracks //
+		// and mu1 satisfies signal selection
+		//////////////////////////////////////////////////////////////////////
+		if (   tk1_1.size() == 1 
+			&& tk2_1.size() >= 1 
+			&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
+			&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
+			&& tk2_1to2p5.size() <= 3
+			&& tk2_1to2p5.size() != 0
+			){
+
+				double m1(0);		
+				m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+				
+				switch (tk2_1to2p5.size())
+				{
+					case 1:
+						histM1_Ntk2_2->Fill(m1);
+						histM1_Ntk2_2or3->Fill(m1);
+						break;
+					case 2:
+						histM1_Ntk2_3->Fill(m1);
+						histM1_Ntk2_2or3->Fill(m1);
+						break;
+					case 3:
+						histM1_Ntk2_4->Fill(m1);
+						break;
+				}			
+		}
+
+
 		////////////////////////////////////////////////////
 		// SIDEBAND REGION - for soft tracks 1 < pT < 2.5 //
 		////////////////////////////////////////////////////
 		// 
 		// For 2D plot of N(m1,m2):
 		// Each muon must have exactly 1 OS tk with pT > 2.5 within ∆R < 0.5.
-		// And *at least* one muon has 1 additional soft track with 1 < pT < 2.5,
+		// And *at least* one muon has 1 or 2 additional soft tracks with 1 < pT < 2.5,
 		// within dR < 0.5. No sign requirement on additional soft track.
-		if (   tk1_1.size() >= 1 && tk1_1.size() <= 2 
-			&& tk2_1.size() >= 1 && tk2_1.size() <= 2 
+		// 
+		// This matches Control Region A in the PAS (B in AN)
+		if (   tk1_1.size() >= 1 && tk1_1.size() <= 3 
+			&& tk2_1.size() >= 1 && tk2_1.size() <= 3 
 			&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
 			&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
-			&& tk1_1to2p5.size() <= 1 && tk2_1to2p5.size() <= 1 
+			&& tk1_1to2p5.size() <= 2 && tk2_1to2p5.size() <= 2 
 			&& !(tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 0)
 			){
 				double m1(0), m2(0);		
@@ -772,6 +816,11 @@ void massPlots(int argc, char* argv[])
 	printIntegral(histM);
 	printIntegral(histM1vsM2);
 
+	printIntegral(histM1_Ntk2_2);
+	printIntegral(histM1_Ntk2_3);
+	printIntegral(histM1_Ntk2_2or3);
+	printIntegral(histM1_Ntk2_4);
+
 	/////////////////
 	// PLOT THINGS //
 	/////////////////
@@ -828,6 +877,18 @@ void massPlots(int argc, char* argv[])
 
 	makeCopySave(histM1);
 	normaliseHist(histM1);
+
+	makeCopySave(histM1_Ntk2_2);
+	normaliseHist(histM1_Ntk2_2);
+	
+	makeCopySave(histM1_Ntk2_3);
+	normaliseHist(histM1_Ntk2_3);
+
+	makeCopySave(histM1_Ntk2_2or3);
+	normaliseHist(histM1_Ntk2_2or3);
+	
+	makeCopySave(histM1_Ntk2_4);
+	normaliseHist(histM1_Ntk2_4);
 
 	makeCopySave(histM1_fine);
 	normaliseHist(histM1_fine);
@@ -980,6 +1041,12 @@ void massPlots(int argc, char* argv[])
 	drawHistAndSave(histM1vsM2_correlations, "colzTEXTE","M1vsM2_correlations", directory, app);
 	drawHistAndSave(histCorr1D, "e1", "Correlations1D", directory, app);
 
+	// Extra tracks around mu2
+	drawHistAndSave(histM1_Ntk2_2, "HISTE", "M1_Ntk2_2", directory, app);
+	drawHistAndSave(histM1_Ntk2_3, "HISTE", "M1_Ntk2_3", directory, app);
+	drawHistAndSave(histM1_Ntk2_2or3, "HISTE", "M1_Ntk2_2or3", directory, app);
+	drawHistAndSave(histM1_Ntk2_4, "HISTE", "M1_Ntk2_4", directory, app);
+
 	// Testing hists
 	// -------------
 	
@@ -991,8 +1058,12 @@ void massPlots(int argc, char* argv[])
 	//////////////////////////
 
 	histM1->Write("",TObject::kOverwrite);
-	histM1_fine->Write("",TObject::kOverwrite);
 	histM2->Write("",TObject::kOverwrite);
+	histM1_Ntk2_2->Write("",TObject::kOverwrite);
+	histM1_Ntk2_3->Write("",TObject::kOverwrite);
+	histM1_Ntk2_2or3->Write("",TObject::kOverwrite);
+	histM1_Ntk2_4->Write("",TObject::kOverwrite);
+	histM1_fine->Write("",TObject::kOverwrite);
 	histM2_fine->Write("",TObject::kOverwrite);
 	histM->Write("",TObject::kOverwrite);
 	if (doSignal){
