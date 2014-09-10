@@ -815,7 +815,7 @@ void paperConvert() {
     ////////////////////////////////////////////
     // mass shape as fn of # tracks about mu2 //
     ////////////////////////////////////////////
-    THStack *st_Ntk2 = new THStack("","");
+    THStack* st_Ntk2_234 = new THStack("","");
     TH1D* histM1_Ntk2_2 = (TH1D*) f_bg_mass2->Get("hM1_Ntk2_2");
     TH1D* histM1_Ntk2_3 = (TH1D*) f_bg_mass2->Get("hM1_Ntk2_3");
     TH1D* histM1_Ntk2_4 = (TH1D*) f_bg_mass2->Get("hM1_Ntk2_4");
@@ -824,22 +824,41 @@ void paperConvert() {
     doCustomHist(histM1_Ntk2_2, kRed);
     doCustomHist(histM1_Ntk2_3, kBlack);
     doCustomHist(histM1_Ntk2_4, kGreen+3);
-    st_Ntk2->Add(hM1_bare_bg_muRand_HLT_dR2);
-    st_Ntk2->Add(histM1_Ntk2_2);
-    st_Ntk2->Add(histM1_Ntk2_3);
-    st_Ntk2->Add(histM1_Ntk2_4);
-    st_Ntk2->Draw("NOSTACK E");
-    setMassAUTitles(st_Ntk2->GetHistogram());
-    st_Ntk2->GetHistogram()->SetXTitle("m_{1}(#mu-tk) [GeV]");
-    setAltTitleLabelSizes(st_Ntk2->GetHistogram());
-    TLegend* l_Ntk2 = new TLegend(0.67, 0.67, 0.88, 0.88);
-    l_Ntk2->AddEntry(hM1_bare_bg_muRand_HLT_dR2, "N_{tk,2} = 1", "l");
-    l_Ntk2->AddEntry(histM1_Ntk2_2, "N_{tk,2} = 2", "l");
-    l_Ntk2->AddEntry(histM1_Ntk2_3, "N_{tk,2} = 3", "l");
-    l_Ntk2->AddEntry(histM1_Ntk2_4, "N_{tk,2} = 4", "l");
-    doStandardLegend(l_Ntk2);
-    l_Ntk2->Draw();
+    st_Ntk2_234->Add(hM1_bare_bg_muRand_HLT_dR2);
+    st_Ntk2_234->Add(histM1_Ntk2_2);
+    st_Ntk2_234->Add(histM1_Ntk2_3);
+    st_Ntk2_234->Add(histM1_Ntk2_4);
+    st_Ntk2_234->Draw("NOSTACK E");
+    setMassAUTitles(st_Ntk2_234->GetHistogram());
+    st_Ntk2_234->GetHistogram()->SetXTitle("m_{1}(#mu-tk) [GeV]");
+    setAltTitleLabelSizes(st_Ntk2_234->GetHistogram());
+    TLegend* l_Ntk2_234 = new TLegend(0.56, 0.6, 0.88, 0.88);
+    l_Ntk2_234->AddEntry((TObject*)0, "Gen. level QCD b#bar{b} MC", "");
+    l_Ntk2_234->AddEntry(hM1_bare_bg_muRand_HLT_dR2, "N_{tk,2} = 1", "l");
+    l_Ntk2_234->AddEntry(histM1_Ntk2_2, "N_{tk,2} = 2", "l");
+    l_Ntk2_234->AddEntry(histM1_Ntk2_3, "N_{tk,2} = 3", "l");
+    l_Ntk2_234->AddEntry(histM1_Ntk2_4, "N_{tk,2} = 4", "l");
+    doStandardLegend(l_Ntk2_234);
+    l_Ntk2_234->Draw();
     c1->SaveAs("Combined/M1_Ntk2.pdf");
+
+    THStack* st_Ntk2_2or3 = new THStack("","");
+    TH1D* histM1_Ntk2_2or3 = (TH1D*) f_bg_mass2->Get("hM1_Ntk2_2or3");
+    doCustomHist(histM1_Ntk2_2or3, kRed);
+    st_Ntk2_2or3->Add(hM1_bare_bg_muRand_HLT_dR2);
+    st_Ntk2_2or3->Add(histM1_Ntk2_2or3);
+    st_Ntk2_2or3->Draw("NOSTACK E");
+    setMassAUTitles(st_Ntk2_2or3->GetHistogram());
+    st_Ntk2_2or3->GetHistogram()->SetXTitle("m_{1}(#mu-tk) [GeV]");
+    setAltTitleLabelSizes(st_Ntk2_2or3->GetHistogram());
+    TLegend* l_Ntk2_2or3 = new TLegend(0.56, 0.6, 0.88, 0.88);
+    l_Ntk2_2or3->AddEntry((TObject*)0, "Gen. level QCD b#bar{b} MC", "");
+    l_Ntk2_2or3->AddEntry(hM1_bare_bg_muRand_HLT_dR2, "N_{tk,2} = 1", "l");
+    l_Ntk2_2or3->AddEntry(histM1_Ntk2_2or3, "N_{tk,2} = 2, 3", "l");
+    doStandardLegend(l_Ntk2_2or3);
+    l_Ntk2_2or3->Draw();
+    c1->SaveAs("Combined/M1_Ntk2_2or3.pdf");
+
 
     // cleanup
     f_sig_main1->Close();
