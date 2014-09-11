@@ -494,18 +494,23 @@ void massPlots(int argc, char* argv[])
 
 		// Do some preselection here that's common to most regions of consideration
 		// 1 OS track with pT > 2.5 within ∆R < 0.5 of muon
-		if (tk1_2p5_OS.size() >= 1 && tk2_2p5_OS.size() >= 1) {
+		// if (tk1_2p5_OS.size() >= 1 && tk2_2p5_OS.size() >= 1) {
 			// sort track vectors by descending pT
 			std::sort(tk1_2p5_OS.begin(), tk1_2p5_OS.end(), sortByPT<Track>);
 			std::sort(tk2_2p5_OS.begin(), tk2_2p5_OS.end(), sortByPT<Track>);
 
+			// if (tk2_2p5_OS.size() > 1) {
+				// cout << tk2_2p5_OS[0]->PT << " - " << tk2_2p5_OS[1]->PT << endl;
+			// }
 			// do swapping?
-			TLorentzVector totMom = tk1_2p5_OS[0]->P4() + tk2_2p5_OS[0]->P4() + mu1Mom + mu2Mom;
-			TLorentzVector sys1Mom = tk1_2p5_OS[0]->P4() + mu1Mom;
-			TLorentzVector sys2Mom = tk2_2p5_OS[0]->P4() + mu2Mom;
+			// TLorentzVector totMom = tk1_2p5_OS[0]->P4() + tk2_2p5_OS[0]->P4() + mu1Mom + mu2Mom;
+			// TLorentzVector sys1Mom = tk1_2p5_OS[0]->P4() + mu1Mom;
+			// TLorentzVector sys2Mom = tk2_2p5_OS[0]->P4() + mu2Mom;
 
 
-		}
+		// } else { 
+		// 	continue; 
+		// }
 
 
 		/////////////////////////
