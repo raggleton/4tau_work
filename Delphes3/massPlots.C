@@ -453,6 +453,10 @@ void massPlots(int argc, char* argv[])
 		// same but with 1 < pT < 2.5 (for sideband)
 		std::vector<Track*> tk1_1to2p5;
 		std::vector<Track*> tk2_1to2p5;
+		
+		// same but with 1 < pT < 2.5 (for sideband) with tighter IP cuts (tau candidate IP)
+		std::vector<Track*> tk1_1to2p5_taucand;
+		std::vector<Track*> tk2_1to2p5_taucand;
 
 		// same but with 1 < pT < 1.5 (for sideband)
 		std::vector<Track*> tk1_1to1p5;
@@ -470,22 +474,26 @@ void massPlots(int argc, char* argv[])
 				// Store track in suitable vector
 				fillTrackVectors(candTk, mu1, mu2, &tk1_1, &tk2_1);
 
-				// 1 prong candiate must have pT >2.5, 
+				// 1 prong candiates, 
 				// d_z < 0.04cm, d_0 < 0.02cm
-				if (checkTrackTight(candTk)) {
+				if (checkTrackIPTight(candTk) && checkTrackEta(candTk)) {
+					// for N_trk = 2or3
+					fillTrackVectors(candTk, mu1, mu2, &tk1_1to2p5_taucand, &tk2_1to2p5_taucand);						
 
-					fillTrackVectors(candTk, mu1, mu2, &tk1_2p5, & tk2_2p5);
+					if (checkTrackPTTight(candTk)) {
+						// tau candidate must have pT > 2.5 GeV
+						fillTrackVectors(candTk, mu1, mu2, &tk1_2p5, & tk2_2p5);
 
-					if (checkTkMuOS(candTk, mu1)) {
-						fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_OS, &tk2_2p5_OS);
-					}					
+						if (checkTkMuOS(candTk, mu1)) {
+							fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_OS, &tk2_2p5_OS);
+						}					
+					}
 				} else {
+					
 					fillTrackVectors(candTk, mu1, mu2, &tk1_1to2p5, &tk2_1to2p5);
-
-					if (do1to1p5){
-						if (candTk->PT < 1.5) {
-							fillTrackVectors(candTk, mu1, mu2, &tk1_1to1p5, &tk2_1to1p5);
-						}
+					
+					if (do1to1p5 && candTk->PT < 1.5){
+						fillTrackVectors(candTk, mu1, mu2, &tk1_1to1p5, &tk2_1to1p5);
 					}
 				}
 			} // End of track selection criteria
@@ -593,33 +601,43 @@ void massPlots(int argc, char* argv[])
 		// }
 
 		//////////////////////////////////////////////////////////////////////
-		// SIDEBAND REGION - where mu2 has 1, 2, 3 additional soft tracks //
+		// SIDEBAND REGION - where mu2 has 1, 2, 3 additional soft tracks with tight IP cuts//
 		// and mu1 satisfies signal selection
 		//////////////////////////////////////////////////////////////////////
 		if (   tk1_1.size() == 1 
-			&& tk2_1.size() >= 1 
 			&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
 			&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
-			&& tk2_1to2p5.size() <= 3
-			&& tk2_1to2p5.size() != 0
 			){
+			
+			double m1(0);		
 
-				double m1(0);		
-				m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
-				
-				switch (tk2_1to2p5.size())
-				{
-					case 1:
-						histM1_Ntk2_2->Fill(m1);
-						histM1_Ntk2_2or3->Fill(m1);
-						break;
-					case 2:
-						histM1_Ntk2_3->Fill(m1);
-						histM1_Ntk2_2or3->Fill(m1);
-						break;
-					case 3:
-						histM1_Ntk2_4->Fill(m1);
-						break;
+			if ( //tk2_1.size() == 2 
+				tk2_1to2p5_taucand.size() == 1
+				&& tk2_1to2p5.size() == 1
+				) {
+					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+					
+					histM1_Ntk2_2->Fill(m1);
+					histM1_Ntk2_2or3->Fill(m1);
+				}			
+
+			if (// tk2_1.size() == 3 
+				tk2_1to2p5_taucand.size() == 2
+				&& tk2_1to2p5.size() == 2
+				) {
+					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+					
+					histM1_Ntk2_3->Fill(m1);
+					histM1_Ntk2_2or3->Fill(m1);
+				}			
+
+			if ( //tk2_1.size() == 4 
+				tk2_1to2p5_taucand.size() == 3
+				&& tk2_1to2p5.size() == 3
+				) {
+					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+					
+					histM1_Ntk2_4->Fill(m1);
 				}			
 		}
 

@@ -394,6 +394,16 @@ TH1D* createCorrelationPlot(TH2D* numerator2D, TH1D* denominator1D) {
     return corr1D;
 }
 
+/**
+ * Prints bin contents and errors
+ * @param h Histogram whose bin contents we want to print
+ */
+void printBinContents(TH1D* h) {
+    TAxis *x_axis = h->GetXaxis();
+    for(int i = 1; i <= h->GetNbinsX(); ++i) {
+        std::cout << "Bin " << i << " [ " << x_axis->GetBinLabel(i) << " ] " << ": " << h->GetBinContent(i) << " \\pm " << h->GetBinError(i) << std::endl; 
+    }
+}
 
 /////////////////
 // MAIN SCRIPT //
@@ -467,7 +477,7 @@ void paperConvert() {
     c1->SaveAs("Combined/M_10bins_bare_bg_muRand_HLT_dR2.pdf");
 
     std::vector<double> scalingFactors;
-    scalingFactors.push_back(2.9475);
+    scalingFactors.push_back(1.7649);
     scalingFactors.push_back(2.6577);
 
     // // bbbar + scatter
@@ -674,6 +684,10 @@ void paperConvert() {
 
     c1->SetTicks(1,1);
     
+    TLegend* l_bonly = new TLegend(0.6, 0.82, 0.88, 0.88);
+    l_bonly->AddEntry(hCorr_bare_b, "QCD b#bar{b} MC", "lp");
+    doStandardLegend(l_bonly);
+    
     ///////////////////
     // signal region //
     ///////////////////
@@ -685,13 +699,19 @@ void paperConvert() {
     c1->SaveAs("Combined/Corr_bare_sig.pdf");
     
     // bbbar qcd by itself
+    std::cout << "bbbar QCD MC in signal region:" << std::endl;
+    printBinContents(hCorr_bare_b);
     hCorr_bare_b->Draw();
     line.Draw();
     t_signal->Draw();
+    l_bonly->Draw();
     c1->SaveAs("Combined/Corr_bare_b.pdf");
+    c1->SaveAs("Combined/Corr_bare_b.png");
     
     // bbbar + signal
+    hCorr_bare_b->Draw();
     hCorr_bare_sig->Draw("SAME");
+    line.Draw();
     l->Draw();
     c1->SaveAs("Combined/Corr_bare_b_sig.pdf");
 
@@ -732,9 +752,13 @@ void paperConvert() {
     c1->SaveAs("Combined/Corr_side_sig.pdf");
     
     // bbbar qcd by itself
+    std::cout << "bbbar QCD MC in control region:" << std::endl;
+    printBinContents(hCorr_side_b);
     hCorr_side_b->Draw();
     line.Draw();
+    l_bonly->Draw();
     c1->SaveAs("Combined/Corr_side_b.pdf");
+    c1->SaveAs("Combined/Corr_side_b.png");
 
     // signal + bbbar together
     hCorr_side_sig->Draw();
@@ -787,11 +811,12 @@ void paperConvert() {
     
     t_side->Draw();
     c1->SaveAs("Combined/Corr_side_bg_data.pdf");
+    // c1->SaveAs("Combined/Corr_side_bg_data.png");
 
     // bbar + data
     hCorr_side_b->Draw();
     hCorr_side_data->Draw("SAME");
-    TLegend* l_b_data = new TLegend(0.52,0.65,0.86,0.89);
+    TLegend* l_b_data = new TLegend(0.6,0.7,0.86,0.89);
     l_b_data->AddEntry(hM_bg_dR2,"QCD b#bar{b} MC","lp");
     l_b_data->AddEntry(hCorr_side_data, "Data", "lp");
     doStandardLegend(l_b_data);
@@ -799,6 +824,7 @@ void paperConvert() {
     line.Draw();
     t_side->Draw();
     c1->SaveAs("Combined/Corr_side_b_data.pdf");
+    c1->SaveAs("Combined/Corr_side_b_data.png");
 
 
     /////////////////////////
@@ -808,8 +834,8 @@ void paperConvert() {
     combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAbs1", "HISTE", "Combined/combined_NTrackAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV", "Average number of tracks per #mu_{1} / bin");
     combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAll1", "HISTE", "Combined/combined_NTrackAll1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV");
     combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAllAbs1", "HISTE", "Combined/combined_NTrackAllAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV", "Average number of tracks per #mu_{1} / bin");
-    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf", scalingFactors, "Tracks with 2.5 > p_{T} > 1 GeV");
-    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf", scalingFactors, "Tracks with 2.5 > p_{T} > 1 GeV", "Average number of tracks per #mu_{1} / bin");
+    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf", scalingFactors, "Tracks with 1 < p_{T} < 2.5 GeV");
+    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf", scalingFactors, "Tracks with 1 < p_{T} < 2.5 GeV", "Average number of tracks per #mu_{1} / bin");
 
 
     ////////////////////////////////////////////
@@ -849,15 +875,30 @@ void paperConvert() {
     st_Ntk2_2or3->Add(histM1_Ntk2_2or3);
     st_Ntk2_2or3->Draw("NOSTACK E");
     setMassAUTitles(st_Ntk2_2or3->GetHistogram());
-    st_Ntk2_2or3->GetHistogram()->SetXTitle("m_{1}(#mu-tk) [GeV]");
+    st_Ntk2_2or3->GetHistogram()->SetXTitle("m_{1}(#mu-trk) [GeV]");
     setAltTitleLabelSizes(st_Ntk2_2or3->GetHistogram());
-    TLegend* l_Ntk2_2or3 = new TLegend(0.56, 0.6, 0.88, 0.88);
+    TLegend* l_Ntk2_2or3 = new TLegend(0.55, 0.56, 0.88, 0.88);
     l_Ntk2_2or3->AddEntry((TObject*)0, "Gen. level QCD b#bar{b} MC", "");
-    l_Ntk2_2or3->AddEntry(hM1_bare_bg_muRand_HLT_dR2, "N_{tk,2} = 1", "lp");
-    l_Ntk2_2or3->AddEntry(histM1_Ntk2_2or3, "N_{tk,2} = 2, 3", "lp");
+    l_Ntk2_2or3->AddEntry(hM1_bare_bg_muRand_HLT_dR2, "N_{trk,2} = 1", "lp");
+    l_Ntk2_2or3->AddEntry(histM1_Ntk2_2or3, "N_{trk,2} = 2, 3", "lp");
     doStandardLegend(l_Ntk2_2or3);
     l_Ntk2_2or3->Draw();
     c1->SaveAs("Combined/M1_Ntk2_2or3.pdf");
+    c1->SaveAs("Combined/M1_Ntk2_2or3.png");
+
+    histM1_Ntk2_2or3->SetMinimum(0.001); // Stop SetLogy complainng
+    hM1_bare_bg_muRand_HLT_dR2->SetMinimum(0.001); // Stop SetLogy complainng
+    THStack* st_Ntk2_2or3_log = new THStack("","");
+    st_Ntk2_2or3_log->Add(hM1_bare_bg_muRand_HLT_dR2);
+    st_Ntk2_2or3_log->Add(histM1_Ntk2_2or3);
+    st_Ntk2_2or3_log->Draw("NOSTACK E");
+    setMassAUTitles(st_Ntk2_2or3_log->GetHistogram());
+    st_Ntk2_2or3_log->GetHistogram()->SetXTitle("m_{1}(#mu-trk) [GeV]");
+    setAltTitleLabelSizes(st_Ntk2_2or3_log->GetHistogram());
+    c1->SetLogy();
+    l_Ntk2_2or3->Draw();
+    c1->SaveAs("Combined/M1_Ntk2_2or3_log.pdf");
+    c1->SaveAs("Combined/M1_Ntk2_2or3_log.png");
 
 
     // cleanup

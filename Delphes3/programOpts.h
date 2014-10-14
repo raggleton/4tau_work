@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <exception>
 
 // ROOT headers
 // #include "TStyle.h"
@@ -224,9 +225,10 @@ class ProgramOpts
  * @param startNum Starting file number
  * @param endNum   Ending file number
  */
-void addFileFromFolder(TChain* chain, std::string folder, std::string file, int startNum, int endNum) {
+void addFilesFromFolder(TChain* chain, std::string folder, std::string file, int startNum, int endNum) {
+	cout << "Adding " << folder+file+boost::lexical_cast<std::string>(startNum)+".root" 
+		 <<  " to " << folder+file+boost::lexical_cast<std::string>(endNum)+".root" << endl;
 	for (int i = startNum; i <= endNum; i++) {
-		cout << "Adding " << folder+file+boost::lexical_cast<std::string>(i)+".root" << endl;
 		chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
 	}
 }
@@ -238,8 +240,8 @@ void addFileFromFolder(TChain* chain, std::string folder, std::string file, int 
  * @param file     File name, of form myFile_whatever_
  * @param endNum   Ending file number
  */
-void addFileFromFolder(TChain* chain, std::string folder, std::string file, int endNum) {
-	addFileFromFolder(chain, folder, file, 1, endNum);
+void addFilesFromFolder(TChain* chain, std::string folder, std::string file, int endNum) {
+	addFilesFromFolder(chain, folder, file, 1, endNum);
 }
 
 /**
@@ -266,10 +268,10 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			// file = "signal_1prong_500K_TauPythia_HLT_";
 			// folder = "Signal_1prong_500K_bare/";
 			// file = "signal_1prong_500K_HLT_";
-			addFileFromFolder(chain, "Signal_1prong_HLT_bare/", "Signal_HLT_", 20);
+			addFilesFromFolder(chain, "Signal_1prong_HLT_bare/", "Signal_HLT_", 20);
 		} else { 
 			cout << "Doing signal without HLT cuts" << endl;
-			addFileFromFolder(chain, "Signal_1prong_500K_bare/", "signal_1prong_500K_NoHLT_", 20);
+			addFilesFromFolder(chain, "Signal_1prong_500K_bare/", "signal_1prong_500K_NoHLT_", 20);
 		}
 
 	////////////////
@@ -279,14 +281,15 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 		if (doMu) {
 			if(doHLT) {
 				cout << "Doing QCDb_mu with HLT cuts" << endl;
-				addFileFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", 1000);
+				addFilesFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", 1300);
 			} else{
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
-				addFileFromFolder(chain, "QCDb_mu_pthatmin20_bare/", "QCDb_mu_pthatmin20_", 94);
+				throw std::invalid_argument("DON'T USE QCDb_mu");
+				addFilesFromFolder(chain, "QCDb_mu_pthatmin20_bare/", "QCDb_mu_pthatmin20_", 94);
 			}
 		} else {
 			cout << "Doing QCDb" << endl;
-			addFileFromFolder(chain, "QCDb_cleanTk/", "QCDb_", 10);
+			addFilesFromFolder(chain, "QCDb_cleanTk/", "QCDb_", 10);
 		}
 	
 	//////////////
@@ -295,7 +298,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	} else if (source == qcdc) {
 		if(doHLT) {
 			cout << "Doing QCDc_mu with HLT cuts" << endl;
-			addFileFromFolder(chain, "QCDc_mu_pthatmin20_Mu17_Mu8_bare/", "QCDc_mu_pthatmin20_Mu17_Mu8_", 200);
+			addFilesFromFolder(chain, "QCDc_mu_pthatmin20_Mu17_Mu8_bare/", "QCDc_mu_pthatmin20_Mu17_Mu8_", 200);
 		}
 	
 	//////////////////////
@@ -304,8 +307,8 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	} else if (source == qcdscatter) {
 		if(doHLT) {
 			cout << "Doing QCDScatter with HLT cuts" << endl;
-			addFileFromFolder(chain, "QCDbcScatter_HLT_bare/", "QCDbcScatter_HLT_250_", 1, 200);
-			addFileFromFolder(chain, "QCDbcScatter_HLT_bare/", "QCDbcScatter_HLT_500_", 201, 800);
+			addFilesFromFolder(chain, "QCDbcScatter_HLT_bare/", "QCDbcScatter_HLT_250_", 1, 200);
+			addFilesFromFolder(chain, "QCDbcScatter_HLT_bare/", "QCDbcScatter_HLT_500_", 201, 800);
 		}
 	
 	////////////////////
@@ -316,7 +319,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			cout << "Doing QCDAll with HLT cuts" << endl;
 			// folder = "QCDAll_mu_pthatmin20_Mu17_Mu8_bare/";
 			// file = "QCDAll_mu_pthatmin20_Mu17_Mu8_";
-			addFileFromFolder(chain, "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_bare/", "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_", 200);
+			addFilesFromFolder(chain, "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_bare/", "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_", 200);
 		}
 	
 	////////////////
@@ -324,7 +327,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	////////////////
 	} else if (source == test) {
 		cout << "Doing test files" << endl;
-		addFileFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", 5);
+		addFilesFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", 5);
 	}
 
 	// Auto-loop over ROOT files in folder using Boost::Filesystem
