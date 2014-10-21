@@ -93,6 +93,17 @@ You can now edit your new analysis code. To re-make it, just run `makeScripts`. 
 
 - `cuts.h` is loats of central functions that test muons, tracks, etc. Not the best, but is centralised.
 
+- Delphes distance units for Xd, Yd, Dxy, etc are mm. You can see this in ParticlePropagator.cc
+
+- By default Dxy is **NOT** stored properly. Add the line:
+```
+candidate->Dxy = dxy*1.0E3;
+```
+after
+```
+candidate->Zd = zd*1.0E3;
+```
+
 Installing & compiling against Boost
 ====================================
 

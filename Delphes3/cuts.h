@@ -21,12 +21,12 @@ using std::endl;
  * Used a lot in cutFlow program
  * @param  muons17toInf  std::vector of muons with pT > 17 GeV, descending pT order
  * @param  muons10to17   std::vector of muons with 17 > pT > 10 GeV, descending pT order
- * @param  checkMuons    function to test muons against
+ * @param  muonCheck    function to test muons against
  * @return   std::pair of highest-pT muons passing cuts.
  */
 std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf, 
 		  std::vector<Track*> muons10to17, 
-		  bool (*checkMuons)(Track*,Track*)) {
+		  bool (*muonCheck)(Track*,Track*)) {
 
 	Track *mu1(nullptr), *mu2(nullptr);
 	bool foundMuonPair = false;
@@ -38,7 +38,7 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
 		muB++;
 		for (; muB != muA, muB != muons17toInf.end(); muB++) {
 			if (*muA != *muB){
-				if (checkMuons(*muA, *muB)) {
+				if (muonCheck(*muA, *muB)) {
 					mu1 = *muA;
 					mu2 = *muB;
 					foundMuonPair = true;
@@ -49,7 +49,7 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
 
 		if(!foundMuonPair) {
 			for (auto muB : muons10to17) {
-				if (checkMuons(*muA, muB)) {
+				if (muonCheck(*muA, muB)) {
 					mu1 = *muA;
 					mu2 = muB;
 					foundMuonPair = true;
@@ -65,16 +65,16 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
 
 /**
  * This is like the above function but adds an extra argument for specifying 
- * the deltaR(mu-mu) cut for the checkMuons function.
+ * the deltaR(mu-mu) cut for the muonCheck function.
  * @param  muons17toInf  std::vector of muons with pT > 17 GeV, descending pT order
  * @param  muons10to17   std::vector of muons with 17 > pT > 10 GeV, descending pT order
- * @param  checkMuons    function to test muons against, which is dependent on deltaR param
+ * @param  muonCheck    function to test muons against, which is dependent on deltaR param
  * @param  deltaR        deltaR(mu-mu) cut to use
  * @return   std::pair of highest-pT muons passing cuts.
  */
 std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf, 
 		  std::vector<Track*> muons10to17, 
-		  bool (*checkMuons)(Track*, Track*, double),
+		  bool (*muonCheck)(Track*, Track*, double),
 		  double deltaR) {
 
 	Track *mu1(nullptr), *mu2(nullptr);
@@ -87,7 +87,7 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
 		muB++;
 		for (; muB != muA, muB != muons17toInf.end(); muB++) {
 			if (*muA != *muB){
-				if (checkMuons(*muA, *muB, deltaR)) {
+				if (muonCheck(*muA, *muB, deltaR)) {
 					mu1 = *muA;
 					mu2 = *muB;
 					foundMuonPair = true;
@@ -98,7 +98,7 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
 
 		if(!foundMuonPair) {
 			for (auto muB : muons10to17) {
-				if (checkMuons(*muA, muB, deltaR)) {
+				if (muonCheck(*muA, muB, deltaR)) {
 					mu1 = *muA;
 					mu2 = muB;
 					foundMuonPair = true;
@@ -112,11 +112,52 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
 	return p;
 }
 
+/**
+ * Calculates the transverse impact parameter, d_xy, as Delphes doesn't do it
+ * unless you use the ImpactParameterSmearing module
+ * @param  cand Track object
+ * @return      Transverse impact parameter
+ */
+float calcDxy(Track* cand) {
+	
+
+	// calculate coordinates of closest approach to track circle in transverse plane xd, yd, zd
+    float xd =  cand->Xd;
+    float yd =  cand->Yd;
+
+    TLorentzVector candidateMomentum = cand->P4();
+
+    // calculate impact paramater (after-smearing)
+    float ang_mom = (xd*candidateMomentum.Py() - yd*candidateMomentum.Px());
+    float dxy = ang_mom/cand->PT;
+
+    cand->Dxy = dxy;
+    return dxy;
+}
+
 /////////////////////////
 // LOTS OF 2-MUON CUTS //
 /////////////////////////
 
 // Template these?
+
+/**
+ * Check to see if muA and muB satisfy muon IP criteria
+ * @param  muA [description]
+ * @param  muB [description]
+ * @return     [description]
+ */
+bool checkMuonsIP(Track* muA, Track* muB){
+	if( (fabs(muA->Zd) < 1.) // dZ < 0.1cm
+		&& (fabs(muB->Zd) < 1.) // dZ < 0.1cm
+		&& (fabs(calcDxy(muA)) < 0.3 ) // d0 < 0.03cm
+		&& (fabs(calcDxy(muB)) < 0.3 ) // d0 < 0.03cm
+	) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 /**
  * These checks to see if muA and muB satisfy muon pT condtions
@@ -127,11 +168,14 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
  */
 bool checkMuonsPT(Track* muA, Track* muB){
-	if (muA->PT > 17. && muB->PT > 10
-		&& (fabs(muA->Zd) < 1.) // dZ < 0.1cm
-		&& (fabs(muB->Zd) < 1.) // dZ < 0.1cm
-		&& (fabs(muA->Dxy) < 0.3 ) // d0 < 0.03cm
-		&& (fabs(muB->Dxy) < 0.3 ) // d0 < 0.03cm
+	if (muA->PT > 17. && muB->PT > 10.
+		&& checkMuonsIP(muA, muB)
+		// && (fabs(muA->Zd) < 1.) // dZ < 0.1cm
+		// && (fabs(muB->Zd) < 1.) // dZ < 0.1cm
+		// // && (fabs(muA->Dxy) < 0.3 ) // d0 < 0.03cm
+		// && (fabs(calcDxy(muA)) < 0.3 ) // d0 < 0.03cm
+		// // && (fabs(muB->Dxy) < 0.3 ) // d0 < 0.03cm
+		// && (fabs(calcDxy(muB)) < 0.3 ) // d0 < 0.03cm
 		){
 		return true;
 	} else {
@@ -152,6 +196,48 @@ bool checkMuonsPTSS(Track* muA, Track* muB){
 	} else {
 		return false;
 	}
+}
+
+/**
+ * These checks to see if muA and muB satisfy muon SS condtions 
+ * for signal region
+ * @param  muA Higher pT muon
+ * @param  muB Lesser pT muon
+ * @return    TRUE if muA and muB pass cuts, FALSE otherwise
+ */
+bool checkMuonsSS(Track* muA, Track* muB){
+	if (muA->Charge == muB->Charge){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+/**
+ * Check to see if muons pass IP and SS cuts
+ * @param  muA [description]
+ * @param  muB [description]
+ * @return     [description]
+ */
+bool checkMuonsIPSS(Track* muA, Track* muB) {
+	return checkMuonsIP(muA, muB) && checkMuonsSS(muA, muB);	
+}
+
+/**
+ * Check to see if muons pass IP and SS and deltaR cuts
+ * @param  muA [description]
+ * @param  muB [description]
+ * @param  deltaR [description]
+ * @return     [description]
+ */
+bool checkMuonsIPSSDR(Track* muA, Track* muB, double deltaR) {
+	if (checkMuonsIP(muA, muB) 
+		&& checkMuonsSS(muA, muB) 
+		&& (muA->P4().DeltaR(muB->P4()) > deltaR)) {
+		return true;
+	} else {
+		return false;
+	}	
 }
 
 /**
@@ -198,6 +284,7 @@ bool checkMuonsDR1(Track* muA, Track* muB){
 	return checkMuons(muA, muB, 1.0);
 }
 
+
 /**
  * These checks to see if muA and muB satisfy all muon condtions 
  * for signal region (dR(mu-mu) > 2)
@@ -228,14 +315,14 @@ bool checkTrackPTLoose(Track* candTk){
 }
 
 /**
- * Check to see if track passes loose IP requirement (dz < 0.5 cm, d0 < 1 cm)
+ * Check to see if track passes loose IP requirement (dz < 1 cm, d0 < 1 cm)
  * (Delphes does all distacnes in mm)
  * @param  candTk Pointer to track object
  * @return        TRUE if track passes cuts, FALSE otherwise
  */
 bool checkTrackIPLoose(Track* candTk){
-	if ((fabs(candTk->Zd) < 5.) // dz < 0.5cm
-		&& (fabs(candTk->Dxy) < 10.)){ // d0 impact parameter < 1cm
+	if ((fabs(candTk->Zd) < 10.) // dz < 1cm
+		&& (fabs(calcDxy(candTk)) < 10.)){ // d0 impact parameter < 1cm
 		return true;
 	} else {
 		return false;
@@ -264,7 +351,7 @@ bool checkTrackPTTight(Track* candTk){
  */
 bool checkTrackIPTight(Track* candTk){
 	if ((fabs(candTk->Zd) < 0.4) // dz < 0.04cm
-		&& (fabs(candTk->Dxy) < 0.2)) { // d0 < 0.02cm 
+		&& (fabs(calcDxy(candTk)) < 0.2)) { // d0 < 0.02cm 
 		return true;
 	} else {
 		return false;
