@@ -114,21 +114,21 @@ Regularization power    :0: 2
 #########################################
 #            Events Generation          #
 #########################################
-Number of events (per run step): 50000
+Number of events (per run step): 500000
 Max lumi [1/fb]                : 1000000000
-Filename                       : GG_H_aa_4taus_decay-single-single
+Filename                       : GG_H_aa_8_4taus_decay_500K_NUMEVT
 Cleanup                        : True
 
 #########################################
 #            Parallelization info       #
 #########################################
-Parallelization method : local
-Que                    : 
-Walltime               : 0
-Memory                 : 0
+Parallelization method : pbs
+Que                    : veryshort
+Walltime               : 10:00:00
+Memory                 : 1
 email                  : 
 Max number of cpus     : 12
-sleep time             : 3
+sleep time             : 60
 nice level             : 19
 
 #########################################
