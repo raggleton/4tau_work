@@ -198,28 +198,44 @@ void massPlots(int argc, char* argv[])
 	// --------------------------
 
 	// mu1/2 pt/eta
-	TH1D* histMu1Pt_fine_IPSS                = new TH1D("hMu1Pt_fine_IPSS","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",100,0.,100.);
-	TH1D* histMu2Pt_fine_IPSS                = new TH1D("hMu2Pt_fine_IPSS","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",100,0.,100.);
-	TH1D* histMu1Eta_fine_IPSS               = new TH1D("hMu1Eta_fine_IPSS","#mu_{1} #eta; #mu_{1} #eta;A.U.",100,-5.,5.);
-	TH1D* histMu2Eta_fine_IPSS               = new TH1D("hMu2Eta_fine_IPSS","#mu_{2} #eta; #mu_{2} #eta;A.U.",100,-5.,5.);
+	TH1F* histMu1Pt_fine_IPSS                = new TH1F("hMu1Pt_fine_IPSS","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMu2Pt_fine_IPSS                = new TH1F("hMu2Pt_fine_IPSS","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMu1Eta_fine_IPSS               = new TH1F("hMu1Eta_fine_IPSS","#mu_{1} #eta; #mu_{1} #eta;A.U.",200,-5.,5.);
+	TH1F* histMu2Eta_fine_IPSS               = new TH1F("hMu2Eta_fine_IPSS","#mu_{2} #eta; #mu_{2} #eta;A.U.",200,-5.,5.);
 
 	// mu1/2 pt/eta
-	TH1D* histMu1Pt_fine_IPSSDR              = new TH1D("hMu1Pt_fine_IPSSDR","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",100,0.,100.);
-	TH1D* histMu2Pt_fine_IPSSDR              = new TH1D("hMu2Pt_fine_IPSSDR","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",100,0.,100.);
-	TH1D* histMu1Eta_fine_IPSSDR             = new TH1D("hMu1Eta_fine_IPSSDR","#mu_{1} #eta; #mu_{1} #eta;A.U.",100,-5.,5.);
-	TH1D* histMu2Eta_fine_IPSSDR             = new TH1D("hMu2Eta_fine_IPSSDR","#mu_{2} #eta; #mu_{2} #eta;A.U.",100,-5.,5.);
+	TH1F* histMu1Pt_fine_IPSSDR              = new TH1F("hMu1Pt_fine_IPSSDR","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMu2Pt_fine_IPSSDR              = new TH1F("hMu2Pt_fine_IPSSDR","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMu1Eta_fine_IPSSDR             = new TH1F("hMu1Eta_fine_IPSSDR","#mu_{1} #eta; #mu_{1} #eta;A.U.",200,-5.,5.);
+	TH1F* histMu2Eta_fine_IPSSDR             = new TH1F("hMu2Eta_fine_IPSSDR","#mu_{2} #eta; #mu_{2} #eta;A.U.",200,-5.,5.);
+
+	// mu1 vs mu 2 pT
+	TH2F * HardMuonPtSoftMuonPt_DimuonsH     = new TH2F("HardMuonPtSoftMuonPt_DimuonsH","",40,0,200,40,0,200);
+
 
 	// mu1/2 pt/eta
-	TH1D* histTk1Pt_fine_IPSS                = new TH1D("hTk1Pt_fine_IPSS","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,100.);
-	TH1D* histTk2Pt_fine_IPSS                = new TH1D("hTk2Pt_fine_IPSS","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,100.);
-	TH1D* histTk1Eta_fine_IPSS               = new TH1D("hTk1Eta_fine_IPSS","Tk_{1} #eta; Tk_{1} #eta;A.U.",100,-5.,5.);
-	TH1D* histTk2Eta_fine_IPSS               = new TH1D("hTk2Eta_fine_IPSS","Tk_{2} #eta; Tk_{2} #eta;A.U.",100,-5.,5.);
+	// TH1D* histTk1Pt_fine_IPSS                = new TH1D("hTk1Pt_fine_IPSS","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,100.);
+	// TH1D* histTk2Pt_fine_IPSS                = new TH1D("hTk2Pt_fine_IPSS","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,100.);
+	// TH1D* histTk1Eta_fine_IPSS               = new TH1D("hTk1Eta_fine_IPSS","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
+	// TH1D* histTk2Eta_fine_IPSS               = new TH1D("hTk2Eta_fine_IPSS","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
 
 	// Tk1/2 pt/eta
-	TH1D* histTk1Pt_fine_IPSSDR              = new TH1D("hTk1Pt_fine_IPSSDR","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,100.);
-	TH1D* histTk2Pt_fine_IPSSDR              = new TH1D("hTk2Pt_fine_IPSSDR","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,100.);
-	TH1D* histTk1Eta_fine_IPSSDR             = new TH1D("hTk1Eta_fine_IPSSDR","Tk_{1} #eta; Tk_{1} #eta;A.U.",100,-5.,5.);
-	TH1D* histTk2Eta_fine_IPSSDR             = new TH1D("hTk2Eta_fine_IPSSDR","Tk_{2} #eta; Tk_{2} #eta;A.U.",100,-5.,5.);
+	TH1D* histTauTk1Pt                       = new TH1D("hTauTk1Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histTauTk1Eta                      = new TH1D("hTauTk1Eta","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
+	TH1D* histTauTk2Pt                       = new TH1D("hTauTk2Pt","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histTauTk2Eta                      = new TH1D("hTauTk2Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+	TH2F* histTauTk1vs2Pt                      = new TH2F("hTauTk1vs2Pt","",100,0.,50.,100,0.,50.);
+	TH1D* histTauTk12Pt                      = new TH1D("hTauTk12Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histTauTk12Eta                     = new TH1D("hTauTk12Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+
+	// Tk1/2 pt/eta when mu non-iso (2 or 3 tracks)
+	TH1D* histNonIsoTk1Pt                       = new TH1D("hNonIsoTk1Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histNonIsoTk1Eta                      = new TH1D("hNonIsoTk1Eta","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
+	TH1D* histNonIsoTk2Pt                       = new TH1D("hNonIsoTk2Pt","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histNonIsoTk2Eta                      = new TH1D("hNonIsoTk2Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+	TH2F* histNonIsoTk1vs2Pt                      = new TH2F("hNonIsoTk1vs2Pt","",100,0.,50.,100,0.,50.);
+	TH1D* histNonIsoTk12Pt                      = new TH1D("hNonIsoTk12Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histNonIsoTk12Eta                     = new TH1D("hNonIsoTk12Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
 
 	// mu1 pT plots in bins of m2
 	TH1D* histMu1Pt_0to1                     = new TH1D("hMu1Pt_0to1","#mu_{1} p_{T} for m(#mu_{2}-tk) = 0-1 GeV; #mu_{1} p_{T} [GeV];A.U.",10,10.,50.);
@@ -278,8 +294,8 @@ void massPlots(int argc, char* argv[])
 	TH1D* histN_2p5_looseIP                  = new TH1D("hN_2p5_looseIP","Number of tracks with p_{T} > 2.5 GeV with loose IP;Number of tracks; Fraction", 5, 0, 5);
 	TH1D* histN_2p5_OS_looseIP               = new TH1D("hN_2p5_OS_looseIP","Number of OS tracks with p_{T} > 2.5 GeV with loose IP;Number of tracks; Fraction", 5, 0, 5);
 
-	TH1D* histN_2p5                  = new TH1D("hN_2p5","Number of tracks with p_{T} > 2.5 GeV ;Number of tracks; Fraction", 5, 0, 5);
-	TH1D* histN_2p5_OS               = new TH1D("hN_2p5_OS","Number of OS tracks with p_{T} > 2.5 GeV ;Number of tracks; Fraction", 5, 0, 5);
+	TH1D* histN_2p5                          = new TH1D("hN_2p5","Number of tracks with p_{T} > 2.5 GeV ;Number of tracks; Fraction", 5, 0, 5);
+	TH1D* histN_2p5_OS                       = new TH1D("hN_2p5_OS","Number of OS tracks with p_{T} > 2.5 GeV ;Number of tracks; Fraction", 5, 0, 5);
 
 	// int nMu(0);
 	// int n1(0), n2(0), nMuPass(0);
@@ -445,23 +461,24 @@ void massPlots(int argc, char* argv[])
 		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<Track>);
 		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<Track>);
 
-		// For muon pT and eta, we want fewer cuts on muons - just SS, IP
-		std::pair<Track*, Track*> p_loose = testMuons(muons17toInf, muons10to17, &checkMuonsIPSS);
-		if (p_loose.first && p_loose.second) {
-			histMu1Pt_fine_IPSS->Fill(p_loose.first->PT);
-			histMu1Eta_fine_IPSS->Fill(p_loose.first->Eta);
-			histMu2Pt_fine_IPSS->Fill(p_loose.second->PT);
-			histMu2Eta_fine_IPSS->Fill(p_loose.second->Eta);
-		}		 
+		// // For muon pT and eta, we want fewer cuts on muons - just SS, IP, Eta
+		// std::pair<Track*, Track*> p_loose = testMuons(muons17toInf, muons10to17, &checkMuonsIPSSEta);
+		// if (p_loose.first && p_loose.second) {
+		// 	histMu1Pt_fine_IPSS->Fill(p_loose.first->PT);
+		// 	histMu1Eta_fine_IPSS->Fill(p_loose.first->Eta);
+		// 	histMu2Pt_fine_IPSS->Fill(p_loose.second->PT);
+		// 	histMu2Eta_fine_IPSS->Fill(p_loose.second->Eta);
+		// }		 
 
-		// For muon pT and eta, we want fewer cuts on muons - just SS, IP, deltaR
-		std::pair<Track*, Track*> p_loose_DR = testMuons(muons17toInf, muons10to17, &checkMuonsIPSSDR, deltaR);
-		if (p_loose_DR.first && p_loose_DR.second) {
-			histMu1Pt_fine_IPSSDR->Fill(p_loose_DR.first->PT);
-			histMu1Eta_fine_IPSSDR->Fill(p_loose_DR.first->Eta);
-			histMu2Pt_fine_IPSSDR->Fill(p_loose_DR.second->PT);
-			histMu2Eta_fine_IPSSDR->Fill(p_loose_DR.second->Eta);
-		}		 
+		// // For muon pT and eta, we use standard selection, no tracks
+		// std::pair<Track*, Track*> p_loose_DR = testMuons(muons17toInf, muons10to17, &checkMuonsIPSSDREta, deltaR);
+		// if (p_loose_DR.first && p_loose_DR.second) {
+		// 	histMu1Pt_fine_IPSSDR->Fill(p_loose_DR.first->PT);
+		// 	histMu1Eta_fine_IPSSDR->Fill(p_loose_DR.first->Eta);
+		// 	histMu2Pt_fine_IPSSDR->Fill(p_loose_DR.second->PT);
+		// 	histMu2Eta_fine_IPSSDR->Fill(p_loose_DR.second->Eta);
+		// 	HardMuonPtSoftMuonPt_DimuonsH->Fill(p_loose_DR.first->PT);
+		// }		 
 
 		// For rest of plots we want our muons to pass signal selection
 		// Make pairs, see if they pass all cuts (SS, eta, deltaR, dZ, d0)
@@ -472,6 +489,13 @@ void massPlots(int argc, char* argv[])
 
 		if (!(p.first && p.second)) continue;
 
+		histMu1Pt_fine_IPSSDR->Fill(p.first->PT);
+		histMu1Eta_fine_IPSSDR->Fill(p.first->Eta);
+		histMu2Pt_fine_IPSSDR->Fill(p.second->PT);
+		histMu2Eta_fine_IPSSDR->Fill(p.second->Eta);
+		HardMuonPtSoftMuonPt_DimuonsH->Fill(p.first->PT, p.second->PT);
+
+
 		// cout << " >>>>> Muon pair details: " << endl;
 		// cout << " >>>>> Mu1 pT " << mu1->PT << " charge: " << mu1->Charge << " eta " << mu1->Eta << endl;
 		// cout << " >>>>> Mu2 pT " << mu2->PT << " charge: " << mu2->Charge << " eta " << mu2->Eta << endl;
@@ -481,11 +505,13 @@ void massPlots(int argc, char* argv[])
 		Track *origMu1(nullptr), *origMu2(nullptr);
 		origMu1 = mu1;
 		origMu2 = mu2;
+		bool swapped = false;
 		if (swapMuRandomly){
 			// TLorentzVector mu1MomTmp = mu1->P4();
 			// TLorentzVector mu2MomTmp = mu2->P4();
 			double randNum = (double)rand() / RAND_MAX;
 			if (randNum > 0.5){
+				swapped = true; 
 				mu1 = origMu2;
 				mu2 = origMu1;
 			}
@@ -560,7 +586,6 @@ void massPlots(int argc, char* argv[])
 					}
 				} else {
 					
-					fillTrackVectors(candTk, mu1, mu2, &tk1_1to2p5, &tk2_1to2p5);
 					
 					if (checkTrackPTTight(candTk)) {
 						// tau candidate must have pT > 2.5 GeV
@@ -569,7 +594,10 @@ void massPlots(int argc, char* argv[])
 						if (checkTkMuOS(candTk, mu1)) {
 							fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_OS_looseip, &tk2_2p5_OS_looseip);
 						}					
+					} else {
+						fillTrackVectors(candTk, mu1, mu2, &tk1_1to2p5, &tk2_1to2p5);
 					}
+
 					if (do1to1p5 && candTk->PT < 1.5){
 						fillTrackVectors(candTk, mu1, mu2, &tk1_1to1p5, &tk2_1to1p5);
 					}
@@ -625,7 +653,29 @@ void massPlots(int argc, char* argv[])
 				histM1_fine->Fill(m1);
 				histM2->Fill(m2);
 				histM2_fine->Fill(m2);
-				
+
+				if (swapped){
+					histTauTk1Pt->Fill(tk2_2p5_OS[0]->PT);
+					histTauTk1Eta->Fill(tk2_2p5_OS[0]->Eta);
+					histTauTk2Pt->Fill(tk1_2p5_OS[0]->PT);
+					histTauTk2Eta->Fill(tk1_2p5_OS[0]->Eta);
+					// histTauTk1vs2Pt->Fill(tk2_2p5_OS[0]->PT, tk1_2p5_OS[0]->PT);
+					histTauTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+					histTauTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+					histTauTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+					histTauTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
+				} else {
+					histTauTk1Pt->Fill(tk1_2p5_OS[0]->PT);
+					histTauTk1Eta->Fill(tk1_2p5_OS[0]->Eta);
+					histTauTk2Pt->Fill(tk2_2p5_OS[0]->PT);
+					histTauTk2Eta->Fill(tk2_2p5_OS[0]->Eta);
+					// histTauTk1vs2Pt->Fill(tk1_2p5_OS[0]->PT, tk2_2p5_OS[0]->PT);
+					histTauTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+					histTauTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+					histTauTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+					histTauTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
+				}
+
 				// Fill symmetrically to increase stats
 				histM1vsM2->Fill(m1,m2);
 				// if (getMassBin(m1) != getMassBin(m2)){
@@ -728,6 +778,7 @@ void massPlots(int argc, char* argv[])
 			
 			double m1(0);		
 
+
 			if ( //tk2_1.size() == 2 
 				tk2_1to2p5_taucand.size() == 1
 				&& tk2_1to2p5.size() == 1
@@ -736,6 +787,28 @@ void massPlots(int argc, char* argv[])
 					
 					histM1_Ntk2_2->Fill(m1);
 					histM1_Ntk2_2or3->Fill(m1);
+
+					if(swapped) {
+						histNonIsoTk1Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk1Eta->Fill(tk2_2p5_OS[0]->Eta);
+						histNonIsoTk2Pt->Fill(tk1_2p5_OS[0]->PT);
+						histNonIsoTk2Eta->Fill(tk1_2p5_OS[0]->Eta);
+						// histNonIsoTk1vs2Pt->Fill(tk2_2p5_OS[0]->PT, tk1_2p5_OS[0]->PT);
+						histNonIsoTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+						histNonIsoTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+						histNonIsoTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
+					} else {
+						histNonIsoTk1Pt->Fill(tk1_2p5_OS[0]->PT);
+						histNonIsoTk1Eta->Fill(tk1_2p5_OS[0]->Eta);
+						histNonIsoTk2Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk2Eta->Fill(tk2_2p5_OS[0]->Eta);
+						// histNonIsoTk1vs2Pt->Fill(tk1_2p5_OS[0]->PT, tk2_2p5_OS[0]->PT);
+						histNonIsoTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+						histNonIsoTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+						histNonIsoTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
+					}
 				}			
 
 			if (// tk2_1.size() == 3 
@@ -746,6 +819,29 @@ void massPlots(int argc, char* argv[])
 					
 					histM1_Ntk2_3->Fill(m1);
 					histM1_Ntk2_2or3->Fill(m1);
+
+					if(swapped) {
+						histNonIsoTk1Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk1Eta->Fill(tk2_2p5_OS[0]->Eta);
+						histNonIsoTk2Pt->Fill(tk1_2p5_OS[0]->PT);
+						histNonIsoTk2Eta->Fill(tk1_2p5_OS[0]->Eta);
+						// histNonIsoTk1vs2Pt->Fill(tk2_2p5_OS[0]->PT, tk1_2p5_OS[0]->PT);
+						histNonIsoTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+						histNonIsoTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+						histNonIsoTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
+					} else {
+						histNonIsoTk1Pt->Fill(tk1_2p5_OS[0]->PT);
+						histNonIsoTk1Eta->Fill(tk1_2p5_OS[0]->Eta);
+						histNonIsoTk2Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk2Eta->Fill(tk2_2p5_OS[0]->Eta);
+						// histNonIsoTk1vs2Pt->Fill(tk1_2p5_OS[0]->PT, tk2_2p5_OS[0]->PT);
+						histNonIsoTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+						histNonIsoTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+						histNonIsoTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
+					}
+
 				}			
 
 			if ( //tk2_1.size() == 4 
@@ -1030,6 +1126,19 @@ void massPlots(int argc, char* argv[])
 	printIntegral(histMu2Pt_fine_IPSSDR);
 	printIntegral(histMu1Eta_fine_IPSSDR);
 	printIntegral(histMu2Eta_fine_IPSSDR);
+
+	printIntegral(histTauTk1Pt);
+	printIntegral(histTauTk1Eta);
+	printIntegral(histTauTk2Pt);
+	printIntegral(histTauTk2Eta);
+	printIntegral(histTauTk12Pt);
+	printIntegral(histTauTk12Eta);
+	printIntegral(histNonIsoTk1Pt);
+	printIntegral(histNonIsoTk1Eta);
+	printIntegral(histNonIsoTk2Pt);
+	printIntegral(histNonIsoTk2Eta);
+	printIntegral(histNonIsoTk12Pt);
+	printIntegral(histNonIsoTk12Eta);
 
 	/////////////////
 	// PLOT THINGS //
@@ -1340,6 +1449,25 @@ void massPlots(int argc, char* argv[])
 	drawHistAndSave(histMu1Eta_fine_IPSSDR, "HISTE", "histMu1Eta_fine_IPSSDR", directory, app);
 	drawHistAndSave(histMu2Pt_fine_IPSSDR, "HISTE", "histMu2Pt_fine_IPSSDR", directory, app);
 	drawHistAndSave(histMu2Eta_fine_IPSSDR, "HISTE", "histMu2Eta_fine_IPSSDR", directory, app);
+	
+	drawHistAndSave(HardMuonPtSoftMuonPt_DimuonsH, "COLZ", "HardMuonPtSoftMuonPt_DimuonsH", directory, app);
+
+	// tk1,2 pt, eta
+	drawHistAndSave(histTauTk1Pt, "HISTE", "histTauTk1Pt", directory, app);
+	drawHistAndSave(histTauTk1Eta, "HISTE", "histTauTk1Eta", directory, app);
+	drawHistAndSave(histTauTk2Pt, "HISTE", "histTauTk2Pt", directory, app);
+	drawHistAndSave(histTauTk2Eta, "HISTE", "histTauTk2Eta", directory, app);
+	drawHistAndSave(histTauTk1vs2Pt, "COLZ", "histTauTk1vs2Pt", directory, app);
+	drawHistAndSave(histTauTk12Pt, "HISTE", "histTauTk12Pt", directory, app);
+	drawHistAndSave(histTauTk12Eta, "HISTE", "histTauTk12Eta", directory, app);
+
+	drawHistAndSave(histNonIsoTk1Pt, "HISTE", "histNonIsoTk1Pt", directory, app);
+	drawHistAndSave(histNonIsoTk1Eta, "HISTE", "histNonIsoTk1Eta", directory, app);
+	drawHistAndSave(histNonIsoTk2Pt, "HISTE", "histNonIsoTk2Pt", directory, app);
+	drawHistAndSave(histNonIsoTk2Eta, "HISTE", "histNonIsoTk2Eta", directory, app);
+	drawHistAndSave(histNonIsoTk1vs2Pt, "COLZ", "histNonIsoTk12Pt", directory, app);
+	drawHistAndSave(histNonIsoTk12Pt, "HISTE", "histNonIsoTk12Pt", directory, app);
+	drawHistAndSave(histNonIsoTk12Eta, "HISTE", "histNonIsoTk12Eta", directory, app);
 
 	// Testing hists
 	// -------------
@@ -1470,7 +1598,23 @@ void massPlots(int argc, char* argv[])
 	histMu2Pt_fine_IPSSDR->Write("", TObject::kOverwrite);
 	histMu2Eta_fine_IPSSDR->Write("", TObject::kOverwrite);
 
+	HardMuonPtSoftMuonPt_DimuonsH->Write("", TObject::kOverwrite);
 
+	histTauTk1Pt->Write("", TObject::kOverwrite);
+	histTauTk1Eta->Write("", TObject::kOverwrite);
+	histTauTk2Pt->Write("", TObject::kOverwrite);
+	histTauTk2Eta->Write("", TObject::kOverwrite);
+	histTauTk1vs2Pt->Write("", TObject::kOverwrite);
+	histTauTk12Pt->Write("", TObject::kOverwrite);
+	histTauTk12Eta->Write("", TObject::kOverwrite);
+	
+	histNonIsoTk1Pt->Write("", TObject::kOverwrite);
+	histNonIsoTk1Eta->Write("", TObject::kOverwrite);
+	histNonIsoTk2Pt->Write("", TObject::kOverwrite);
+	histNonIsoTk2Eta->Write("", TObject::kOverwrite);
+	histNonIsoTk1vs2Pt->Write("", TObject::kOverwrite);
+	histNonIsoTk12Pt->Write("", TObject::kOverwrite);
+	histNonIsoTk12Eta->Write("", TObject::kOverwrite);
 
 	outFile->Close();
 
