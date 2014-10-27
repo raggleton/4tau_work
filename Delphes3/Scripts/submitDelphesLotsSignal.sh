@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for name in ${HOME}/pythia8183/Signal_1prong_500K_bare/GG_H_aa_8_4taus_decay_500K_*.hepmc
+for name in ${HOME}/pythia8185/Signal_1prong_500K_bare/GG_H_aa_8_4taus_decay_500K_*.hepmc
 do
 	# Pure filename, no path
 	filename=${name##*/}
@@ -26,6 +26,6 @@ do
 	echo "Doing "$filename
 	out="signal_1prong_500K_${num}_${hltConf}_${delphConf}"	
 	echo $out
-	qsub -v hepmcname=${name},rootname="/panfs/panasas01/phys/ra12451/Delphes-3.0.12/Signal_1prong_500K_bare/"${out}.root runDelphesBatch.sh
+	qsub -v hepmcname=${name},rootname="/panfs/panasas01/phys/ra12451/Delphes-3.1.2/Signal_1prong_HLT_bare/"${out}.root runDelphesBatch.sh
 	sleep 10
 done
