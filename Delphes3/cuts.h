@@ -141,6 +141,14 @@ float calcDxy(Track* cand) {
 
 // Template these?
 
+bool checkMuonsEta(Track* muA, Track* muB){
+	if ((fabs(muA->Eta) < 2.1) && (fabs(muB->Eta) < 2.1)){
+		return true;
+	} else {
+		return false;
+	}
+}
+
 /**
  * Check to see if muA and muB satisfy muon IP criteria
  * @param  muA [description]
@@ -219,8 +227,8 @@ bool checkMuonsSS(Track* muA, Track* muB){
  * @param  muB [description]
  * @return     [description]
  */
-bool checkMuonsIPSS(Track* muA, Track* muB) {
-	return checkMuonsIP(muA, muB) && checkMuonsSS(muA, muB);	
+bool checkMuonsIPSSEta(Track* muA, Track* muB) {
+	return checkMuonsEta(muA, muB) && checkMuonsIP(muA, muB) && checkMuonsSS(muA, muB);	
 }
 
 /**
@@ -230,8 +238,9 @@ bool checkMuonsIPSS(Track* muA, Track* muB) {
  * @param  deltaR [description]
  * @return     [description]
  */
-bool checkMuonsIPSSDR(Track* muA, Track* muB, double deltaR) {
-	if (checkMuonsIP(muA, muB) 
+bool checkMuonsIPSSDREta(Track* muA, Track* muB, double deltaR) {
+	if (checkMuonsEta(muA, muB)
+		&& checkMuonsIP(muA, muB) 
 		&& checkMuonsSS(muA, muB) 
 		&& (muA->P4().DeltaR(muB->P4()) > deltaR)) {
 		return true;
@@ -248,8 +257,7 @@ bool checkMuonsIPSSDR(Track* muA, Track* muB, double deltaR) {
  * @return    TRUE if muA and muB pass cuts, FALSE otherwise
  */
 bool checkMuonsPTSSEta(Track* muA, Track* muB){
-	if (checkMuonsPTSS(muA, muB) 
-		&& (fabs(muA->Eta) < 2.1) && (fabs(muB->Eta) < 2.1)){
+	if (checkMuonsPTSS(muA, muB) && checkMuonsEta(muA, muB)){
 		return true;
 	} else {
 		return false;
