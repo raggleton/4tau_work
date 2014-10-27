@@ -268,7 +268,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			// file = "signal_1prong_500K_TauPythia_HLT_";
 			// folder = "Signal_1prong_500K_bare/";
 			// file = "signal_1prong_500K_HLT_";
-			addFilesFromFolder(chain, "Signal_1prong_HLT_bare/", "Signal_HLT_", 20);
+			addFilesFromFolder(chain, "Signal_1prong_HLT_bare/", "Signal_HLT_", 60);
 		} else { 
 			cout << "Doing signal without HLT cuts" << endl;
 			addFilesFromFolder(chain, "Signal_1prong_500K_bare/", "signal_1prong_500K_NoHLT_", 20);
