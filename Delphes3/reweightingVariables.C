@@ -93,6 +93,48 @@ void reweightingVariables(int argc, char* argv[])
 	TH1D* histDRmutk_hard_noniso = new TH1D("hDRmutk_hard_noniso", "#DeltaR(#mu-tk) (hard)",40,0,2);
 	TH1D* histDRmutk_soft_noniso = new TH1D("hDRmutk_soft_noniso", "#DeltaR(#mu-tk) (soft)",40,0,2);
 
+	// mu1/2 pt/eta
+	TH1F* histMu1Pt_fine_IPSS                = new TH1F("hMu1Pt_fine_IPSS","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMu2Pt_fine_IPSS                = new TH1F("hMu2Pt_fine_IPSS","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMu1Eta_fine_IPSS               = new TH1F("hMu1Eta_fine_IPSS","#mu_{1} #eta; #mu_{1} #eta;A.U.",200,-5.,5.);
+	TH1F* histMu2Eta_fine_IPSS               = new TH1F("hMu2Eta_fine_IPSS","#mu_{2} #eta; #mu_{2} #eta;A.U.",200,-5.,5.);
+
+	// mu1/2 pt/eta
+	TH1F* histMu1Pt_fine_IPSSDR              = new TH1F("hMu1Pt_fine_IPSSDR","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMu2Pt_fine_IPSSDR              = new TH1F("hMu2Pt_fine_IPSSDR","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMu1Eta_fine_IPSSDR             = new TH1F("hMu1Eta_fine_IPSSDR","#mu_{1} #eta; #mu_{1} #eta;A.U.",200,-5.,5.);
+	TH1F* histMu2Eta_fine_IPSSDR             = new TH1F("hMu2Eta_fine_IPSSDR","#mu_{2} #eta; #mu_{2} #eta;A.U.",200,-5.,5.);
+
+	// mu1 vs mu 2 pT
+	TH2F * HardMuonPtSoftMuonPt_DimuonsH     = new TH2F("HardMuonPtSoftMuonPt_DimuonsH","",40,0,200,40,0,200);
+
+
+	// mu1/2 pt/eta
+	// TH1D* histTk1Pt_fine_IPSS                = new TH1D("hTk1Pt_fine_IPSS","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,100.);
+	// TH1D* histTk2Pt_fine_IPSS                = new TH1D("hTk2Pt_fine_IPSS","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,100.);
+	// TH1D* histTk1Eta_fine_IPSS               = new TH1D("hTk1Eta_fine_IPSS","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
+	// TH1D* histTk2Eta_fine_IPSS               = new TH1D("hTk2Eta_fine_IPSS","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+
+	// Tk1/2 pt/eta
+	TH1D* histTauTk1Pt                       = new TH1D("hTauTk1Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histTauTk1Eta                      = new TH1D("hTauTk1Eta","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
+	TH1D* histTauTk2Pt                       = new TH1D("hTauTk2Pt","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histTauTk2Eta                      = new TH1D("hTauTk2Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+	TH2F* histTauTk1vs2Pt                      = new TH2F("hTauTk1vs2Pt","",100,0.,50.,100,0.,50.);
+	TH1D* histTauTk12Pt                      = new TH1D("hTauTk12Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histTauTk12Eta                     = new TH1D("hTauTk12Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+
+	// Tk1/2 pt/eta when mu non-iso (2 or 3 tracks)
+	TH1D* histNonIsoTk1Pt                       = new TH1D("hNonIsoTk1Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histNonIsoTk1Eta                      = new TH1D("hNonIsoTk1Eta","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
+	TH1D* histNonIsoTk2Pt                       = new TH1D("hNonIsoTk2Pt","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histNonIsoTk2Eta                      = new TH1D("hNonIsoTk2Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+	TH2F* histNonIsoTk1vs2Pt                      = new TH2F("hNonIsoTk1vs2Pt","",100,0.,50.,100,0.,50.);
+	TH1D* histNonIsoTk12Pt                      = new TH1D("hNonIsoTk12Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histNonIsoTk12Eta                     = new TH1D("hNonIsoTk12Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+
+
+
 	// int nMu(0);
 	// int n1(0), n2(0), nMuPass(0);
 
@@ -257,24 +299,6 @@ void reweightingVariables(int argc, char* argv[])
 		std::sort(muons17toInf.begin(), muons17toInf.end(), sortByPT<Track>);
 		std::sort(muons10to17.begin(), muons10to17.end(), sortByPT<Track>);
 
-		// // For muon pT and eta, we want fewer cuts on muons - just SS, IP, Eta
-		// std::pair<Track*, Track*> p_loose = testMuons(muons17toInf, muons10to17, &checkMuonsIPSSEta);
-		// if (p_loose.first && p_loose.second) {
-		// 	histMu1Pt_fine_IPSS->Fill(p_loose.first->PT);
-		// 	histMu1Eta_fine_IPSS->Fill(p_loose.first->Eta);
-		// 	histMu2Pt_fine_IPSS->Fill(p_loose.second->PT);
-		// 	histMu2Eta_fine_IPSS->Fill(p_loose.second->Eta);
-		// }		 
-
-		// // For muon pT and eta, we use standard selection, no tracks
-		// std::pair<Track*, Track*> p_loose_DR = testMuons(muons17toInf, muons10to17, &checkMuonsIPSSDREta, deltaR);
-		// if (p_loose_DR.first && p_loose_DR.second) {
-		// 	histMu1Pt_fine_IPSSDR->Fill(p_loose_DR.first->PT);
-		// 	histMu1Eta_fine_IPSSDR->Fill(p_loose_DR.first->Eta);
-		// 	histMu2Pt_fine_IPSSDR->Fill(p_loose_DR.second->PT);
-		// 	histMu2Eta_fine_IPSSDR->Fill(p_loose_DR.second->Eta);
-		// 	HardMuonPtSoftMuonPt_DimuonsH->Fill(p_loose_DR.first->PT);
-		// }		 
 
 		// For rest of plots we want our muons to pass signal selection
 		// Make pairs, see if they pass all cuts (SS, eta, deltaR, dZ, d0)
@@ -285,6 +309,11 @@ void reweightingVariables(int argc, char* argv[])
 
 		if (!(p.first && p.second)) continue;
 
+		histMu1Pt_fine_IPSSDR->Fill(p.first->PT);
+		histMu1Eta_fine_IPSSDR->Fill(p.first->Eta);
+		histMu2Pt_fine_IPSSDR->Fill(p.second->PT);
+		histMu2Eta_fine_IPSSDR->Fill(p.second->Eta);
+		HardMuonPtSoftMuonPt_DimuonsH->Fill(p.first->PT, p.second->PT);
 
 		// cout << " >>>>> Muon pair details: " << endl;
 		// cout << " >>>>> Mu1 pT " << mu1->PT << " charge: " << mu1->Charge << " eta " << mu1->Eta << endl;
@@ -438,9 +467,27 @@ void reweightingVariables(int argc, char* argv[])
 				// double m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
 				if (swapped){
+					histTauTk1Pt->Fill(tk2_2p5_OS[0]->PT);
+					histTauTk1Eta->Fill(tk2_2p5_OS[0]->Eta);
+					histTauTk2Pt->Fill(tk1_2p5_OS[0]->PT);
+					histTauTk2Eta->Fill(tk1_2p5_OS[0]->Eta);
+					// histTauTk1vs2Pt->Fill(tk2_2p5_OS[0]->PT, tk1_2p5_OS[0]->PT);
+					histTauTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+					histTauTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+					histTauTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+					histTauTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
 					histDRmutk_hard->Fill(track2Mom.DeltaR(mu2Mom));
 					histDRmutk_soft->Fill(track1Mom.DeltaR(mu1Mom));
 				} else {
+					histTauTk1Pt->Fill(tk1_2p5_OS[0]->PT);
+					histTauTk1Eta->Fill(tk1_2p5_OS[0]->Eta);
+					histTauTk2Pt->Fill(tk2_2p5_OS[0]->PT);
+					histTauTk2Eta->Fill(tk2_2p5_OS[0]->Eta);
+					// histTauTk1vs2Pt->Fill(tk1_2p5_OS[0]->PT, tk2_2p5_OS[0]->PT);
+					histTauTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+					histTauTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+					histTauTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+					histTauTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
 					histDRmutk_hard->Fill(track1Mom.DeltaR(mu1Mom));
 					histDRmutk_soft->Fill(track2Mom.DeltaR(mu2Mom));
 				}
@@ -525,9 +572,27 @@ void reweightingVariables(int argc, char* argv[])
 					
 
 				if (swapped){
+					histNonIsoTk1Pt->Fill(tk2_2p5_OS[0]->PT);
+					histNonIsoTk1Eta->Fill(tk2_2p5_OS[0]->Eta);
+					histNonIsoTk2Pt->Fill(tk1_2p5_OS[0]->PT);
+					histNonIsoTk2Eta->Fill(tk1_2p5_OS[0]->Eta);
+					// histNonIsoTk1vs2Pt->Fill(tk2_2p5_OS[0]->PT, tk1_2p5_OS[0]->PT);
+					histNonIsoTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+					histNonIsoTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+					histNonIsoTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+					histNonIsoTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
 					histDRmutk_hard_noniso->Fill(track2Mom.DeltaR(mu2Mom));
 					histDRmutk_soft_noniso->Fill(track1Mom.DeltaR(mu1Mom));
 				} else {
+					histNonIsoTk1Pt->Fill(tk1_2p5_OS[0]->PT);
+					histNonIsoTk1Eta->Fill(tk1_2p5_OS[0]->Eta);
+					histNonIsoTk2Pt->Fill(tk2_2p5_OS[0]->PT);
+					histNonIsoTk2Eta->Fill(tk2_2p5_OS[0]->Eta);
+					// histNonIsoTk1vs2Pt->Fill(tk1_2p5_OS[0]->PT, tk2_2p5_OS[0]->PT);
+					histNonIsoTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+					histNonIsoTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+					histNonIsoTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+					histNonIsoTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
 					histDRmutk_hard_noniso->Fill(track1Mom.DeltaR(mu1Mom));
 					histDRmutk_soft_noniso->Fill(track2Mom.DeltaR(mu2Mom));
 				}
@@ -541,9 +606,27 @@ void reweightingVariables(int argc, char* argv[])
 					// m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 					
 					if (swapped){
+						histNonIsoTk1Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk1Eta->Fill(tk2_2p5_OS[0]->Eta);
+						histNonIsoTk2Pt->Fill(tk1_2p5_OS[0]->PT);
+						histNonIsoTk2Eta->Fill(tk1_2p5_OS[0]->Eta);
+						// histNonIsoTk1vs2Pt->Fill(tk2_2p5_OS[0]->PT, tk1_2p5_OS[0]->PT);
+						histNonIsoTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+						histNonIsoTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+						histNonIsoTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
 						histDRmutk_hard_noniso->Fill(track2Mom.DeltaR(mu2Mom));
 						histDRmutk_soft_noniso->Fill(track1Mom.DeltaR(mu1Mom));
 					} else {
+						histNonIsoTk1Pt->Fill(tk1_2p5_OS[0]->PT);
+						histNonIsoTk1Eta->Fill(tk1_2p5_OS[0]->Eta);
+						histNonIsoTk2Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk2Eta->Fill(tk2_2p5_OS[0]->Eta);
+						// histNonIsoTk1vs2Pt->Fill(tk1_2p5_OS[0]->PT, tk2_2p5_OS[0]->PT);
+						histNonIsoTk12Pt->Fill(tk1_2p5_OS[0]->PT),
+						histNonIsoTk12Pt->Fill(tk2_2p5_OS[0]->PT);
+						histNonIsoTk12Eta->Fill(tk1_2p5_OS[0]->Eta);
+						histNonIsoTk12Eta->Fill(tk2_2p5_OS[0]->Eta);
 						histDRmutk_hard_noniso->Fill(track1Mom.DeltaR(mu1Mom));
 						histDRmutk_soft_noniso->Fill(track2Mom.DeltaR(mu2Mom));
 					}
@@ -645,7 +728,31 @@ void reweightingVariables(int argc, char* argv[])
 	} // end of event loop
 
 
-	// Print out integrals before we normalise
+	//////////////////////////////////////////////
+	// Print out integrals before we normalise //
+	//////////////////////////////////////////////
+	// printIntegral(histMu1Pt_fine_IPSS);
+	// printIntegral(histMu2Pt_fine_IPSS);
+	// printIntegral(histMu1Eta_fine_IPSS);
+	// printIntegral(histMu2Eta_fine_IPSS);
+
+	printIntegral(histMu1Pt_fine_IPSSDR);
+	printIntegral(histMu2Pt_fine_IPSSDR);
+	printIntegral(histMu1Eta_fine_IPSSDR);
+	printIntegral(histMu2Eta_fine_IPSSDR);
+
+	printIntegral(histTauTk1Pt);
+	printIntegral(histTauTk1Eta);
+	printIntegral(histTauTk2Pt);
+	printIntegral(histTauTk2Eta);
+	printIntegral(histTauTk12Pt);
+	printIntegral(histTauTk12Eta);
+	printIntegral(histNonIsoTk1Pt);
+	printIntegral(histNonIsoTk1Eta);
+	printIntegral(histNonIsoTk2Pt);
+	printIntegral(histNonIsoTk2Eta);
+	printIntegral(histNonIsoTk12Pt);
+	printIntegral(histNonIsoTk12Eta);
 	printIntegral(histDRmutk_hard);
 	printIntegral(histDRmutk_soft);
 	printIntegral(histDRmutk_hard_noniso);
@@ -689,6 +796,39 @@ void reweightingVariables(int argc, char* argv[])
 	// makeCopySave(histM1_side_1to2p5);
 	// normaliseHist(histM1_side_1to2p5);
 	
+	/////////////////////////////////
+	// PLOT AND SAVE HISTS TO PDF //
+	/////////////////////////////////
+
+	// mu1,2 pt,eta
+	// drawHistAndSave(histMu1Pt_fine_IPSS, "HISTE", "histMu1Pt_fine_IPSS", directory, app);
+	// drawHistAndSave(histMu1Eta_fine_IPSS, "HISTE", "histMu1Eta_fine_IPSS", directory, app);
+	// drawHistAndSave(histMu2Pt_fine_IPSS, "HISTE", "histMu2Pt_fine_IPSS", directory, app);
+	// drawHistAndSave(histMu2Eta_fine_IPSS, "HISTE", "histMu2Eta_fine_IPSS", directory, app);
+	drawHistAndSave(histMu1Pt_fine_IPSSDR, "HISTE", "histMu1Pt_fine_IPSSDR", directory, app);
+	drawHistAndSave(histMu1Eta_fine_IPSSDR, "HISTE", "histMu1Eta_fine_IPSSDR", directory, app);
+	drawHistAndSave(histMu2Pt_fine_IPSSDR, "HISTE", "histMu2Pt_fine_IPSSDR", directory, app);
+	drawHistAndSave(histMu2Eta_fine_IPSSDR, "HISTE", "histMu2Eta_fine_IPSSDR", directory, app);
+	
+	drawHistAndSave(HardMuonPtSoftMuonPt_DimuonsH, "COLZ", "HardMuonPtSoftMuonPt_DimuonsH", directory, app);
+
+	// tk1,2 pt, eta
+	drawHistAndSave(histTauTk1Pt, "HISTE", "histTauTk1Pt", directory, app);
+	drawHistAndSave(histTauTk1Eta, "HISTE", "histTauTk1Eta", directory, app);
+	drawHistAndSave(histTauTk2Pt, "HISTE", "histTauTk2Pt", directory, app);
+	drawHistAndSave(histTauTk2Eta, "HISTE", "histTauTk2Eta", directory, app);
+	drawHistAndSave(histTauTk1vs2Pt, "COLZ", "histTauTk1vs2Pt", directory, app);
+	drawHistAndSave(histTauTk12Pt, "HISTE", "histTauTk12Pt", directory, app);
+	drawHistAndSave(histTauTk12Eta, "HISTE", "histTauTk12Eta", directory, app);
+
+	drawHistAndSave(histNonIsoTk1Pt, "HISTE", "histNonIsoTk1Pt", directory, app);
+	drawHistAndSave(histNonIsoTk1Eta, "HISTE", "histNonIsoTk1Eta", directory, app);
+	drawHistAndSave(histNonIsoTk2Pt, "HISTE", "histNonIsoTk2Pt", directory, app);
+	drawHistAndSave(histNonIsoTk2Eta, "HISTE", "histNonIsoTk2Eta", directory, app);
+	drawHistAndSave(histNonIsoTk1vs2Pt, "COLZ", "histNonIsoTk12Pt", directory, app);
+	drawHistAndSave(histNonIsoTk12Pt, "HISTE", "histNonIsoTk12Pt", directory, app);
+	drawHistAndSave(histNonIsoTk12Eta, "HISTE", "histNonIsoTk12Eta", directory, app);
+
 	drawHistAndSave(histDRmutk_hard, "HISTE", "DRmutk_hard", directory, app);
 	drawHistAndSave(histDRmutk_soft, "HISTE", "DRmutk_soft", directory, app);
 	drawHistAndSave(histDRmutk_hard_noniso, "HISTE", "DRmutk_hard_noniso", directory, app);
@@ -698,6 +838,29 @@ void reweightingVariables(int argc, char* argv[])
 	// Write hists to file //
 	//////////////////////////
 
+	histMu1Pt_fine_IPSSDR->Write("", TObject::kOverwrite);
+	histMu1Eta_fine_IPSSDR->Write("", TObject::kOverwrite);
+	histMu2Pt_fine_IPSSDR->Write("", TObject::kOverwrite);
+	histMu2Eta_fine_IPSSDR->Write("", TObject::kOverwrite);
+
+	HardMuonPtSoftMuonPt_DimuonsH->Write("", TObject::kOverwrite);
+
+	histTauTk1Pt->Write("", TObject::kOverwrite);
+	histTauTk1Eta->Write("", TObject::kOverwrite);
+	histTauTk2Pt->Write("", TObject::kOverwrite);
+	histTauTk2Eta->Write("", TObject::kOverwrite);
+	histTauTk1vs2Pt->Write("", TObject::kOverwrite);
+	histTauTk12Pt->Write("", TObject::kOverwrite);
+	histTauTk12Eta->Write("", TObject::kOverwrite);
+	
+	histNonIsoTk1Pt->Write("", TObject::kOverwrite);
+	histNonIsoTk1Eta->Write("", TObject::kOverwrite);
+	histNonIsoTk2Pt->Write("", TObject::kOverwrite);
+	histNonIsoTk2Eta->Write("", TObject::kOverwrite);
+	histNonIsoTk1vs2Pt->Write("", TObject::kOverwrite);
+	histNonIsoTk12Pt->Write("", TObject::kOverwrite);
+	histNonIsoTk12Eta->Write("", TObject::kOverwrite);
+	
 	histDRmutk_hard->Write("",TObject::kOverwrite);
 	histDRmutk_soft->Write("",TObject::kOverwrite);
 	histDRmutk_hard_noniso->Write("",TObject::kOverwrite);
