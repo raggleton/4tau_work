@@ -29,10 +29,11 @@ alias ls='ls --color=auto'
 alias lt='ls -lrth'
 alias lS='ls -rSlh'
 alias mc='. /usr/libexec/mc/mc-wrapper.sh'
+alias pu="ps ux"
 alias qstatme='qstat -u ra12451; getNumberInQueue '
 alias delEmpty="find . -type f -empty -delete"
 alias loadDelphes="gSystem->Load("libDelphes");"
-
+alias Latest="less `ls -rt | tail -n 1`"
 alias vi='vim'
 #alias vsqueue='qstat | grep veryshort && echo '\''TOTAL: '\'' DAMMIT'
 alias vsqueue='qstat | grep veryshort | tee  >(wc -l)'
