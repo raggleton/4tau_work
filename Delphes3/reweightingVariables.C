@@ -94,16 +94,16 @@ void reweightingVariables(int argc, char* argv[])
 	TH1D* histDRmutk_soft_noniso = new TH1D("hDRmutk_soft_noniso", "#DeltaR(#mu-tk) (soft)",40,0,2);
 
 	// mu1/2 pt/eta
-	TH1F* histMu1Pt_fine_IPSS                = new TH1F("hMu1Pt_fine_IPSS","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",40,0.,200.);
-	TH1F* histMu2Pt_fine_IPSS                = new TH1F("hMu2Pt_fine_IPSS","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",40,0.,200.);
-	TH1F* histMu1Eta_fine_IPSS               = new TH1F("hMu1Eta_fine_IPSS","#mu_{1} #eta; #mu_{1} #eta;A.U.",200,-5.,5.);
-	TH1F* histMu2Eta_fine_IPSS               = new TH1F("hMu2Eta_fine_IPSS","#mu_{2} #eta; #mu_{2} #eta;A.U.",200,-5.,5.);
+	TH1F* histMuHardPt_fine_IPSS                = new TH1F("hMu1Pt_fine_IPSS","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMuSoftPt_fine_IPSS                = new TH1F("hMu2Pt_fine_IPSS","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMuHardEta_fine_IPSS               = new TH1F("hMu1Eta_fine_IPSS","#mu_{1} #eta; #mu_{1} #eta;A.U.",200,-5.,5.);
+	TH1F* histMuSoftEta_fine_IPSS               = new TH1F("hMu2Eta_fine_IPSS","#mu_{2} #eta; #mu_{2} #eta;A.U.",200,-5.,5.);
 
 	// mu1/2 pt/eta
-	TH1F* histMu1Pt_fine_IPSSDR              = new TH1F("hMu1Pt_fine_IPSSDR","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",40,0.,200.);
-	TH1F* histMu2Pt_fine_IPSSDR              = new TH1F("hMu2Pt_fine_IPSSDR","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",40,0.,200.);
-	TH1F* histMu1Eta_fine_IPSSDR             = new TH1F("hMu1Eta_fine_IPSSDR","#mu_{1} #eta; #mu_{1} #eta;A.U.",200,-5.,5.);
-	TH1F* histMu2Eta_fine_IPSSDR             = new TH1F("hMu2Eta_fine_IPSSDR","#mu_{2} #eta; #mu_{2} #eta;A.U.",200,-5.,5.);
+	TH1F* histMuHardPt_fine_IPSSDR              = new TH1F("hMu1Pt_fine_IPSSDR","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMuSoftPt_fine_IPSSDR              = new TH1F("hMu2Pt_fine_IPSSDR","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",40,0.,200.);
+	TH1F* histMuHardEta_fine_IPSSDR             = new TH1F("hMu1Eta_fine_IPSSDR","#mu_{1} #eta; #mu_{1} #eta;A.U.",200,-5.,5.);
+	TH1F* histMuSoftEta_fine_IPSSDR             = new TH1F("hMu2Eta_fine_IPSSDR","#mu_{2} #eta; #mu_{2} #eta;A.U.",200,-5.,5.);
 
 	// mu1 vs mu 2 pT
 	TH2F * HardMuonPtSoftMuonPt_DimuonsH     = new TH2F("HardMuonPtSoftMuonPt_DimuonsH","",40,0,200,40,0,200);
@@ -251,16 +251,16 @@ void reweightingVariables(int argc, char* argv[])
 					// cout << m1 << "     " << m2 << endl;
 					// if(m2 < 1.){
 					// 	histM1_truth_0to1->Fill(m1);
-					// 	histMu1Pt_truth_0to1->Fill(muTruth1->PT);
+					// 	histMuHardPt_truth_0to1->Fill(muTruth1->PT);
 					// } else if (m2 < 2.){
 					// 	histM1_truth_1to2->Fill(m1);
-					// 	histMu1Pt_truth_1to2->Fill(muTruth1->PT);
+					// 	histMuHardPt_truth_1to2->Fill(muTruth1->PT);
 					// } else if (m2 < 3.){
 					// 	histM1_truth_2to3->Fill(m1);
-					// 	histMu1Pt_truth_2to3->Fill(muTruth1->PT);
+					// 	histMuHardPt_truth_2to3->Fill(muTruth1->PT);
 					// } else{
 					// 	histM1_truth_3toInf->Fill(m1);
-					// 	histMu1Pt_truth_3toInf->Fill(muTruth1->PT);
+					// 	histMuHardPt_truth_3toInf->Fill(muTruth1->PT);
 					// }
 				}
 
@@ -309,10 +309,10 @@ void reweightingVariables(int argc, char* argv[])
 
 		if (!(p.first && p.second)) continue;
 
-		histMu1Pt_fine_IPSSDR->Fill(p.first->PT);
-		histMu1Eta_fine_IPSSDR->Fill(p.first->Eta);
-		histMu2Pt_fine_IPSSDR->Fill(p.second->PT);
-		histMu2Eta_fine_IPSSDR->Fill(p.second->Eta);
+		histMuHardPt_fine_IPSSDR->Fill(p.first->PT);
+		histMuHardEta_fine_IPSSDR->Fill(p.first->Eta);
+		histMuSoftPt_fine_IPSSDR->Fill(p.second->PT);
+		histMuSoftEta_fine_IPSSDR->Fill(p.second->Eta);
 		HardMuonPtSoftMuonPt_DimuonsH->Fill(p.first->PT, p.second->PT);
 
 		// cout << " >>>>> Muon pair details: " << endl;
@@ -731,15 +731,15 @@ void reweightingVariables(int argc, char* argv[])
 	//////////////////////////////////////////////
 	// Print out integrals before we normalise //
 	//////////////////////////////////////////////
-	// printIntegral(histMu1Pt_fine_IPSS);
-	// printIntegral(histMu2Pt_fine_IPSS);
-	// printIntegral(histMu1Eta_fine_IPSS);
-	// printIntegral(histMu2Eta_fine_IPSS);
+	// printIntegral(histMuHardPt_fine_IPSS);
+	// printIntegral(histMuSoftPt_fine_IPSS);
+	// printIntegral(histMuHardEta_fine_IPSS);
+	// printIntegral(histMuSoftEta_fine_IPSS);
 
-	printIntegral(histMu1Pt_fine_IPSSDR);
-	printIntegral(histMu2Pt_fine_IPSSDR);
-	printIntegral(histMu1Eta_fine_IPSSDR);
-	printIntegral(histMu2Eta_fine_IPSSDR);
+	printIntegral(histMuHardPt_fine_IPSSDR);
+	printIntegral(histMuSoftPt_fine_IPSSDR);
+	printIntegral(histMuHardEta_fine_IPSSDR);
+	printIntegral(histMuSoftEta_fine_IPSSDR);
 
 	printIntegral(histTauTk1Pt);
 	printIntegral(histTauTk1Eta);
@@ -801,14 +801,14 @@ void reweightingVariables(int argc, char* argv[])
 	/////////////////////////////////
 
 	// mu1,2 pt,eta
-	// drawHistAndSave(histMu1Pt_fine_IPSS, "HISTE", "histMu1Pt_fine_IPSS", directory, app);
-	// drawHistAndSave(histMu1Eta_fine_IPSS, "HISTE", "histMu1Eta_fine_IPSS", directory, app);
-	// drawHistAndSave(histMu2Pt_fine_IPSS, "HISTE", "histMu2Pt_fine_IPSS", directory, app);
-	// drawHistAndSave(histMu2Eta_fine_IPSS, "HISTE", "histMu2Eta_fine_IPSS", directory, app);
-	drawHistAndSave(histMu1Pt_fine_IPSSDR, "HISTE", "histMu1Pt_fine_IPSSDR", directory, app);
-	drawHistAndSave(histMu1Eta_fine_IPSSDR, "HISTE", "histMu1Eta_fine_IPSSDR", directory, app);
-	drawHistAndSave(histMu2Pt_fine_IPSSDR, "HISTE", "histMu2Pt_fine_IPSSDR", directory, app);
-	drawHistAndSave(histMu2Eta_fine_IPSSDR, "HISTE", "histMu2Eta_fine_IPSSDR", directory, app);
+	// drawHistAndSave(histMuHardPt_fine_IPSS, "HISTE", "histMuHardPt_fine_IPSS", directory, app);
+	// drawHistAndSave(histMuHardEta_fine_IPSS, "HISTE", "histMuHardEta_fine_IPSS", directory, app);
+	// drawHistAndSave(histMuSoftPt_fine_IPSS, "HISTE", "histMuSoftPt_fine_IPSS", directory, app);
+	// drawHistAndSave(histMuSoftEta_fine_IPSS, "HISTE", "histMuSoftEta_fine_IPSS", directory, app);
+	drawHistAndSave(histMuHardPt_fine_IPSSDR, "HISTE", "histMuHardPt_fine_IPSSDR", directory, app);
+	drawHistAndSave(histMuHardEta_fine_IPSSDR, "HISTE", "histMuHardEta_fine_IPSSDR", directory, app);
+	drawHistAndSave(histMuSoftPt_fine_IPSSDR, "HISTE", "histMuSoftPt_fine_IPSSDR", directory, app);
+	drawHistAndSave(histMuSoftEta_fine_IPSSDR, "HISTE", "histMuSoftEta_fine_IPSSDR", directory, app);
 	
 	drawHistAndSave(HardMuonPtSoftMuonPt_DimuonsH, "COLZ", "HardMuonPtSoftMuonPt_DimuonsH", directory, app);
 
@@ -838,10 +838,10 @@ void reweightingVariables(int argc, char* argv[])
 	// Write hists to file //
 	//////////////////////////
 
-	histMu1Pt_fine_IPSSDR->Write("", TObject::kOverwrite);
-	histMu1Eta_fine_IPSSDR->Write("", TObject::kOverwrite);
-	histMu2Pt_fine_IPSSDR->Write("", TObject::kOverwrite);
-	histMu2Eta_fine_IPSSDR->Write("", TObject::kOverwrite);
+	histMuHardPt_fine_IPSSDR->Write("", TObject::kOverwrite);
+	histMuHardEta_fine_IPSSDR->Write("", TObject::kOverwrite);
+	histMuSoftPt_fine_IPSSDR->Write("", TObject::kOverwrite);
+	histMuSoftEta_fine_IPSSDR->Write("", TObject::kOverwrite);
 
 	HardMuonPtSoftMuonPt_DimuonsH->Write("", TObject::kOverwrite);
 
