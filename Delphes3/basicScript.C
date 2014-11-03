@@ -84,7 +84,7 @@ void massPlots(int argc, char* argv[])
 	int nBinsX = massBins.size()-1;
 
 	// ------------------------
-	// m1 & m2 1D distributions
+	// Declare plots
 	// ------------------------
 
 	TH1D* histM1                             = new TH1D("hM1", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
