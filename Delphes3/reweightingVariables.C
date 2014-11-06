@@ -19,7 +19,7 @@ int countParticle(TClonesArray* branchAll, int PID) {
 	for (int a = 0; a < branchAll->GetEntries(); a++){
 		GenParticle* candP = (GenParticle*) branchAll->At(a);
 		// cout << candP->PID << endl;
-		if (fabs(candP->PID) == fabs(PID)) { 
+		if (fabs(candP->PID) == fabs(PID)) {
 			nParticle++;
 		}
 	}
@@ -28,7 +28,7 @@ int countParticle(TClonesArray* branchAll, int PID) {
 }
 
 /**
- * makes clone fo hist, appends "suffix" to hist name, 
+ * makes clone fo hist, appends "suffix" to hist name,
  * write to currently open file
  */
 template <typename T>
@@ -48,15 +48,15 @@ void reweightingVariables(int argc, char* argv[])
 	// Get program options from user and store
 	ProgramOpts pOpts(argc, argv);
 
-	MCsource source     = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
-	bool doSignal       = pOpts.getSignal(); // for signal or not
-	// bool doMu        = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
-	bool swapMuRandomly = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
-	bool doHLT          = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
-	// bool DEBUG       = pOpts.getVerbose(); // output debug statments
-	double deltaR       = pOpts.getdR(); // dR(mu-mu) value to use
-
-	bool do1to1p5 = false; // for additional sideband studies. Slower?
+	MCsource source      = pOpts.getSource(); // get MC source (signal, qcdb, qcdc)
+	bool doSignal        = pOpts.getSignal(); // for signal or not
+	// bool doMu         = pOpts.getQCDMu(); // for QCDb - either inclusive decays or mu only decays
+	bool swapMuRandomly  = pOpts.getMuOrdering(); // if true, fills plots for mu 1 and 2 randomly from highest & 2nd highest pt muons. Otherwise, does 1 = leading (highest pt), 2 = subleading (2nd highest pt)
+	bool doHLT           = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
+	// bool DEBUG        = pOpts.getVerbose(); // output debug statments
+	double deltaR        = pOpts.getdR(); // dR(mu-mu) value to use
+	double rescaleFactor = pOpts.getRescale(); // factor to rescaleFactor track eta & phi to match data. 1 = no rescaling
+	bool do1to1p5        = false; // for additional sideband studies. Slower?
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -87,51 +87,51 @@ void reweightingVariables(int argc, char* argv[])
 	// Declare hists
 	// ------------------------
 
-	TH1D* histDRmutk_hard = new TH1D("hDRmutk_hard", "#DeltaR(#mu-tk) (hard)",40,0,2);
-	TH1D* histDRmutk_soft = new TH1D("hDRmutk_soft", "#DeltaR(#mu-tk) (soft)",40,0,2);
+	TH1D* histDRmutk_hard                = new TH1D("hDRmutk_hard", "#DeltaR(#mu-tk) (hard)",40,0,2);
+	TH1D* histDRmutk_soft                = new TH1D("hDRmutk_soft", "#DeltaR(#mu-tk) (soft)",40,0,2);
 
-	TH1D* histDRmutk_hard_noniso = new TH1D("hDRmutk_hard_noniso", "#DeltaR(#mu-tk) (hard)",40,0,2);
-	TH1D* histDRmutk_soft_noniso = new TH1D("hDRmutk_soft_noniso", "#DeltaR(#mu-tk) (soft)",40,0,2);
-
-	// mu1/2 pt/eta
-	TH1F* histMuHardPt_fine_IPSS                = new TH1F("hMu1Pt_fine_IPSS","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",40,0.,200.);
-	TH1F* histMuSoftPt_fine_IPSS                = new TH1F("hMu2Pt_fine_IPSS","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",40,0.,200.);
-	TH1F* histMuHardEta_fine_IPSS               = new TH1F("hMu1Eta_fine_IPSS","#mu_{1} #eta; #mu_{1} #eta;A.U.",200,-5.,5.);
-	TH1F* histMuSoftEta_fine_IPSS               = new TH1F("hMu2Eta_fine_IPSS","#mu_{2} #eta; #mu_{2} #eta;A.U.",200,-5.,5.);
+	TH1D* histDRmutk_hard_noniso         = new TH1D("hDRmutk_hard_noniso", "#DeltaR(#mu-tk) (hard)",40,0,2);
+	TH1D* histDRmutk_soft_noniso         = new TH1D("hDRmutk_soft_noniso", "#DeltaR(#mu-tk) (soft)",40,0,2);
 
 	// mu1/2 pt/eta
-	TH1F* histMuHardPt_fine_IPSSDR              = new TH1F("hMu1Pt_fine_IPSSDR","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",40,0.,200.);
-	TH1F* histMuSoftPt_fine_IPSSDR              = new TH1F("hMu2Pt_fine_IPSSDR","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",40,0.,200.);
-	TH1F* histMuHardEta_fine_IPSSDR             = new TH1F("hMu1Eta_fine_IPSSDR","#mu_{1} #eta; #mu_{1} #eta;A.U.",200,-5.,5.);
-	TH1F* histMuSoftEta_fine_IPSSDR             = new TH1F("hMu2Eta_fine_IPSSDR","#mu_{2} #eta; #mu_{2} #eta;A.U.",200,-5.,5.);
+	TH1F* histMuHardPt_fine_signal       = new TH1F("hMu1Pt_fine_signal","#mu_{hard} p_{T}; #mu_{hard} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1F* histMuSoftPt_fine_signal       = new TH1F("hMu2Pt_fine_signal","#mu_{soft} p_{T}; #mu_{soft} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1F* histMuHardEta_fine_signal      = new TH1F("hMu1Eta_fine_signal","#mu_{hard} #eta; #mu_{hard} #eta;A.U.",200,-5.,5.);
+	TH1F* histMuSoftEta_fine_signal      = new TH1F("hMu2Eta_fine_signal","#mu_{soft} #eta; #mu_{soft} #eta;A.U.",200,-5.,5.);
+
+	// mu1/2 pt/eta
+	TH1F* histMuHardPt_fine_IPSSDR       = new TH1F("hMu1Pt_fine_IPSSDR","#mu_{1} p_{T}; #mu_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1F* histMuSoftPt_fine_IPSSDR       = new TH1F("hMu2Pt_fine_IPSSDR","#mu_{2} p_{T}; #mu_{2} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1F* histMuHardEta_fine_IPSSDR      = new TH1F("hMu1Eta_fine_IPSSDR","#mu_{1} #eta; #mu_{1} #eta;A.U.",200,-5.,5.);
+	TH1F* histMuSoftEta_fine_IPSSDR      = new TH1F("hMu2Eta_fine_IPSSDR","#mu_{2} #eta; #mu_{2} #eta;A.U.",200,-5.,5.);
 
 	// mu1 vs mu 2 pT
-	TH2F * HardMuonPtSoftMuonPt_DimuonsH     = new TH2F("HardMuonPtSoftMuonPt_DimuonsH","",40,0,200,40,0,200);
+	TH2F * HardMuonPtSoftMuonPt_DimuonsH = new TH2F("HardMuonPtSoftMuonPt_DimuonsH","",40,0,200,40,0,200);
 
 
 	// mu1/2 pt/eta
-	// TH1D* histTk1Pt_fine_IPSS                = new TH1D("hTk1Pt_fine_IPSS","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,100.);
-	// TH1D* histTk2Pt_fine_IPSS                = new TH1D("hTk2Pt_fine_IPSS","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,100.);
-	// TH1D* histTk1Eta_fine_IPSS               = new TH1D("hTk1Eta_fine_IPSS","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
-	// TH1D* histTk2Eta_fine_IPSS               = new TH1D("hTk2Eta_fine_IPSS","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+	// TH1D* histTk1Pt_fine_IPSS         = new TH1D("hTk1Pt_fine_IPSS","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,100.);
+	// TH1D* histTk2Pt_fine_IPSS         = new TH1D("hTk2Pt_fine_IPSS","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,100.);
+	// TH1D* histTk1Eta_fine_IPSS        = new TH1D("hTk1Eta_fine_IPSS","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
+	// TH1D* histTk2Eta_fine_IPSS        = new TH1D("hTk2Eta_fine_IPSS","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
 
 	// Tk1/2 pt/eta
-	TH1D* histTauTk1Pt                       = new TH1D("hTauTk1Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
-	TH1D* histTauTk1Eta                      = new TH1D("hTauTk1Eta","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
-	TH1D* histTauTk2Pt                       = new TH1D("hTauTk2Pt","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,50.);
-	TH1D* histTauTk2Eta                      = new TH1D("hTauTk2Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
-	TH2F* histTauTk1vs2Pt                      = new TH2F("hTauTk1vs2Pt","",100,0.,50.,100,0.,50.);
-	TH1D* histTauTk12Pt                      = new TH1D("hTauTk12Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
-	TH1D* histTauTk12Eta                     = new TH1D("hTauTk12Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+	TH1D* histTauTk1Pt                   = new TH1D("hTauTk1Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histTauTk1Eta                  = new TH1D("hTauTk1Eta","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
+	TH1D* histTauTk2Pt                   = new TH1D("hTauTk2Pt","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histTauTk2Eta                  = new TH1D("hTauTk2Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+	TH2F* histTauTk1vs2Pt                = new TH2F("hTauTk1vs2Pt","",100,0.,50.,100,0.,50.);
+	TH1D* histTauTk12Pt                  = new TH1D("hTauTk12Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histTauTk12Eta                 = new TH1D("hTauTk12Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
 
 	// Tk1/2 pt/eta when mu non-iso (2 or 3 tracks)
-	TH1D* histNonIsoTk1Pt                       = new TH1D("hNonIsoTk1Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
-	TH1D* histNonIsoTk1Eta                      = new TH1D("hNonIsoTk1Eta","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
-	TH1D* histNonIsoTk2Pt                       = new TH1D("hNonIsoTk2Pt","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,50.);
-	TH1D* histNonIsoTk2Eta                      = new TH1D("hNonIsoTk2Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
-	TH2F* histNonIsoTk1vs2Pt                      = new TH2F("hNonIsoTk1vs2Pt","",100,0.,50.,100,0.,50.);
-	TH1D* histNonIsoTk12Pt                      = new TH1D("hNonIsoTk12Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
-	TH1D* histNonIsoTk12Eta                     = new TH1D("hNonIsoTk12Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+	TH1D* histNonIsoTk1Pt                = new TH1D("hNonIsoTk1Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histNonIsoTk1Eta               = new TH1D("hNonIsoTk1Eta","Tk_{1} #eta; Tk_{1} #eta;A.U.",200,-5.,5.);
+	TH1D* histNonIsoTk2Pt                = new TH1D("hNonIsoTk2Pt","Tk_{2} p_{T}; Tk_{2} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histNonIsoTk2Eta               = new TH1D("hNonIsoTk2Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
+	TH2F* histNonIsoTk1vs2Pt             = new TH2F("hNonIsoTk1vs2Pt","",100,0.,50.,100,0.,50.);
+	TH1D* histNonIsoTk12Pt               = new TH1D("hNonIsoTk12Pt","Tk_{1} p_{T}; Tk_{1} p_{T} [GeV];A.U.",100,0.,50.);
+	TH1D* histNonIsoTk12Eta              = new TH1D("hNonIsoTk12Eta","Tk_{2} #eta; Tk_{2} #eta;A.U.",200,-5.,5.);
 
 
 
@@ -145,7 +145,15 @@ void reweightingVariables(int argc, char* argv[])
 	cout << "Running over " << numberOfEntries << " events" << endl;
 
 	bool stop = false; // used to stop the loop, for debugging/testing
+	int last_pc = -1;
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
+
+		// output something every 5%
+		int pc = int(100*entry/double(numberOfEntries));
+		if(pc%5 == 0 && pc != last_pc) {
+			std::cout << pc << "% progress (event " << entry << ")" << endl;
+			last_pc = pc;
+		}
 
 		// Load selected branches with data from specified event
 		treeReader->ReadEntry(entry);
@@ -153,12 +161,12 @@ void reweightingVariables(int argc, char* argv[])
 		// cout << "*** Event" << endl;
 
 		if (branchGenMuons->GetEntries() < 2) continue; // skip if <2 muons! (alhtough pointless for HLT samples)
-	
+
 		////////////////////////////////////////////////////////////
 		// Get the hard interaction particles for signal MC truth //
 		// No selection cuts applied (only >=2 muons)             //
 		////////////////////////////////////////////////////////////
-		
+
 		GenParticle *charged1a(nullptr);
 		GenParticle *charged1b(nullptr);
 		GenParticle *charged2a(nullptr);
@@ -170,7 +178,7 @@ void reweightingVariables(int argc, char* argv[])
 			for(int j = 0; j < branchAll->GetEntries(); j++){
 				GenParticle* cand = (GenParticle*) branchAll->At(j);
 				// cout << j << " ID: " << cand->PID << " status: " << cand->Status << endl;
-			
+
 				if ((fabs(cand->PID)==36) && (fabs(cand->Status)==62)){
 					if (a1==0){
 						a1=cand;
@@ -199,9 +207,9 @@ void reweightingVariables(int argc, char* argv[])
 			charged1b = getChargedObject(branchAll, tau1b);
 			charged2a = getChargedObject(branchAll, tau2a);
 			charged2b = getChargedObject(branchAll, tau2b);
-			
+
 			if (charged1a && charged1b && charged2a && charged2b){
-				
+
 				// To hold mu and tracks from each tau
 				GenParticle* muTruth1(nullptr);
 				GenParticle* trackTruth1(nullptr);
@@ -209,15 +217,15 @@ void reweightingVariables(int argc, char* argv[])
 				GenParticle* trackTruth2(nullptr);
 
 				// Assign charged products to be mu or track
-				bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, *charged1a, *charged1b);				
+				bool truth1HasMu = assignMuonAndTrack(muTruth1, trackTruth1, *charged1a, *charged1b);
 				bool truth2HasMu = assignMuonAndTrack(muTruth2, trackTruth2, *charged2a, *charged2b);
 
 				// NOTE: muons are NOT pT ordered
 
 				if (!truth1HasMu || !truth2HasMu) {
 					// cout << "Problem, no truth mu for 1 and/or 2!" << endl;
-				} else { 
-					
+				} else {
+
 					// Assign system "1" to higher pT muon
 					// Swap obj if necessary
 					if (muTruth1->PT < muTruth2->PT) {
@@ -228,7 +236,7 @@ void reweightingVariables(int argc, char* argv[])
 						muTruth2 = tempMu;
 						trackTruth2 = tempTk;
 					}
-					
+
 					// Randomly swap trk-mu pairs 1<->2 if desired
 					if(swapMuRandomly){
 						double randNum = (double)rand() / RAND_MAX;
@@ -268,16 +276,16 @@ void reweightingVariables(int argc, char* argv[])
 				if (!trackTruth1) delete trackTruth1;
 				if (!muTruth2) delete muTruth2;
 				if (!trackTruth2) delete trackTruth2;
-			} // end if(charged1a...) 
+			} // end if(charged1a...)
 		} // end if(doSignal)
 
 
 		/////////////////////////////////////////////////////////////////////////
-		// Now, get the two highest pT muons in the event that pass selection, // 
+		// Now, get the two highest pT muons in the event that pass selection, //
 		// store pointers to the Track particles and 4-momenta                 //
 		// (Use tracks for muons as store more info about position)
 		/////////////////////////////////////////////////////////////////////////
-		
+
 		// Track *candTk(nullptr);
 
 		// Fill vectors with muons, based on pT
@@ -330,7 +338,7 @@ void reweightingVariables(int argc, char* argv[])
 			// TLorentzVector mu2MomTmp = mu2->P4();
 			double randNum = (double)rand() / RAND_MAX;
 			if (randNum > 0.5){
-				swapped = true; 
+				swapped = true;
 				mu1 = origMu2;
 				mu2 = origMu1;
 			}
@@ -364,11 +372,11 @@ void reweightingVariables(int argc, char* argv[])
 		// same but with pT > 2.5, OS to muon, , looser (iso) IP cuts
 		std::vector<Track*> tk1_2p5_OS_looseip;
 		std::vector<Track*> tk2_2p5_OS_looseip;
-		
+
 		// same but with 1 < pT < 2.5 (for sideband) (loose/iso IP cuts)
 		std::vector<Track*> tk1_1to2p5;
 		std::vector<Track*> tk2_1to2p5;
-		
+
 		// same but with 1 < pT < 2.5 (for sideband) with tighter IP cuts (tau candidate IP)
 		std::vector<Track*> tk1_1to2p5_taucand;
 		std::vector<Track*> tk2_1to2p5_taucand;
@@ -387,38 +395,38 @@ void reweightingVariables(int argc, char* argv[])
 			){
 
 				// Store track in suitable vector
-				fillTrackVectors(candTk, mu1, mu2, &tk1_1, &tk2_1);
+				fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_1, &tk2_1, rescaleFactor);
 
 
-				// 1 prong candiates, 
+				// 1 prong candiates,
 				if (checkTrackIPTight(candTk)) {
 					// for N_trk = 2or3
-					fillTrackVectors(candTk, mu1, mu2, &tk1_1to2p5_taucand, &tk2_1to2p5_taucand);						
+					fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_1to2p5_taucand, &tk2_1to2p5_taucand, rescaleFactor);
 
 					if (checkTrackPTTight(candTk)) {
 						// tau candidate must have pT > 2.5 GeV
-						fillTrackVectors(candTk, mu1, mu2, &tk1_2p5, & tk2_2p5);
+						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5, & tk2_2p5, rescaleFactor);
 
 						if (checkTkMuOS(candTk, mu1)) {
-							fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_OS, &tk2_2p5_OS);
-						}					
+							fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_OS, &tk2_2p5_OS, rescaleFactor);
+						}
 					}
 				} else {
-					
-					
+
+
 					if (checkTrackPTTight(candTk)) {
 						// tau candidate must have pT > 2.5 GeV
-						fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_looseip, & tk2_2p5_looseip);
+						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_looseip, & tk2_2p5_looseip, rescaleFactor);
 
 						if (checkTkMuOS(candTk, mu1)) {
-							fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_OS_looseip, &tk2_2p5_OS_looseip);
-						}					
+							fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_OS_looseip, &tk2_2p5_OS_looseip, rescaleFactor);
+						}
 					} else {
-						fillTrackVectors(candTk, mu1, mu2, &tk1_1to2p5, &tk2_1to2p5);
+						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_1to2p5, &tk2_1to2p5, rescaleFactor);
 					}
 
 					if (do1to1p5 && candTk->PT < 1.5){
-						fillTrackVectors(candTk, mu1, mu2, &tk1_1to1p5, &tk2_1to1p5);
+						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_1to1p5, &tk2_1to1p5, rescaleFactor);
 					}
 				}
 			} // End of track selection criteria
@@ -441,24 +449,24 @@ void reweightingVariables(int argc, char* argv[])
 			// TLorentzVector sys2Mom = tk2_2p5_OS[0]->P4() + mu2Mom;
 
 
-		// } else { 
-		// 	continue; 
+		// } else {
+		// 	continue;
 		// }
 
 
 		/////////////////////////
 		// SIGNAL SELECTION    //
 		/////////////////////////
-		// Only 1 track within ∆R < 0.5 of muon has pT > 1, 
+		// Only 1 track within ∆R < 0.5 of muon has pT > 1,
 		// and that track must have pT > 2.5, and be oppsite charge to muon
 		if (tk1_1.size() == 1 && tk2_1.size() == 1 )
 		{
 
 
 			if (tk1_2p5.size() == 1 && tk2_2p5.size() == 1
-			&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1) 
+			&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1)
 			{
-				
+
 				TLorentzVector track1Mom=tk1_2p5_OS[0]->P4();
 				TLorentzVector track2Mom=tk2_2p5_OS[0]->P4();
 
@@ -467,6 +475,11 @@ void reweightingVariables(int argc, char* argv[])
 				// double m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
 				if (swapped){
+					histMuHardPt_fine_signal->Fill(mu2->PT);
+					histMuHardEta_fine_signal->Fill(mu2->Eta);
+					histMuSoftPt_fine_signal->Fill(mu1->PT);
+					histMuSoftEta_fine_signal->Fill(mu1->Eta);
+
 					histTauTk1Pt->Fill(tk2_2p5_OS[0]->PT);
 					histTauTk1Eta->Fill(tk2_2p5_OS[0]->Eta);
 					histTauTk2Pt->Fill(tk1_2p5_OS[0]->PT);
@@ -479,6 +492,11 @@ void reweightingVariables(int argc, char* argv[])
 					histDRmutk_hard->Fill(track2Mom.DeltaR(mu2Mom));
 					histDRmutk_soft->Fill(track1Mom.DeltaR(mu1Mom));
 				} else {
+					histMuHardPt_fine_signal->Fill(mu1->PT);
+					histMuHardEta_fine_signal->Fill(mu1->Eta);
+					histMuSoftPt_fine_signal->Fill(mu2->PT);
+					histMuSoftEta_fine_signal->Fill(mu2->Eta);
+
 					histTauTk1Pt->Fill(tk1_2p5_OS[0]->PT);
 					histTauTk1Eta->Fill(tk1_2p5_OS[0]->Eta);
 					histTauTk2Pt->Fill(tk2_2p5_OS[0]->PT);
@@ -502,10 +520,10 @@ void reweightingVariables(int argc, char* argv[])
 		if (tk1_1.size() == 1 && tk2_1.size() == 1)
 		{
 
-			if (tk1_2p5_OS_looseip.size() == 1 && tk2_2p5_OS_looseip.size() == 1 
+			if (tk1_2p5_OS_looseip.size() == 1 && tk2_2p5_OS_looseip.size() == 1
 				&& tk1_2p5_looseip.size() == 1 && tk2_2p5_looseip.size() == 1)
 			{
-			
+
 				TLorentzVector track1Mom=tk1_2p5_OS_looseip[0]->P4();
 				TLorentzVector track2Mom=tk2_2p5_OS_looseip[0]->P4();
 
@@ -523,7 +541,7 @@ void reweightingVariables(int argc, char* argv[])
 
 		// if (tk1_1.size() == 1 && (tk2_1.size() == 2 || tk2_1.size() == 3)
 		// 	&& tk1_2p5_OS.size() == 1 && (tk2_2p5.size() == 2 || tk2_2p5.size() == 3)){
-			
+
 		// 	// mu1Mom has 1 tk, mu2Mom has 2/3 tks, stay as "mu1" and "mu2"
 		// 	double m1 = (mu1Mom+tk1_2p5[0]->P4()).M();
 		// 	double m2 = (mu2Mom+tk2_2p5[0]->P4()).M();
@@ -555,21 +573,21 @@ void reweightingVariables(int argc, char* argv[])
 		// SIDEBAND REGION - where mu2 has 1, 2, 3 additional soft tracks with tight IP cuts//
 		// and mu1 satisfies signal selection
 		//////////////////////////////////////////////////////////////////////
-		if (   tk1_1.size() == 1 
-			&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
-			&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
+		if (   tk1_1.size() == 1
+			&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1
+			&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1
 			){
-			
-			double m1(0);		
+
+			double m1(0);
 			TLorentzVector track1Mom=tk1_2p5_OS[0]->P4();
 			TLorentzVector track2Mom=tk2_2p5_OS[0]->P4();
 
-			if ( //tk2_1.size() == 2 
+			if ( //tk2_1.size() == 2
 				tk2_1to2p5_taucand.size() == 1
 				&& tk2_1to2p5.size() == 1
 				) {
 					// m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
-					
+
 
 				if (swapped){
 					histNonIsoTk1Pt->Fill(tk2_2p5_OS[0]->PT);
@@ -597,14 +615,14 @@ void reweightingVariables(int argc, char* argv[])
 					histDRmutk_soft_noniso->Fill(track2Mom.DeltaR(mu2Mom));
 				}
 
-			}			
+			}
 
-			if (// tk2_1.size() == 3 
+			if (// tk2_1.size() == 3
 				tk2_1to2p5_taucand.size() == 2
 				&& tk2_1to2p5.size() == 2
 				) {
 					// m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
-					
+
 					if (swapped){
 						histNonIsoTk1Pt->Fill(tk2_2p5_OS[0]->PT);
 						histNonIsoTk1Eta->Fill(tk2_2p5_OS[0]->Eta);
@@ -632,35 +650,35 @@ void reweightingVariables(int argc, char* argv[])
 					}
 
 
-			}			
+			}
 
-/*			if ( //tk2_1.size() == 4 
+/*			if ( //tk2_1.size() == 4
 				tk2_1to2p5_taucand.size() == 3
 				&& tk2_1to2p5.size() == 3
 				) {
 					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
-				}	*/		
+				}	*/
 		}
 
 
 		////////////////////////////////////////////////////
 		// SIDEBAND REGION - for soft tracks 1 < pT < 2.5 //
 		////////////////////////////////////////////////////
-		// 
+		//
 		// For 2D plot of N(m1,m2):
 		// Each muon must have exactly 1 OS tk with pT > 2.5 within ∆R < 0.5.
 		// And *at least* one muon has 1 or 2 additional soft tracks with 1 < pT < 2.5,
 		// within dR < 0.5. No sign requirement on additional soft track.
-		// 
+		//
 		// This matches Control Region A in the PAS (B in AN)
-		/*if (   tk1_1.size() >= 1 && tk1_1.size() <= 3 
-			&& tk2_1.size() >= 1 && tk2_1.size() <= 3 
-			&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 
-			&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 
-			&& tk1_1to2p5.size() <= 2 && tk2_1to2p5.size() <= 2 
+		/*if (   tk1_1.size() >= 1 && tk1_1.size() <= 3
+			&& tk2_1.size() >= 1 && tk2_1.size() <= 3
+			&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1
+			&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1
+			&& tk1_1to2p5.size() <= 2 && tk2_1to2p5.size() <= 2
 			&& !(tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 0)
 			){
-				double m1(0), m2(0);		
+				double m1(0), m2(0);
 				m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 				m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
@@ -668,7 +686,7 @@ void reweightingVariables(int argc, char* argv[])
 				// histM1_side_1to2p5->Fill(m1);
 				// histM2_side_1to2p5->Fill(m2);
 
-		} // end of sideband 1to2p5 
+		} // end of sideband 1to2p5
 
 		*/
 
@@ -677,45 +695,45 @@ void reweightingVariables(int argc, char* argv[])
 		// SIDEBAND REGION - for soft tracks 1 < pT < 2.5 //
 		// AND WHERE TAU CANDIDATE HAS LOOSER IP CUTS
 		////////////////////////////////////////////////////
-		// 
+		//
 		// For 2D plot of N(m1,m2):
 		// Each muon must have exactly 1 OS tk with pT > 2.5 within ∆R < 0.5.
 		// And *at least* one muon has 1 or 2 additional soft tracks with 1 < pT < 2.5,
 		// within dR < 0.5. No sign requirement on additional soft track.
-		// 
+		//
 		// This matches Control Region A in the PAS (B in AN)
-		/*if (   tk1_1.size() >= 1 && tk1_1.size() <= 3 
-			&& tk2_1.size() >= 1 && tk2_1.size() <= 3 
-			&& tk1_2p5_looseip.size() == 1 && tk1_2p5_OS_looseip.size() == 1 
-			&& tk2_2p5_looseip.size() == 1 && tk2_2p5_OS_looseip.size() == 1 
-			&& tk1_1to2p5.size() <= 2 && tk2_1to2p5.size() <= 2 
+		/*if (   tk1_1.size() >= 1 && tk1_1.size() <= 3
+			&& tk2_1.size() >= 1 && tk2_1.size() <= 3
+			&& tk1_2p5_looseip.size() == 1 && tk1_2p5_OS_looseip.size() == 1
+			&& tk2_2p5_looseip.size() == 1 && tk2_2p5_OS_looseip.size() == 1
+			&& tk1_1to2p5.size() <= 2 && tk2_1to2p5.size() <= 2
 			&& !(tk1_1to2p5.size() == 0 && tk2_1to2p5.size() == 0)
 			){
-				double m1(0), m2(0);		
+				double m1(0), m2(0);
 				m1 = (mu1Mom+tk1_2p5_OS_looseip[0]->P4()).M();
 				m2 = (mu2Mom+tk2_2p5_OS_looseip[0]->P4()).M();
 
 
-		} // end of sideband 1to2p5 
+		} // end of sideband 1to2p5
 */
-		// SIDEBAND - 1D plot for mu1 
-		// mu1 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
+		// SIDEBAND - 1D plot for mu1
+		// mu1 has 1 OS track with pT > 2.5, within ∆R < 0.5.
 		// Also has 0 or 1 soft track, 1 < pT < 2.5, within ∆R < 0.5.
 		// No sign requirement.
 		// No track requirements on mu2, all it has to do is pass the mu selection above.
 		// if(tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1 && tk1_1to2p5.size() <= 1){
-		// 	double m1(0);		
+		// 	double m1(0);
 		// 	m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 		// 	histM1_side_1to2p5->Fill(m1);
 		// }
 
 		// SIDEBAND - 1D plot for mu2
-		// mu2 has 1 OS track with pT > 2.5, within ∆R < 0.5. 
+		// mu2 has 1 OS track with pT > 2.5, within ∆R < 0.5.
 		// Also has 0 or 1 soft track, 1 < pT < 2.5, within ∆R < 0.5.
 		// No sign requirement.
 		// No track requirements on mu1, all it has to do is pass the mu selection above.
 		// if(tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1 && tk2_1to2p5.size() <= 1){
-		// 	double m2(0);		
+		// 	double m2(0);
 		// 	m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 		// 	histM2_side_1to2p5->Fill(m2);
 		// }
@@ -740,6 +758,11 @@ void reweightingVariables(int argc, char* argv[])
 	printIntegral(histMuSoftPt_fine_IPSSDR);
 	printIntegral(histMuHardEta_fine_IPSSDR);
 	printIntegral(histMuSoftEta_fine_IPSSDR);
+
+	printIntegral(histMuHardPt_fine_signal);
+	printIntegral(histMuSoftPt_fine_signal);
+	printIntegral(histMuHardEta_fine_signal);
+	printIntegral(histMuSoftEta_fine_signal);
 
 	printIntegral(histTauTk1Pt);
 	printIntegral(histTauTk1Eta);
@@ -791,11 +814,11 @@ void reweightingVariables(int argc, char* argv[])
 
 	TFile* outFile = TFile::Open((directory+"/output_reweight_"+delph+"_"+app+".root").c_str(),"UPDATE");
 	cout << "Writing to " << outFile->GetName() << endl;
-	
+
 	// Do some normalizing, make copies beforehand for combination plots
 	// makeCopySave(histM1_side_1to2p5);
 	// normaliseHist(histM1_side_1to2p5);
-	
+
 	/////////////////////////////////
 	// PLOT AND SAVE HISTS TO PDF //
 	/////////////////////////////////
@@ -809,7 +832,12 @@ void reweightingVariables(int argc, char* argv[])
 	drawHistAndSave(histMuHardEta_fine_IPSSDR, "HISTE", "histMuHardEta_fine_IPSSDR", directory, app);
 	drawHistAndSave(histMuSoftPt_fine_IPSSDR, "HISTE", "histMuSoftPt_fine_IPSSDR", directory, app);
 	drawHistAndSave(histMuSoftEta_fine_IPSSDR, "HISTE", "histMuSoftEta_fine_IPSSDR", directory, app);
-	
+
+	drawHistAndSave(histMuHardPt_fine_signal, "HISTE", "histMuHardPt_fine_signal", directory, app);
+	drawHistAndSave(histMuHardEta_fine_signal, "HISTE", "histMuHardEta_fine_signal", directory, app);
+	drawHistAndSave(histMuSoftPt_fine_signal, "HISTE", "histMuSoftPt_fine_signal", directory, app);
+	drawHistAndSave(histMuSoftEta_fine_signal, "HISTE", "histMuSoftEta_fine_signal", directory, app);
+
 	drawHistAndSave(HardMuonPtSoftMuonPt_DimuonsH, "COLZ", "HardMuonPtSoftMuonPt_DimuonsH", directory, app);
 
 	// tk1,2 pt, eta
@@ -833,7 +861,7 @@ void reweightingVariables(int argc, char* argv[])
 	drawHistAndSave(histDRmutk_soft, "HISTE", "DRmutk_soft", directory, app);
 	drawHistAndSave(histDRmutk_hard_noniso, "HISTE", "DRmutk_hard_noniso", directory, app);
 	drawHistAndSave(histDRmutk_soft_noniso, "HISTE", "DRmutk_soft_noniso", directory, app);
-	
+
 	//////////////////////////
 	// Write hists to file //
 	//////////////////////////
@@ -842,6 +870,11 @@ void reweightingVariables(int argc, char* argv[])
 	histMuHardEta_fine_IPSSDR->Write("", TObject::kOverwrite);
 	histMuSoftPt_fine_IPSSDR->Write("", TObject::kOverwrite);
 	histMuSoftEta_fine_IPSSDR->Write("", TObject::kOverwrite);
+
+	histMuHardPt_fine_signal->Write("", TObject::kOverwrite);
+	histMuHardEta_fine_signal->Write("", TObject::kOverwrite);
+	histMuSoftPt_fine_signal->Write("", TObject::kOverwrite);
+	histMuSoftEta_fine_signal->Write("", TObject::kOverwrite);
 
 	HardMuonPtSoftMuonPt_DimuonsH->Write("", TObject::kOverwrite);
 
@@ -852,7 +885,7 @@ void reweightingVariables(int argc, char* argv[])
 	histTauTk1vs2Pt->Write("", TObject::kOverwrite);
 	histTauTk12Pt->Write("", TObject::kOverwrite);
 	histTauTk12Eta->Write("", TObject::kOverwrite);
-	
+
 	histNonIsoTk1Pt->Write("", TObject::kOverwrite);
 	histNonIsoTk1Eta->Write("", TObject::kOverwrite);
 	histNonIsoTk2Pt->Write("", TObject::kOverwrite);
@@ -860,7 +893,7 @@ void reweightingVariables(int argc, char* argv[])
 	histNonIsoTk1vs2Pt->Write("", TObject::kOverwrite);
 	histNonIsoTk12Pt->Write("", TObject::kOverwrite);
 	histNonIsoTk12Eta->Write("", TObject::kOverwrite);
-	
+
 	histDRmutk_hard->Write("",TObject::kOverwrite);
 	histDRmutk_soft->Write("",TObject::kOverwrite);
 	histDRmutk_hard_noniso->Write("",TObject::kOverwrite);

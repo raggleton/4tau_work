@@ -24,15 +24,15 @@ using std::endl;
  * @param  muonCheck    function to test muons against
  * @return   std::pair of highest-pT muons passing cuts.
  */
-std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf, 
-		  std::vector<Track*> muons10to17, 
+std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
+		  std::vector<Track*> muons10to17,
 		  bool (*muonCheck)(Track*,Track*)) {
 
 	Track *mu1(nullptr), *mu2(nullptr);
 	bool foundMuonPair = false;
 	std::vector<Track*>::iterator muA = muons17toInf.begin();
 	while(!foundMuonPair && muA != muons17toInf.end()){
-		
+
 		// Need to make pairs among the 17toInf vector also, if size >= 2
 		auto muB = muA;
 		muB++;
@@ -64,7 +64,7 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
 }
 
 /**
- * This is like the above function but adds an extra argument for specifying 
+ * This is like the above function but adds an extra argument for specifying
  * the deltaR(mu-mu) cut for the muonCheck function.
  * @param  muons17toInf  std::vector of muons with pT > 17 GeV, descending pT order
  * @param  muons10to17   std::vector of muons with 17 > pT > 10 GeV, descending pT order
@@ -72,8 +72,8 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
  * @param  deltaR        deltaR(mu-mu) cut to use
  * @return   std::pair of highest-pT muons passing cuts.
  */
-std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf, 
-		  std::vector<Track*> muons10to17, 
+std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
+		  std::vector<Track*> muons10to17,
 		  bool (*muonCheck)(Track*, Track*, double),
 		  double deltaR) {
 
@@ -81,7 +81,7 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
 	bool foundMuonPair = false;
 	std::vector<Track*>::iterator muA = muons17toInf.begin();
 	while(!foundMuonPair && muA != muons17toInf.end()){
-		
+
 		// Need to make pairs among the 17toInf vector also, if size >= 2
 		auto muB = muA;
 		muB++;
@@ -119,7 +119,7 @@ std::pair<Track*, Track*> testMuons(std::vector<Track*> muons17toInf,
  * @return      Transverse impact parameter
  */
 float calcDxy(Track* cand) {
-	
+
 
 	// calculate coordinates of closest approach to track circle in transverse plane xd, yd, zd
     float xd =  cand->Xd;
@@ -192,7 +192,7 @@ bool checkMuonsPT(Track* muA, Track* muB){
 }
 
 /**
- * These checks to see if muA and muB satisfy muon pT and SS condtions 
+ * These checks to see if muA and muB satisfy muon pT and SS condtions
  * for signal region
  * @param  muA Higher pT muon
  * @param  muB Lesser pT muon
@@ -207,7 +207,7 @@ bool checkMuonsPTSS(Track* muA, Track* muB){
 }
 
 /**
- * These checks to see if muA and muB satisfy muon SS condtions 
+ * These checks to see if muA and muB satisfy muon SS condtions
  * for signal region
  * @param  muA Higher pT muon
  * @param  muB Lesser pT muon
@@ -228,7 +228,7 @@ bool checkMuonsSS(Track* muA, Track* muB){
  * @return     [description]
  */
 bool checkMuonsIPSSEta(Track* muA, Track* muB) {
-	return checkMuonsEta(muA, muB) && checkMuonsIP(muA, muB) && checkMuonsSS(muA, muB);	
+	return checkMuonsEta(muA, muB) && checkMuonsIP(muA, muB) && checkMuonsSS(muA, muB);
 }
 
 /**
@@ -240,17 +240,17 @@ bool checkMuonsIPSSEta(Track* muA, Track* muB) {
  */
 bool checkMuonsIPSSDREta(Track* muA, Track* muB, double deltaR) {
 	if (checkMuonsEta(muA, muB)
-		&& checkMuonsIP(muA, muB) 
-		&& checkMuonsSS(muA, muB) 
+		&& checkMuonsIP(muA, muB)
+		&& checkMuonsSS(muA, muB)
 		&& (muA->P4().DeltaR(muB->P4()) > deltaR)) {
 		return true;
 	} else {
 		return false;
-	}	
+	}
 }
 
 /**
- * These checks to see if muA and muB satisfy muon pT, SS and eta condtions 
+ * These checks to see if muA and muB satisfy muon pT, SS and eta condtions
  * for signal region
  * @param  muA Higher pT muon
  * @param  muB Lesser pT muon
@@ -265,7 +265,7 @@ bool checkMuonsPTSSEta(Track* muA, Track* muB){
 }
 
 /**
- * These checks to see if muA and muB satisfy all muon condtions, 
+ * These checks to see if muA and muB satisfy all muon condtions,
  * with user-defined deltaR cut
  * @param  muA Higher pT muon
  * @param  muB Lesser pT muon
@@ -294,7 +294,7 @@ bool checkMuonsDR1(Track* muA, Track* muB){
 
 
 /**
- * These checks to see if muA and muB satisfy all muon condtions 
+ * These checks to see if muA and muB satisfy all muon condtions
  * for signal region (dR(mu-mu) > 2)
  * @param  muA Higher pT muon
  * @param  muB Lesser pT muon
@@ -359,7 +359,7 @@ bool checkTrackPTTight(Track* candTk){
  */
 bool checkTrackIPTight(Track* candTk){
 	if ((fabs(candTk->Zd) < 0.4) // dz < 0.04cm
-		&& (fabs(calcDxy(candTk)) < 0.2)) { // d0 < 0.02cm 
+		&& (fabs(calcDxy(candTk)) < 0.2)) { // d0 < 0.02cm
 		return true;
 	} else {
 		return false;
@@ -380,14 +380,16 @@ bool checkTrackEta(Track* candTk) {
 }
 
 /**
- * Check track against loose pT cuts, loose IP cut, and eta cut/
+ * Check track against loose pT cuts, loose IP cut. No eta cut
+ * - that's done in fillTrackVector since we have to rescale the track eta.
  * @param  candTk Pointer to track object
  * @return        TRUE if track passes cuts, FALSE otherwise
  */
 bool checkTrackLoose(Track* candTk) {
-	if (checkTrackPTLoose(candTk) 
-		&& checkTrackIPLoose(candTk) 
-		&& checkTrackEta(candTk)) {
+	if (checkTrackPTLoose(candTk)
+		&& checkTrackIPLoose(candTk)
+		// && checkTrackEta(candTk)
+		) {
 		return true;
 	} else {
 		return false;
@@ -400,8 +402,8 @@ bool checkTrackLoose(Track* candTk) {
  * @return        TRUE if track passes cuts, FALSE otherwise
  */
 bool checkTrackTight(Track* candTk) {
-	if (checkTrackPTTight(candTk) 
-		&& checkTrackIPTight(candTk) 
+	if (checkTrackPTTight(candTk)
+		&& checkTrackIPTight(candTk)
 		&& checkTrackEta(candTk)) {
 		return true;
 	} else {
@@ -415,7 +417,7 @@ bool checkTrackTight(Track* candTk) {
 /////////////////////
 
 /**
- * Calculates deltaR(tk-mu) between candTk and mu1, and candTk and mu2. 
+ * Calculates deltaR(tk-mu) between candTk and mu1, and candTk and mu2.
  * If either is < deltaR param (default = 0.5) then fill the relevant vector
  * with pointer to that track.
  * @param candTk Track to compare against muons
@@ -425,19 +427,88 @@ bool checkTrackTight(Track* candTk) {
  * @param tks2   vector of track pointers, where dR(tk-mu2) < deltaR
  * @param deltaR Optional deltaR cut for tk-mu. Default = 0.5
  */
-void fillTrackVectors(Track* candTk, Track* mu1, Track* mu2, 
-				 std::vector<Track*>* tks1, std::vector<Track*>* tks2, 
-				 double deltaR = 0.5) {
-	
+void fillTrackVectors(Track* candTk, Track* mu1, Track* mu2,
+				 std::vector<Track*>* tks1, std::vector<Track*>* tks2,
+				 double deltaR_mutk = 0.5) {
+
 	double dR1 = (candTk->P4()).DeltaR(mu1->P4());
 	double dR2 = (candTk->P4()).DeltaR(mu2->P4());
-	if (dR1 < deltaR) {
-		tks1->push_back(candTk);
-	} 
-	if (dR2 < deltaR) {
-		tks2->push_back(candTk);
+
+	// do cut on track eta
+	if (checkTrackEta(candTk)) {
+		if (dR1 < deltaR_mutk) {
+			tks1->push_back(candTk);
+		}
+		if (dR2 < deltaR_mutk) {
+			tks2->push_back(candTk);
+		}
 	}
 }
+
+/**
+ * @brief Rescales track eta & phi using muon eta & phi
+ * @details  DON'T set using the TLorentzVEctor from P4() method
+ * - it won't store the new Eta/Phi
+ * Instead do candTk->Eta = ... etc
+ * Then if you call candTk->P4() again, it'll give the new updated TLorentzVector
+ * Also, use the DelptaPhi function to calculate the difference in phi correctly,
+ * otherwise you'll get lost in factors of 2pi
+ * @param tk Track to rescale
+ * @param mu Muon to use for rescaling
+ * @param alpha Rescale factor. 1 = off (no rescaling)
+ */
+void rescaleTk(Track* tk, Track* mu, double rescaleFactor) {
+	if (rescaleFactor != 1) { // to save time?
+		tk->Eta = mu->Eta + (rescaleFactor * (tk->Eta - mu->Eta));
+		tk->Phi = mu->Phi + (rescaleFactor * (tk->P4()).DeltaPhi(mu->P4()));
+	}
+}
+
+/**
+ * Calculates deltaR(tk-mu) between candTk and mu1, and candTk and mu2.
+ * If either is < deltaR param (default = 0.5) then fill the relevant vector
+ * with pointer to that track.
+ * Also does rescaling of track eta and phi, and checks track eta is in barrel
+ * @param candTk Track to compare against muons
+ * @param mu1    One muon
+ * @param mu2    Other muon
+ * @param tks1   vector of track pointers, where dR(tk-mu1) < deltaR
+ * @param tks2   vector of track pointers, where dR(tk-mu2) < deltaR
+ * @param rescale rescale value (alpha) for scaling MC to data. 1 = no scaling
+ * @param deltaR Optional deltaR cut for tk-mu. Default = 0.5
+ */
+void fillTrackVectorsWithRescale(Track* candTk, Track* mu1, Track* mu2,
+				 std::vector<Track*>* tks1, std::vector<Track*>* tks2,
+				 double rescaleFactor, double deltaR_mutk = 0.5) {
+
+	// store pre-scaled values
+	double dR1 = (candTk->P4()).DeltaR(mu1->P4());
+	double dR2 = (candTk->P4()).DeltaR(mu2->P4());
+
+	// Skip if nether track will pass dR selection for either muon
+	if (((dR1*rescaleFactor) > deltaR_mutk)
+		&& ((dR2*rescaleFactor) > deltaR_mutk)) {
+		return;
+	}
+
+	if (dR1 < dR2) {
+		rescaleTk(candTk, mu1, rescaleFactor);
+		if (checkTrackEta(candTk) && ((dR1*rescaleFactor) < deltaR_mutk)) {
+			// cout << "prescaling: dR1: " << dR1 << ", expect " << rescaleFactor*dR1;
+			// cout << " postscaling: dR1: " << (candTk->P4()).DeltaR(mu1->P4()) << " factor: " << (candTk->P4()).DeltaR(mu1->P4())/dR1 << endl;
+			tks1->push_back(candTk);
+		}
+	} else {
+		rescaleTk(candTk, mu2, rescaleFactor);
+		if (checkTrackEta(candTk) && ((dR2*rescaleFactor) < deltaR_mutk)) {
+			// cout << "prescaling: dR2: " << dR2 << ", expect " << rescaleFactor*dR2;
+			// cout << " postscaling: dR2: " << (candTk->P4()).DeltaR(mu2->P4()) << " factor: " << (candTk->P4()).DeltaR(mu2->P4())/dR2 << endl;
+			tks2->push_back(candTk);
+		}
+	}
+
+}
+
 
 /**
  * Check to see if track and muon have opposite charges
@@ -446,7 +517,7 @@ void fillTrackVectors(Track* candTk, Track* mu1, Track* mu2,
  * @return        TRUE if opposite charge, FALSE otherwise
  */
 bool checkTkMuOS(Track* candTk, Track* mu) {
-	return ((candTk->Charge) * (mu->Charge)) < 0; 
+	return ((candTk->Charge) * (mu->Charge)) < 0;
 }
 
 /////////////////

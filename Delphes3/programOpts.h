@@ -12,8 +12,8 @@
 // #include "TStyle.h"
 
 // BOOST headers
-// Need to add 
-// -I $(HOME)/boost_1_55_0 -I $(HOME)/boost_1_55_0_install/include 
+// Need to add
+// -I $(HOME)/boost_1_55_0 -I $(HOME)/boost_1_55_0_install/include
 // to CXXFLAGS in Delphes/Makefile
 // and
 // -L/panfs/panasas01/phys/ra12451/boost_1_55_0_install/lib -lboost_program_options -lboost_filesystem
@@ -29,25 +29,32 @@ namespace fs = boost::filesystem;
 namespace po = boost::program_options;
 
 /**
- * This header contains all the code relating to the program options 
+ * This header contains all the code relating to the program options
  * for Delphes analysis scripts (ie adding of ROOT files for analysis)
  *
  * Robin Aggleton 2014
  */
 
+// for rescaling deltaR(mu-tk)
+// get this value from running reweightingVariables program, then running muonReweighting.C script on output of that
+// then put in the two numbers here
+// alpha = <deltaR in data> / <deltaR in MC>
+// where < > indicate mean. So alpha should be < 1
+const double alpha = 0.150897/0.175266;
+
 // Global enum for the MC source
 // Note convention of all lower case
 enum MCsource { signal, qcdb, qcdc, qcdscatter, qcdall, test };
 
-// Have to define << and >> ops to get enum to work with boost::lexical_cast 
+// Have to define << and >> ops to get enum to work with boost::lexical_cast
 // and program_options, and also so we can cout the enum easily
 std::ostream& operator<<(std::ostream& out, const MCsource value) {
 
     const char* s = 0;
 #define PROCESS_VAL(p) case(p): s = #p; break;
     switch(value) {
-        PROCESS_VAL(signal);     
-        PROCESS_VAL(qcdb);     
+        PROCESS_VAL(signal);
+        PROCESS_VAL(qcdb);
         PROCESS_VAL(qcdc);
         PROCESS_VAL(qcdscatter);
         PROCESS_VAL(qcdall);
@@ -94,7 +101,10 @@ class ProgramOpts
 		int  nEvents; // how many events to run over, -1 = all events
 		bool verbose; // output debugging info to screen
 		double dR; // deltaR(mu-mu) cut
-	public: 
+		bool doRescale; // whether to rescale the track eta & phi to match with data
+		double rescale; // rescale value for rescaling the track eta & phi. 1 = no rescaling
+
+	public:
 		// constructor, parses input
 		ProgramOpts(int argc, char* argv[]):
 			// some sensible defaults
@@ -105,22 +115,20 @@ class ProgramOpts
 			doHLT(true),
 			nEvents(-1),
 			verbose(false),
-			dR(2.)
+			dR(2.),
+			doRescale(false),
+			rescale(1.0)
 		{
 			po::options_description desc("\nAllowed options");
 			desc.add_options()
 				("help,h", "Produce help message")
-				("source,s", po::value<MCsource>(&source), 
-					"Process to run: signal [default], qcdb, qcdc, qcdscatter, test (a qcdb file)")
-				("swapMuRandomly", po::value<bool>(&swapMuRandomly), 
-					"TRUE [default] - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
-				("doHLT", po::value<bool>(&doHLT), 
-					"TRUE [default] - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
-				("number,n", po::value<int>(&nEvents), 
-					"Number of events to run over. -1 for all [default]")
-				("dR", po::value<double>(&dR),
-					"Set deltaR(mu-u) cut value (default = 2).")
+				("source,s", po::value<MCsource>(&source), "Process to run: signal [default], qcdb, qcdc, qcdscatter, test (a qcdb file)")
+				("swapMuRandomly", po::value<bool>(&swapMuRandomly), "TRUE [default] - mu 1,2 randomly assigned, FALSE - mu 1,2 pT ordered")
+				("doHLT", po::value<bool>(&doHLT), "TRUE [default] - use samples with HLT_Mu17_Mu8 during generation, FALSE - no HLT cuts")
+				("number,n", po::value<int>(&nEvents), "Number of events to run over. -1 for all [default]")
+				("dR", po::value<double>(&dR), "Set deltaR(mu-u) cut value (default = 2).")
 				("verbose,v", "Output debugging statements")
+				("doRescale", "Whether to rescale track eta & phi to match data. FALSE by default.")
 			;
 
 			po::variables_map vm;
@@ -138,7 +146,7 @@ class ProgramOpts
 				exit(1); // NOT ELEGANT - DO BETTER!
 			}
 
-			po::notify(vm);    
+			po::notify(vm);
 
 			if (vm.count("help")) {
 			    cout << desc << endl;
@@ -157,7 +165,7 @@ class ProgramOpts
 			// Defaults are set above
 			if (vm.count("source")) {
 			    source = vm["source"].as<MCsource>();
-			    if (source == signal) { 
+			    if (source == signal) {
 			    	doSignal = true;
 			    } else {
 			    	doSignal = false;
@@ -171,11 +179,18 @@ class ProgramOpts
 			} else {
 			    cout << "Mu ordering not set. Defaulting to random." << endl;
 			}
-			
+
 			if (vm.count("doHLT")) {
 			    doHLT = vm["doHLT"].as<bool>();
 			} else {
 			    cout << "HLT requirement not set. Defaulting to using samples with HLT cuts." << endl;
+			}
+
+			if (vm.count("doRescale")) {
+				doRescale = true;
+				rescale = alpha;
+			} else {
+				cout << "No rescaling option set. Defulating to NOT rescaling to data." << endl;
 			}
 
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
@@ -190,15 +205,16 @@ class ProgramOpts
 		int  getNEvents() { return nEvents; }
 		bool getVerbose() { return verbose; }
 		double getdR() { return dR; }
+		double getRescale() { return rescale; }
 
 		// This should really be in a separate .cc file...
 		void printProgramOptions() {
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 			cout << "PROGRAM OPTIONS" << endl;
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
-			
+
 			cout << "Doing " << source << " MC." << endl;
-			
+
 			if (swapMuRandomly) {
 				cout << "Swapping mu 1<->2 randomly." << endl;
 			} else {
@@ -210,7 +226,13 @@ class ProgramOpts
 			} else {
 				cout << "Using MC without any HLT cuts." << endl;
 			}
-			
+
+			if (doRescale) {
+				cout << "Rescaling track eta & phi to match data. Factor: " << rescale << endl;
+			} else {
+				cout << "Not rescaling track eta & phi to match data." << endl;
+			}
+
 			cout << "DeltaR(mu-mu) > " << dR << endl;
 			cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
 		}
@@ -226,7 +248,7 @@ class ProgramOpts
  * @param endNum   Ending file number
  */
 void addFilesFromFolder(TChain* chain, std::string folder, std::string file, int startNum, int endNum) {
-	cout << "Adding " << folder+file+boost::lexical_cast<std::string>(startNum)+".root" 
+	cout << "Adding " << folder+file+boost::lexical_cast<std::string>(startNum)+".root"
 		 <<  " to " << folder+file+boost::lexical_cast<std::string>(endNum)+".root" << endl;
 	for (int i = startNum; i <= endNum; i++) {
 		chain->Add((folder+file+boost::lexical_cast<std::string>(i)+".root").c_str());
@@ -247,13 +269,13 @@ void addFilesFromFolder(TChain* chain, std::string folder, std::string file, int
 /**
  * Add Delphes ntuples to TChain so we can process them in one go
  * @param chain    Pointer to TChain to add files to
- * @param pOpts    Pointer to ProgramOpts object that holds all user flags 
+ * @param pOpts    Pointer to ProgramOpts object that holds all user flags
  * (makes it easy to change avaiable flags without updating all programs individually!)
  */
 void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	// Create chain of root trees
 	// expect files to be named like myFile_i.root, where i = 1 -> nFiles
-	
+
 	MCsource source = pOpts->getSource();
 	bool doMu       = pOpts->getQCDMu();
 	bool doHLT      = pOpts->getHLT();
@@ -269,7 +291,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			// folder = "Signal_1prong_500K_bare/";
 			// file = "signal_1prong_500K_HLT_";
 			addFilesFromFolder(chain, "Signal_1prong_HLT_bare/", "Signal_HLT_", 60);
-		} else { 
+		} else {
 			cout << "Doing signal without HLT cuts" << endl;
 			addFilesFromFolder(chain, "Signal_1prong_500K_bare/", "signal_1prong_500K_NoHLT_", 20);
 		}
@@ -291,7 +313,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			cout << "Doing QCDb" << endl;
 			addFilesFromFolder(chain, "QCDb_cleanTk/", "QCDb_", 10);
 		}
-	
+
 	//////////////
 	// QCDc MC //
 	//////////////
@@ -300,7 +322,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			cout << "Doing QCDc_mu with HLT cuts" << endl;
 			addFilesFromFolder(chain, "QCDc_mu_pthatmin20_Mu17_Mu8_bare/", "QCDc_mu_pthatmin20_Mu17_Mu8_", 200);
 		}
-	
+
 	//////////////////////
 	// QCD q-g scatter //
 	//////////////////////
@@ -310,7 +332,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			addFilesFromFolder(chain, "QCDbcScatter_HLT_bare/", "QCDbcScatter_HLT_250_", 1, 200);
 			addFilesFromFolder(chain, "QCDbcScatter_HLT_bare/", "QCDbcScatter_HLT_500_", 201, 800);
 		}
-	
+
 	////////////////////
 	// QCD all? OLD! //
 	////////////////////
@@ -321,7 +343,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 			// file = "QCDAll_mu_pthatmin20_Mu17_Mu8_";
 			addFilesFromFolder(chain, "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_bare/", "QCDAll_NEW_mu_pthatmin20_Mu17_Mu8_", 200);
 		}
-	
+
 	////////////////
 	// Test file //
 	////////////////
@@ -331,7 +353,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	}
 
 	// Auto-loop over ROOT files in folder using Boost::Filesystem
-	
+
 	// TODO
 }
 
