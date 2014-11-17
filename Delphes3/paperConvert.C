@@ -871,34 +871,30 @@ void paperConvert() {
     THStack* st_Ntk2_2or3 = new THStack("","");
     TH1D* histM1_Ntk2_2or3 = (TH1D*) f_bg_mass2->Get("hM1_Ntk2_2or3");
     doCustomHist(histM1_Ntk2_2or3, kRed, 22);
-    st_Ntk2_2or3->Add(hM1_bare_bg_muRand_HLT_dR2);
+    // st_Ntk2_2or3->Add(hM1_bare_bg_muRand_HLT_dR2);
+    st_Ntk2_2or3->Add(hM_bare_bg_muRand_HLT_dR2);
     st_Ntk2_2or3->Add(histM1_Ntk2_2or3);
     st_Ntk2_2or3->Draw("NOSTACK E");
     setMassAUTitles(st_Ntk2_2or3->GetHistogram());
-    st_Ntk2_2or3->GetHistogram()->SetXTitle("m_{1}(#mu-trk) [GeV]");
+    st_Ntk2_2or3->GetHistogram()->SetXTitle("m(#mu-trk) [GeV]");
     setAltTitleLabelSizes(st_Ntk2_2or3->GetHistogram());
     TLegend* l_Ntk2_2or3 = new TLegend(0.55, 0.56, 0.88, 0.88);
     l_Ntk2_2or3->AddEntry((TObject*)0, "Gen. level QCD b#bar{b} MC", "");
-    l_Ntk2_2or3->AddEntry(hM1_bare_bg_muRand_HLT_dR2, "N_{trk,2} = 1", "lp");
+    // l_Ntk2_2or3->AddEntry(hM1_bare_bg_muRand_HLT_dR2, "N_{trk,2} = 1", "lp");
+    l_Ntk2_2or3->AddEntry(hM_bare_bg_muRand_HLT_dR2, "N_{trk,2} = 1", "lp");
     l_Ntk2_2or3->AddEntry(histM1_Ntk2_2or3, "N_{trk,2} = 2, 3", "lp");
     doStandardLegend(l_Ntk2_2or3);
     l_Ntk2_2or3->Draw();
-    c1->SaveAs("Combined/M1_Ntk2_2or3.pdf");
-    c1->SaveAs("Combined/M1_Ntk2_2or3.png");
+    c1->SaveAs("Combined/M_Ntk2_2or3.pdf");
+    c1->SaveAs("Combined/M_Ntk2_2or3.png");
 
     histM1_Ntk2_2or3->SetMinimum(0.001); // Stop SetLogy complainng
-    hM1_bare_bg_muRand_HLT_dR2->SetMinimum(0.001); // Stop SetLogy complainng
-    THStack* st_Ntk2_2or3_log = new THStack("","");
-    st_Ntk2_2or3_log->Add(hM1_bare_bg_muRand_HLT_dR2);
-    st_Ntk2_2or3_log->Add(histM1_Ntk2_2or3);
-    st_Ntk2_2or3_log->Draw("NOSTACK E");
-    setMassAUTitles(st_Ntk2_2or3_log->GetHistogram());
-    st_Ntk2_2or3_log->GetHistogram()->SetXTitle("m_{1}(#mu-trk) [GeV]");
-    setAltTitleLabelSizes(st_Ntk2_2or3_log->GetHistogram());
+    // hM1_bare_bg_muRand_HLT_dR2->SetMinimum(0.001); // Stop SetLogy complainng
+    hM_bare_bg_muRand_HLT_dR2->SetMinimum(0.001); // Stop SetLogy complainng
+    setAltTitleLabelSizes(st_Ntk2_2or3->GetHistogram());
     c1->SetLogy();
-    l_Ntk2_2or3->Draw();
-    c1->SaveAs("Combined/M1_Ntk2_2or3_log.pdf");
-    c1->SaveAs("Combined/M1_Ntk2_2or3_log.png");
+    c1->SaveAs("Combined/M_Ntk2_2or3_log.pdf");
+    c1->SaveAs("Combined/M_Ntk2_2or3_log.png");
 
 
     // cleanup

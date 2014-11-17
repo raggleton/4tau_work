@@ -712,12 +712,12 @@ void massPlots(int argc, char* argv[])
 
 			double m1(0);
 
+			m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 
 			if ( //tk2_1.size() == 2
 				tk2_1to2p5_taucand.size() == 1
 				&& tk2_1to2p5.size() == 1
 				) {
-					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 
 					histM1_Ntk2_2->Fill(m1);
 					histM1_Ntk2_2or3->Fill(m1);
@@ -728,7 +728,7 @@ void massPlots(int argc, char* argv[])
 				tk2_1to2p5_taucand.size() == 2
 				&& tk2_1to2p5.size() == 2
 				) {
-					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+					// m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 
 					histM1_Ntk2_3->Fill(m1);
 					histM1_Ntk2_2or3->Fill(m1);
@@ -738,12 +738,50 @@ void massPlots(int argc, char* argv[])
 				tk2_1to2p5_taucand.size() == 3
 				&& tk2_1to2p5.size() == 3
 				) {
-					m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
+					// m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 
 					histM1_Ntk2_4->Fill(m1);
 				}
 		}
 
+		if (   tk2_1.size() == 1
+			&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1
+			&& tk1_2p5.size() == 1 && tk1_2p5_OS.size() == 1
+			){
+
+			double m1(0);
+
+			m1 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
+
+			if ( //tk1_1.size() == 2
+				tk1_1to2p5_taucand.size() == 1
+				&& tk1_1to2p5.size() == 1
+				) {
+
+					histM1_Ntk2_2->Fill(m1);
+					histM1_Ntk2_2or3->Fill(m1);
+
+				}
+
+			if (// tk1_1.size() == 3
+				tk1_1to2p5_taucand.size() == 2
+				&& tk1_1to2p5.size() == 2
+				) {
+					// m1 = (mu1Mom+tk2_2p5_OS[0]->P4()).M();
+
+					histM1_Ntk2_3->Fill(m1);
+					histM1_Ntk2_2or3->Fill(m1);
+				}
+
+			if ( //tk1_1.size() == 4
+				tk1_1to2p5_taucand.size() == 3
+				&& tk1_1to2p5.size() == 3
+				) {
+					// m1 = (mu1Mom+tk2_2p5_OS[0]->P4()).M();
+
+					histM1_Ntk2_4->Fill(m1);
+				}
+		}
 
 		////////////////////////////////////////////////////
 		// SIDEBAND REGION - for soft tracks 1 < pT < 2.5 //
