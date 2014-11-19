@@ -1,6 +1,7 @@
 #include "commonFunctions.h"
 #include "classes/SortableObject.h"
 #include "cuts.h"
+#include "rescale.h"
 // #include "tdrstyle.C"
 
 using std::cout;
@@ -55,8 +56,11 @@ void reweightingVariables(int argc, char* argv[])
 	bool doHLT           = pOpts.getHLT(); // whether to use MC that has HLT cuts already applied or not.
 	// bool DEBUG        = pOpts.getVerbose(); // output debug statments
 	double deltaR        = pOpts.getdR(); // dR(mu-mu) value to use
-	double rescaleFactor = pOpts.getRescale(); // factor to rescaleFactor track eta & phi to match data. 1 = no rescaling
+	bool doRescale       = pOpts.doRescaling(); // whether to rescale signal tracks.
 	bool do1to1p5        = false; // for additional sideband studies. Slower?
+
+	// for rescaling signal tracks
+	Rescaler r;
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -80,8 +84,8 @@ void reweightingVariables(int argc, char* argv[])
 	// Book histograms  //
 	//////////////////////
 	// Plots for testing invariant mass correlation
-	std::vector<double> massBins {0,1,2,3,10};
-	int nBinsX = massBins.size()-1;
+	// std::vector<double> massBins {0,1,2,3,10};
+	// int nBinsX = massBins.size()-1;
 
 	// ------------------------
 	// Declare hists
@@ -92,6 +96,8 @@ void reweightingVariables(int argc, char* argv[])
 
 	TH1D* histDRmutk_hard_noniso         = new TH1D("hDRmutk_hard_noniso", "#DeltaR(#mu-tk) (hard)",40,0,2);
 	TH1D* histDRmutk_soft_noniso         = new TH1D("hDRmutk_soft_noniso", "#DeltaR(#mu-tk) (soft)",40,0,2);
+
+	// NB SHOULD REALLY RENAME THESE HARD OR SOFT, NOT 1 OR 2
 
 	// mu1/2 pt/eta
 	TH1F* histMuHardPt_fine_signal       = new TH1F("hMu1Pt_fine_signal","#mu_{hard} p_{T}; #mu_{hard} p_{T} [GeV];A.U.",100,0.,50.);
@@ -395,20 +401,20 @@ void reweightingVariables(int argc, char* argv[])
 			){
 
 				// Store track in suitable vector
-				fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_1, &tk2_1, rescaleFactor);
+				fillTrackVectors(candTk, mu1, mu2, &tk1_1, &tk2_1);
 
 
 				// 1 prong candiates,
 				if (checkTrackIPTight(candTk)) {
 					// for N_trk = 2or3
-					fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_1to2p5_taucand, &tk2_1to2p5_taucand, rescaleFactor);
+					fillTrackVectors(candTk, mu1, mu2, &tk1_1to2p5_taucand, &tk2_1to2p5_taucand);
 
 					if (checkTrackPTTight(candTk)) {
 						// tau candidate must have pT > 2.5 GeV
-						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5, & tk2_2p5, rescaleFactor);
+						fillTrackVectors(candTk, mu1, mu2, &tk1_2p5, & tk2_2p5);
 
 						if (checkTkMuOS(candTk, mu1)) {
-							fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_OS, &tk2_2p5_OS, rescaleFactor);
+							fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_OS, &tk2_2p5_OS);
 						}
 					}
 				} else {
@@ -416,17 +422,17 @@ void reweightingVariables(int argc, char* argv[])
 
 					if (checkTrackPTTight(candTk)) {
 						// tau candidate must have pT > 2.5 GeV
-						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_looseip, & tk2_2p5_looseip, rescaleFactor);
+						fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_looseip, & tk2_2p5_looseip);
 
 						if (checkTkMuOS(candTk, mu1)) {
-							fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_OS_looseip, &tk2_2p5_OS_looseip, rescaleFactor);
+							fillTrackVectors(candTk, mu1, mu2, &tk1_2p5_OS_looseip, &tk2_2p5_OS_looseip);
 						}
 					} else {
-						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_1to2p5, &tk2_1to2p5, rescaleFactor);
+						fillTrackVectors(candTk, mu1, mu2, &tk1_1to2p5, &tk2_1to2p5);
 					}
 
 					if (do1to1p5 && candTk->PT < 1.5){
-						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_1to1p5, &tk2_1to1p5, rescaleFactor);
+						fillTrackVectors(candTk, mu1, mu2, &tk1_1to1p5, &tk2_1to1p5);
 					}
 				}
 			} // End of track selection criteria
@@ -466,6 +472,12 @@ void reweightingVariables(int argc, char* argv[])
 			if (tk1_2p5.size() == 1 && tk2_2p5.size() == 1
 			&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1)
 			{
+
+
+				if(doRescale) {
+					r.rescaleTrack(tk1_2p5_OS.at(0), mu1);
+					r.rescaleTrack(tk2_2p5_OS.at(0), mu2);
+				}
 
 				TLorentzVector track1Mom=tk1_2p5_OS[0]->P4();
 				TLorentzVector track2Mom=tk2_2p5_OS[0]->P4();
@@ -578,7 +590,7 @@ void reweightingVariables(int argc, char* argv[])
 			&& tk2_2p5.size() == 1 && tk2_2p5_OS.size() == 1
 			){
 
-			double m1(0);
+			// double m1(0);
 			TLorentzVector track1Mom=tk1_2p5_OS[0]->P4();
 			TLorentzVector track2Mom=tk2_2p5_OS[0]->P4();
 
@@ -798,6 +810,10 @@ void reweightingVariables(int argc, char* argv[])
 		app += "_HLT";
 	} else {
 		app += "_NoHLT";
+	}
+
+	if (doRescale) {
+		app += "_rescaleQuantile";
 	}
 
 	app += "_dR";

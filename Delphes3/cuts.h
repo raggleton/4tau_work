@@ -388,7 +388,7 @@ bool checkTrackEta(Track* candTk) {
 bool checkTrackLoose(Track* candTk) {
 	if (checkTrackPTLoose(candTk)
 		&& checkTrackIPLoose(candTk)
-		// && checkTrackEta(candTk)
+		&& checkTrackEta(candTk)
 		) {
 		return true;
 	} else {

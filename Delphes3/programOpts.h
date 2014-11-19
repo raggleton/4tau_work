@@ -206,6 +206,7 @@ class ProgramOpts
 		bool getVerbose() { return verbose; }
 		double getdR() { return dR; }
 		double getRescale() { return rescale; }
+		bool doRescaling() { return doRescale; }
 
 		// This should really be in a separate .cc file...
 		void printProgramOptions() {
@@ -228,7 +229,8 @@ class ProgramOpts
 			}
 
 			if (doRescale) {
-				cout << "Rescaling track eta & phi to match data. Factor: " << rescale << endl;
+				// cout << "Rescaling track eta & phi to match data. Factor: " << rescale << endl;
+				cout << "Rescaling track eta & phi to match data. Doing quantile rescaling. " << endl;
 			} else {
 				cout << "Not rescaling track eta & phi to match data." << endl;
 			}

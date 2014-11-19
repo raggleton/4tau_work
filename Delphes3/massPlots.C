@@ -1,6 +1,7 @@
 #include "commonFunctions.h"
 #include "classes/SortableObject.h"
 #include "cuts.h"
+#include "rescale.h"
 // #include "tdrstyle.C"
 
 using std::cout;
@@ -108,7 +109,11 @@ void massPlots(int argc, char* argv[])
 	// bool DEBUG        = pOpts.getVerbose(); // output debug statments
 	double deltaR        = pOpts.getdR(); // dR(mu-mu) value to use
 	double rescaleFactor = pOpts.getRescale(); // factor to rescaleFactor track eta & phi to match data. 1 = no rescaling
+	bool doRescale       = pOpts.doRescaling(); // factor to rescaleFactor track eta & phi to match data. 1 = no rescaling
 	bool do1to1p5        = false; // for additional sideband studies. Slower?
+
+	// for rescaling signal tracks
+	Rescaler r;
 
 	// Create chain of root trees
 	TChain chain("Delphes");
@@ -268,7 +273,15 @@ void massPlots(int argc, char* argv[])
 	cout << "Running over " << numberOfEntries << " events" << endl;
 
 	bool stop = false; // used to stop the loop, for debugging/testing
+	int last_pc = -1;
 	for(Int_t entry = 0; entry < numberOfEntries && !stop; ++entry){
+
+		// output something every 5%
+		int pc = int(100*entry/double(numberOfEntries));
+		if(pc%5 == 0 && pc != last_pc) {
+			std::cout << pc << "% progress (event " << entry << ")" << endl;
+			last_pc = pc;
+		}
 
 		// Load selected branches with data from specified event
 		treeReader->ReadEntry(entry);
@@ -597,12 +610,23 @@ void massPlots(int argc, char* argv[])
 			&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1)
 			{
 
+				cout << (mu1Mom+tk1_2p5_OS[0]->P4()).M() << endl;
+				cout << (mu2Mom+tk2_2p5_OS[0]->P4()).M() << endl;
+
+				if(doRescale) {
+					r.rescaleTrack(tk1_2p5_OS[0], mu1);
+					r.rescaleTrack(tk2_2p5_OS[0], mu2);
+				}
+
 				TLorentzVector track1Mom=tk1_2p5_OS[0]->P4();
 				TLorentzVector track2Mom=tk2_2p5_OS[0]->P4();
 
 				// random since mu1Mom andmu2Mom are randomly assigned (if selected at top)
 				double m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 				double m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
+
+				cout << m1 << endl;
+				cout << m2 << endl;
 
 				histM1->Fill(m1);
 				histM1_fine->Fill(m1);
@@ -1064,9 +1088,10 @@ void massPlots(int argc, char* argv[])
 		app += "_NoHLT";
 	}
 
-	if (rescaleFactor != 1) {
-		app += "_rescale";
+	if (doRescale) {
+		app += "_rescaleQuantile";
 	}
+
 
 	app += "_dR";
 	app += boost::lexical_cast<std::string>(deltaR);
@@ -1172,30 +1197,36 @@ void massPlots(int argc, char* argv[])
 
 	// Do correlations plot by making m1*m1 first, then dividing m1vsm2 by m1*m1
 	// Don't need to normalise m1timesm1, as histM1_side already normalised
+	// turn off errors as correlated with numerator
 	for(int a = 1; a <= nBinsX; a++){
 		for (int b = 1; b <=nBinsX; b++){
 			histM1timesM1_side_1to2p5->SetBinContent(a,b,histM_side_1to2p5->GetBinContent(a)*histM_side_1to2p5->GetBinContent(b));
-			histM1timesM1_side_1to2p5->SetBinError(a,b,sqrt(pow(histM_side_1to2p5->GetBinContent(b)*histM_side_1to2p5->GetBinError(a),2)
-															+pow(histM_side_1to2p5->GetBinContent(a)*histM_side_1to2p5->GetBinError(b),2)));
+			histM1timesM1_side_1to2p5->SetBinError(a,b,0);
+			// histM1timesM1_side_1to2p5->SetBinError(a,b,sqrt(pow(histM_side_1to2p5->GetBinContent(b)*histM_side_1to2p5->GetBinError(a),2)
+															// +pow(histM_side_1to2p5->GetBinContent(a)*histM_side_1to2p5->GetBinError(b),2)));
 
 			// loose tau
 			histM1timesM1_side_1to2p5_loosetau->SetBinContent(a,b,histM_side_1to2p5_loosetau->GetBinContent(a)*histM_side_1to2p5_loosetau->GetBinContent(b));
-			histM1timesM1_side_1to2p5_loosetau->SetBinError(a,b,sqrt(pow(histM_side_1to2p5_loosetau->GetBinContent(b)*histM_side_1to2p5_loosetau->GetBinError(a),2)
-															+pow(histM_side_1to2p5_loosetau->GetBinContent(a)*histM_side_1to2p5_loosetau->GetBinError(b),2)));
+			histM1timesM1_side_1to2p5_loosetau->SetBinError(a,b,0);
+			// histM1timesM1_side_1to2p5_loosetau->SetBinError(a,b,sqrt(pow(histM_side_1to2p5_loosetau->GetBinContent(b)*histM_side_1to2p5_loosetau->GetBinError(a),2)
+															// +pow(histM_side_1to2p5_loosetau->GetBinContent(a)*histM_side_1to2p5_loosetau->GetBinError(b),2)));
 
 			if (do1to1p5) {
 				histM1timesM1_side_1to1p5->SetBinContent(a,b,histM_side_1to1p5->GetBinContent(a)*histM_side_1to1p5->GetBinContent(b));
-				histM1timesM1_side_1to1p5->SetBinError(a,b,sqrt(pow(histM_side_1to1p5->GetBinContent(b)*histM_side_1to1p5->GetBinError(a),2)
-																+pow(histM_side_1to1p5->GetBinContent(a)*histM_side_1to1p5->GetBinError(b),2)));
+				histM1timesM1_side_1to1p5->SetBinError(a,b,0);
+				// histM1timesM1_side_1to1p5->SetBinError(a,b,sqrt(pow(histM_side_1to1p5->GetBinContent(b)*histM_side_1to1p5->GetBinError(a),2)
+																// +pow(histM_side_1to1p5->GetBinContent(a)*histM_side_1to1p5->GetBinError(b),2)));
 			}
 
 			histM1timesM1->SetBinContent(a,b,histM->GetBinContent(a)*histM->GetBinContent(b));
-			histM1timesM1->SetBinError(a,b,sqrt(pow(histM->GetBinContent(b)*histM->GetBinError(a),2)
-												+pow(histM->GetBinContent(a)*histM->GetBinError(b),2)));
+			histM1timesM1->SetBinError(a,b,0);
+			// histM1timesM1->SetBinError(a,b,sqrt(pow(histM->GetBinContent(b)*histM->GetBinError(a),2)
+												// +pow(histM->GetBinContent(a)*histM->GetBinError(b),2)));
 			// loose tau cand
 			histM1timesM1_loosetau->SetBinContent(a,b,histM_loosetau->GetBinContent(a)*histM_loosetau->GetBinContent(b));
-			histM1timesM1_loosetau->SetBinError(a,b,sqrt(pow(histM_loosetau->GetBinContent(b)*histM_loosetau->GetBinError(a),2)
-												+pow(histM_loosetau->GetBinContent(a)*histM_loosetau->GetBinError(b),2)));
+			histM1timesM1_loosetau->SetBinError(a,b,0);
+			// histM1timesM1_loosetau->SetBinError(a,b,sqrt(pow(histM_loosetau->GetBinContent(b)*histM_loosetau->GetBinError(a),2)
+												// +pow(histM_loosetau->GetBinContent(a)*histM_loosetau->GetBinError(b),2)));
 		}
 	}
 	TH2D* histM1vsM2_correlations_side_1to2p5 = (TH2D*)histM1vsM2_side_1to2p5->Clone("hM1vsM2_correlations_side_1to2p5");
@@ -1424,6 +1455,7 @@ void massPlots(int argc, char* argv[])
 	histM1_side_1to2p5->Write("",TObject::kOverwrite);
 	histM2_side_1to2p5->Write("",TObject::kOverwrite);
 	histM_side_1to2p5->Write("",TObject::kOverwrite);
+	histM1timesM1_side_1to2p5->Write("",TObject::kOverwrite);
 	histM1vsM2_side_1to2p5->Write("",TObject::kOverwrite);
 	histM1vsM2_correlations_side_1to2p5->Write("",TObject::kOverwrite);
 	histCorr1D_side_1to2p5->Write("",TObject::kOverwrite);
@@ -1446,7 +1478,7 @@ void massPlots(int argc, char* argv[])
 		histM1vsM2_correlations_side_1to1p5->Write("",TObject::kOverwrite);
 		histCorr1D_side_1to1p5->Write("",TObject::kOverwrite);
 	}
-
+	histM1timesM1->Write("",TObject::kOverwrite);
 	histM1vsM2->Write("",TObject::kOverwrite);
 	histM1vsM2_correlations->Write("",TObject::kOverwrite);
 	histCorr1D->Write("",TObject::kOverwrite);
