@@ -434,9 +434,11 @@ void paperConvert() {
     TFile *f_sig_mass1 = TFile::Open("Signal_1prong_HLT_bare/output_bare_sig_muRand_HLT_dR1.root", "READ");
     TFile *f_sig_mass2 = TFile::Open("Signal_1prong_HLT_bare/output_bare_sig_muRand_HLT_dR2.root", "READ");
     TFile *f_bg_main1 = TFile::Open("QCDb_HLT_bare/output_main_bare_bg_muRand_HLT_dR1.root", "READ");
-    TFile *f_bg_main2 = TFile::Open("QCDb_HLT_bare/output_main_bare_bg_muRand_HLT_dR2.root", "READ");
+    // TFile *f_bg_main2 = TFile::Open("QCDb_HLT_bare/output_main_bare_bg_muRand_HLT_dR2.root", "READ");
+    TFile *f_bg_main2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_noDz_dR2.root", "READ");
     TFile *f_bg_mass1 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_dR1.root", "READ");
-    TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_dR2.root", "READ");
+    // TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_dR2.root", "READ");
+    TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_noDz_dR2.root", "READ");
     TFile *f_scatter_main1 = TFile::Open("QCDbcScatter_HLT_bare/output_main_bare_bg_muRand_HLT_dR1.root", "READ");
     TFile *f_scatter_main2 = TFile::Open("QCDbcScatter_HLT_bare/output_main_bare_bg_muRand_HLT_dR2.root", "READ");
     TFile *f_scatter_mass1 = TFile::Open("QCDbcScatter_HLT_bare/output_bare_bg_muRand_HLT_dR1.root", "READ");
@@ -830,12 +832,12 @@ void paperConvert() {
     /////////////////////////
     // TRACK DISTRIBUTIONS //
     /////////////////////////
-    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracks1", "HISTE", "Combined/combined_NTrack1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV");
-    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAbs1", "HISTE", "Combined/combined_NTrackAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV", "Average number of tracks per #mu_{1} / bin");
-    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAll1", "HISTE", "Combined/combined_NTrackAll1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV");
-    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAllAbs1", "HISTE", "Combined/combined_NTrackAllAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV", "Average number of tracks per #mu_{1} / bin");
-    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf", scalingFactors, "Tracks with 1 < p_{T} < 2.5 GeV");
-    combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf", scalingFactors, "Tracks with 1 < p_{T} < 2.5 GeV", "Average number of tracks per #mu_{1} / bin");
+    // combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracks1", "HISTE", "Combined/combined_NTrack1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV");
+    // combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAbs1", "HISTE", "Combined/combined_NTrackAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 2.5 GeV", "Average number of tracks per #mu_{1} / bin");
+    // combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAll1", "HISTE", "Combined/combined_NTrackAll1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV");
+    // combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNTracksAllAbs1", "HISTE", "Combined/combined_NTrackAllAbs1_muRand.pdf", scalingFactors, "Tracks with p_{T} > 1 GeV", "Average number of tracks per #mu_{1} / bin");
+    // combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracks1", "HISTE", "Combined/combined_NSoftTrack1_muRand.pdf", scalingFactors, "Tracks with 1 < p_{T} < 2.5 GeV");
+    // combineHists(f_sig_main2, f_bg_main2, f_scatter_main2, "hNSoftTracksAbs1", "HISTE", "Combined/combined_NSoftTrackAbs1_muRand.pdf", scalingFactors, "Tracks with 1 < p_{T} < 2.5 GeV", "Average number of tracks per #mu_{1} / bin");
 
 
     ////////////////////////////////////////////
@@ -876,13 +878,13 @@ void paperConvert() {
     st_Ntk2_2or3->Add(histM1_Ntk2_2or3);
     st_Ntk2_2or3->Draw("NOSTACK E");
     setMassAUTitles(st_Ntk2_2or3->GetHistogram());
-    st_Ntk2_2or3->GetHistogram()->SetXTitle("m(#mu-trk) [GeV]");
+    st_Ntk2_2or3->GetHistogram()->SetXTitle("m_{ i }(#mu-trk) [GeV]");
     setAltTitleLabelSizes(st_Ntk2_2or3->GetHistogram());
     TLegend* l_Ntk2_2or3 = new TLegend(0.55, 0.56, 0.88, 0.88);
     l_Ntk2_2or3->AddEntry((TObject*)0, "Gen. level QCD b#bar{b} MC", "");
     // l_Ntk2_2or3->AddEntry(hM1_bare_bg_muRand_HLT_dR2, "N_{trk,2} = 1", "lp");
-    l_Ntk2_2or3->AddEntry(hM_bare_bg_muRand_HLT_dR2, "N_{trk,2} = 1", "lp");
-    l_Ntk2_2or3->AddEntry(histM1_Ntk2_2or3, "N_{trk,2} = 2, 3", "lp");
+    l_Ntk2_2or3->AddEntry(hM_bare_bg_muRand_HLT_dR2, "N_{trk, j} = 1", "lp");
+    l_Ntk2_2or3->AddEntry(histM1_Ntk2_2or3, "N_{trk, j} = 2, 3", "lp");
     doStandardLegend(l_Ntk2_2or3);
     l_Ntk2_2or3->Draw();
     c1->SaveAs("Combined/M_Ntk2_2or3.pdf");
