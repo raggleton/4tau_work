@@ -546,28 +546,33 @@ void massPlots(int argc, char* argv[])
 
 					if (checkTrackPTTight(candTk)) {
 						// tau candidate must have pT > 2.5 GeV
-						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5, & tk2_2p5, rescaleFactor);
+						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5, &tk2_2p5, rescaleFactor);
 
 						if (checkTkMuOS(candTk, mu1)) {
 							fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_OS, &tk2_2p5_OS, rescaleFactor);
 						}
 					}
 				} else {
-
-
-					if (checkTrackPTTight(candTk)) {
+					// if (checkTrackPTTight(candTk)) {
 						// tau candidate must have pT > 2.5 GeV
-						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_looseip, & tk2_2p5_looseip, rescaleFactor);
+						// fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_looseip, & tk2_2p5_looseip, rescaleFactor);
 
-						if (checkTkMuOS(candTk, mu1)) {
-							fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_OS_looseip, &tk2_2p5_OS_looseip, rescaleFactor);
-						}
-					} else {
+						// if (checkTkMuOS(candTk, mu1)) {
+							// fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_OS_looseip, &tk2_2p5_OS_looseip, rescaleFactor);
+						// }
+					// } else {
 						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_1to2p5, &tk2_1to2p5, rescaleFactor);
-					}
+					// }
 
 					if (do1to1p5 && candTk->PT < 1.5){
 						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_1to1p5, &tk2_1to1p5, rescaleFactor);
+					}
+				}
+				// for loose IP on signal tracks
+				if (checkTrackIPTightAlt(candTk) && checkTrackPTTight(candTk)){ // alternate IP cut on 1-prong tracks
+					fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_looseip, &tk2_2p5_looseip, rescaleFactor);
+					if (checkTkMuOS(candTk, mu1)) {
+						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_OS_looseip, &tk2_2p5_OS_looseip, rescaleFactor);
 					}
 				}
 			} // End of track selection criteria
@@ -610,8 +615,8 @@ void massPlots(int argc, char* argv[])
 			&& tk1_2p5_OS.size() == 1 && tk2_2p5_OS.size() == 1)
 			{
 
-				cout << (mu1Mom+tk1_2p5_OS[0]->P4()).M() << endl;
-				cout << (mu2Mom+tk2_2p5_OS[0]->P4()).M() << endl;
+				// cout << (mu1Mom+tk1_2p5_OS[0]->P4()).M() << endl;
+				// cout << (mu2Mom+tk2_2p5_OS[0]->P4()).M() << endl;
 
 				if(doRescale) {
 					r.rescaleTrack(tk1_2p5_OS[0], mu1);
@@ -625,8 +630,8 @@ void massPlots(int argc, char* argv[])
 				double m1 = (mu1Mom+tk1_2p5_OS[0]->P4()).M();
 				double m2 = (mu2Mom+tk2_2p5_OS[0]->P4()).M();
 
-				cout << m1 << endl;
-				cout << m2 << endl;
+				// cout << m1 << endl;
+				// cout << m2 << endl;
 
 				histM1->Fill(m1);
 				histM1_fine->Fill(m1);
@@ -676,7 +681,7 @@ void massPlots(int argc, char* argv[])
 				TLorentzVector track1Mom=tk1_2p5_OS_looseip[0]->P4();
 				TLorentzVector track2Mom=tk2_2p5_OS_looseip[0]->P4();
 
-				// random since mu1Mom andmu2Mom are randomly assigned (if selected at top)
+				// random since mu1Mom and mu2Mom are randomly assigned (if selected at top)
 				double m1 = (mu1Mom+tk1_2p5_OS_looseip[0]->P4()).M();
 				double m2 = (mu2Mom+tk2_2p5_OS_looseip[0]->P4()).M();
 
@@ -1092,6 +1097,7 @@ void massPlots(int argc, char* argv[])
 		app += "_rescaleQuantile";
 	}
 
+	app += "_1912";
 
 	app += "_dR";
 	app += boost::lexical_cast<std::string>(deltaR);

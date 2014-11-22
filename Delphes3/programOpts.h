@@ -305,7 +305,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 		if (doMu) {
 			if(doHLT) {
 				cout << "Doing QCDb_mu with HLT cuts" << endl;
-				addFilesFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", 1600);
+				addFilesFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", 2000);
 			} else{
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
 				throw std::invalid_argument("DON'T USE QCDb_mu");

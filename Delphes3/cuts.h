@@ -358,8 +358,17 @@ bool checkTrackPTTight(Track* candTk){
  * @return        TRUE if track passes cuts, FALSE otherwise
  */
 bool checkTrackIPTight(Track* candTk){
-	if ((fabs(candTk->Zd) < 0.4) // dz < 0.04cm
-		&& (fabs(calcDxy(candTk)) < 0.2)) { // d0 < 0.02cm
+	if ((fabs(candTk->Zd) < 0.4) // dz < 0.04cm, (or 0.05cm for IP option 2)
+		&& (fabs(calcDxy(candTk)) < 0.2)) { // d0 < 0.02cm (or 0.05cm for IP option 2)
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool checkTrackIPTightAlt(Track* candTk){
+	if ((fabs(candTk->Zd) < 0.5) // dz < 0.04cm
+		&& (fabs(calcDxy(candTk)) < 0.5)) { // d0 < 0.02cm
 		return true;
 	} else {
 		return false;
