@@ -436,13 +436,31 @@ void paperConvert() {
     TFile *f_bg_main1 = TFile::Open("QCDb_HLT_bare/output_main_bare_bg_muRand_HLT_dR1.root", "READ");
     // TFile *f_bg_main2 = TFile::Open("QCDb_HLT_bare/output_main_bare_bg_muRand_HLT_dR2.root", "READ");
     TFile *f_bg_main2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_noDz_dR2.root", "READ");
-    TFile *f_bg_mass1 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_dR1.root", "READ");
-    // TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_dR2.root", "READ");
-    TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_noDz_dR2.root", "READ");
+
+    // TFile *f_bg_mass1 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_dR1.root", "READ");
+    // TFile *f_bg_mass1 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_1912_dR1.root", "READ");
+    TFile *f_bg_mass1 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_1912IPopt2_dR1.root", "READ");
+    // TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_dR2.root", "READ"); //normal
+    // TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_looseIsoAndTau_dR2.root", "READ");
+    // TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_IPiso0p5_dR2.root", "READ");
+    // TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_1912_dR2.root", "READ");
+    TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_1912IPopt2_dR2.root", "READ");
+    // TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_noDz_dR2.root", "READ");
+    // TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_IPopt2_dR2.root", "READ");
+    // TFile *f_bg_mass2 = TFile::Open("QCDb_HLT_bare/output_bare_bg_muRand_HLT_IPopt3_dR2.root", "READ");
+
     TFile *f_scatter_main1 = TFile::Open("QCDbcScatter_HLT_bare/output_main_bare_bg_muRand_HLT_dR1.root", "READ");
     TFile *f_scatter_main2 = TFile::Open("QCDbcScatter_HLT_bare/output_main_bare_bg_muRand_HLT_dR2.root", "READ");
     TFile *f_scatter_mass1 = TFile::Open("QCDbcScatter_HLT_bare/output_bare_bg_muRand_HLT_dR1.root", "READ");
     TFile *f_scatter_mass2 = TFile::Open("QCDbcScatter_HLT_bare/output_bare_bg_muRand_HLT_dR2.root", "READ");
+
+    // TString dir("normal");
+    // TString dir("looseIsolooseTau");
+    // TString dir("IPiso0p5");
+    // TString dir("1912");
+    TString dir("1912IPopt2");
+    // TString dir("IPopt2");
+    // TString dir("noDz");
 
     ///////////////////
     // 1D MASS PLOTS //
@@ -476,7 +494,7 @@ void paperConvert() {
     setAltTitleLabelSizes(hM_bare_bg_muRand_HLT_dR2);
     hM_bare_bg_muRand_HLT_dR2->Draw("HISTE");
     t_signal->Draw();
-    c1->SaveAs("Combined/M_10bins_bare_bg_muRand_HLT_dR2.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_10bins_bare_bg_muRand_HLT_dR2.pdf");
 
     std::vector<double> scalingFactors;
     scalingFactors.push_back(1.7649);
@@ -493,7 +511,7 @@ void paperConvert() {
     setAltTitleLabelSizes(hM_bg_dR2);
     hM_bg_dR2->Draw("HISTE");
     t_signal->Draw();
-    c1->SaveAs("Combined/M_10bins_bare_bg_both_muRand_HLT_dR2.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_10bins_bare_bg_both_muRand_HLT_dR2.pdf");
 
     // signal
     TH1D* hM1_bare_sig_muRand_HLT_dR2 = (TH1D*) f_sig_mass2->Get("hM1");
@@ -506,7 +524,7 @@ void paperConvert() {
     setAltTitleLabelSizes(hM_bare_sig_muRand_HLT_dR2);
     hM_bare_sig_muRand_HLT_dR2->Draw("HISTE");
     t_signal->Draw();
-    c1->SaveAs("Combined/M_10bins_bare_sig_muRand_HLT_dR2.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_10bins_bare_sig_muRand_HLT_dR2.pdf");
 
 
     // bbbar + signal
@@ -523,7 +541,7 @@ void paperConvert() {
     l->Draw();
     t_signal->Draw();
 
-    c1->SaveAs("Combined/M_10bins_bare_both_muRand_HLT_dR2.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_10bins_bare_both_muRand_HLT_dR2.pdf");
 
     // bbbar + scatter + signal
     THStack* st_all = new THStack("st_all","");
@@ -541,7 +559,7 @@ void paperConvert() {
     setAltTitleLabelSizes(st_all->GetHistogram());    
     l_all->Draw();
     t_signal->Draw();
-    c1->SaveAs("Combined/M_10bins_bare_allMC_muRand_HLT_dR2.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_10bins_bare_allMC_muRand_HLT_dR2.pdf");
 
     
     ////////////
@@ -565,7 +583,7 @@ void paperConvert() {
     setAltTitleLabelSizes(hM_side_bg_muRand_HLT_dR1);
     hM_side_bg_muRand_HLT_dR1->Draw("HISTE");
     t_side->Draw();
-    c1->SaveAs("Combined/M_10bins_side_bg_muRand_HLT_dR1.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_10bins_side_bg_muRand_HLT_dR1.pdf");
 
     // // bbbar + scatter
     TH1D* hM1_side_bg_dR1 = combineRebin10bins(filesdR1, "hM1_side_1to2p5_unnormalised", scalingFactors);
@@ -578,7 +596,7 @@ void paperConvert() {
     setAltTitleLabelSizes(hM_side_bg_dR1);
     hM_side_bg_dR1->Draw("HISTE");
     t_side->Draw();
-    c1->SaveAs("Combined/M_10bins_side_bg_both_muRand_HLT_dR1.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_10bins_side_bg_both_muRand_HLT_dR1.pdf");
 
     // signal
     TH1D* hM1_side_sig_muRand_HLT_dR1 = (TH1D*) f_sig_mass1->Get("hM1_side_1to2p5");
@@ -593,7 +611,7 @@ void paperConvert() {
     setAltTitleLabelSizes(hM_side_sig_muRand_HLT_dR1);
     hM_side_sig_muRand_HLT_dR1->Draw("HISTE");
     t_side->Draw();
-    c1->SaveAs("Combined/M_10bins_side_sig_muRand_HLT_dR1.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_10bins_side_sig_muRand_HLT_dR1.pdf");
 
     // bbar + signal
     THStack* st_side = new THStack("st_side","");
@@ -604,7 +622,7 @@ void paperConvert() {
     setAltTitleLabelSizes(st_side->GetHistogram());    
     l->Draw();
     t_side->Draw();
-    c1->SaveAs("Combined/M_10bins_side_both_muRand_HLT_dR1.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_10bins_side_both_muRand_HLT_dR1.pdf");
     
     // bbar + scatter + signal
     THStack* st_side_all = new THStack("st_side_all","");
@@ -615,7 +633,7 @@ void paperConvert() {
     setAltTitleLabelSizes(st_side_all->GetHistogram());    
     l_all->Draw();
     t_side->Draw();
-    c1->SaveAs("Combined/M_10bins_side_allMC_muRand_HLT_dR1.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_10bins_side_allMC_muRand_HLT_dR1.pdf");
 
 
     ///////////////////////
@@ -626,6 +644,7 @@ void paperConvert() {
     TH1D* hCorr_side_sig = (TH1D*) f_sig_mass1->Get("hCorr1D_side_1to2p5");
     //bbbar
     TH1D* hCorr_bare_b = (TH1D*) f_bg_mass2->Get("hCorr1D");
+    // TH1D* hCorr_bare_b = (TH1D*) f_bg_mass2->Get("hCorr1D_loosetau");
     TH1D* hCorr_side_b = (TH1D*) f_bg_mass1->Get("hCorr1D_side_1to2p5");
     
     TH1D* hM1D_bare_b_unnormalised = (TH1D*) f_bg_mass2->Get("hM_unnormalised"); // signal region
@@ -698,7 +717,7 @@ void paperConvert() {
     hCorr_bare_sig->Draw();
     line.Draw();
     t_signal->Draw();
-    c1->SaveAs("Combined/Corr_bare_sig.pdf");
+    c1->SaveAs("Combined/"+dir+"/Corr_bare_sig.pdf");
     
     // bbbar qcd by itself
     std::cout << "bbbar QCD MC in signal region:" << std::endl;
@@ -707,15 +726,15 @@ void paperConvert() {
     line.Draw();
     t_signal->Draw();
     l_bonly->Draw();
-    c1->SaveAs("Combined/Corr_bare_b.pdf");
-    c1->SaveAs("Combined/Corr_bare_b.png");
+    c1->SaveAs("Combined/"+dir+"/Corr_bare_b.pdf");
+    c1->SaveAs("Combined/"+dir+"/Corr_bare_b.png");
     
     // bbbar + signal
     hCorr_bare_b->Draw();
     hCorr_bare_sig->Draw("SAME");
     line.Draw();
     l->Draw();
-    c1->SaveAs("Combined/Corr_bare_b_sig.pdf");
+    c1->SaveAs("Combined/"+dir+"/Corr_bare_b_sig.pdf");
 
 
     // make combined corr plot for both qcd
@@ -737,12 +756,12 @@ void paperConvert() {
     hCorr_bare_bg->Draw();
     line.Draw();
     t_signal->Draw();
-    c1->SaveAs("Combined/Corr_bare_bg.pdf");
+    c1->SaveAs("Combined/"+dir+"/Corr_bare_bg.pdf");
     
     // all qcd + signal mc
     hCorr_bare_sig->Draw("SAME");
     l_all->Draw();
-    c1->SaveAs("Combined/Corr_bare_bg_sig.pdf");
+    c1->SaveAs("Combined/"+dir+"/Corr_bare_bg_sig.pdf");
 
     //////////////////////
     // control region B //
@@ -751,7 +770,7 @@ void paperConvert() {
     // signal MC by itself
     hCorr_side_sig->Draw();
     line.Draw();
-    c1->SaveAs("Combined/Corr_side_sig.pdf");
+    c1->SaveAs("Combined/"+dir+"/Corr_side_sig.pdf");
     
     // bbbar qcd by itself
     std::cout << "bbbar QCD MC in control region:" << std::endl;
@@ -759,15 +778,15 @@ void paperConvert() {
     hCorr_side_b->Draw();
     line.Draw();
     l_bonly->Draw();
-    c1->SaveAs("Combined/Corr_side_b.pdf");
-    c1->SaveAs("Combined/Corr_side_b.png");
+    c1->SaveAs("Combined/"+dir+"/Corr_side_b.pdf");
+    c1->SaveAs("Combined/"+dir+"/Corr_side_b.png");
 
     // signal + bbbar together
     hCorr_side_sig->Draw();
     hCorr_side_b->Draw("SAME");
     line.Draw();
     l->Draw();
-    c1->SaveAs("Combined/Corr_side_b_sig.pdf");
+    c1->SaveAs("Combined/"+dir+"/Corr_side_b_sig.pdf");
 
     // make combined corr plot for both qcd
     std::vector<TH1D*> side_bg_hists1D;
@@ -788,12 +807,12 @@ void paperConvert() {
     hCorr_side_bg->Draw();
     line.Draw();
     t_side->Draw();
-    c1->SaveAs("Combined/Corr_side_bg.pdf");
+    c1->SaveAs("Combined/"+dir+"/Corr_side_bg.pdf");
     
     // signal + both QCD
     hCorr_side_sig->Draw("SAME");
     l_all->Draw();
-    c1->SaveAs("Combined/Corr_side_all_MC.pdf");
+    c1->SaveAs("Combined/"+dir+"/Corr_side_all_MC.pdf");
 
     // QCD + data
     hCorr_side_bg->Draw();
@@ -812,8 +831,8 @@ void paperConvert() {
     l_all_data->Draw();
     
     t_side->Draw();
-    c1->SaveAs("Combined/Corr_side_bg_data.pdf");
-    // c1->SaveAs("Combined/Corr_side_bg_data.png");
+    c1->SaveAs("Combined/"+dir+"/Corr_side_bg_data.pdf");
+    // c1->SaveAs("Combined/"+dir+"/Corr_side_bg_data.png");
 
     // bbar + data
     hCorr_side_b->Draw();
@@ -825,8 +844,8 @@ void paperConvert() {
     l_b_data->Draw();
     line.Draw();
     t_side->Draw();
-    c1->SaveAs("Combined/Corr_side_b_data.pdf");
-    c1->SaveAs("Combined/Corr_side_b_data.png");
+    c1->SaveAs("Combined/"+dir+"/Corr_side_b_data.pdf");
+    c1->SaveAs("Combined/"+dir+"/Corr_side_b_data.png");
 
 
     /////////////////////////
@@ -868,7 +887,7 @@ void paperConvert() {
     l_Ntk2_234->AddEntry(histM1_Ntk2_4, "N_{tk,2} = 4", "lp");
     doStandardLegend(l_Ntk2_234);
     l_Ntk2_234->Draw();
-    c1->SaveAs("Combined/M1_Ntk2.pdf");
+    c1->SaveAs("Combined/"+dir+"/M1_Ntk2.pdf");
 
     THStack* st_Ntk2_2or3 = new THStack("","");
     TH1D* histM1_Ntk2_2or3 = (TH1D*) f_bg_mass2->Get("hM1_Ntk2_2or3");
@@ -887,16 +906,16 @@ void paperConvert() {
     l_Ntk2_2or3->AddEntry(histM1_Ntk2_2or3, "N_{trk, j} = 2, 3", "lp");
     doStandardLegend(l_Ntk2_2or3);
     l_Ntk2_2or3->Draw();
-    c1->SaveAs("Combined/M_Ntk2_2or3.pdf");
-    c1->SaveAs("Combined/M_Ntk2_2or3.png");
+    c1->SaveAs("Combined/"+dir+"/M_Ntk2_2or3.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_Ntk2_2or3.png");
 
     histM1_Ntk2_2or3->SetMinimum(0.001); // Stop SetLogy complainng
     // hM1_bare_bg_muRand_HLT_dR2->SetMinimum(0.001); // Stop SetLogy complainng
     hM_bare_bg_muRand_HLT_dR2->SetMinimum(0.001); // Stop SetLogy complainng
     setAltTitleLabelSizes(st_Ntk2_2or3->GetHistogram());
     c1->SetLogy();
-    c1->SaveAs("Combined/M_Ntk2_2or3_log.pdf");
-    c1->SaveAs("Combined/M_Ntk2_2or3_log.png");
+    c1->SaveAs("Combined/"+dir+"/M_Ntk2_2or3_log.pdf");
+    c1->SaveAs("Combined/"+dir+"/M_Ntk2_2or3_log.png");
 
 
     // cleanup
