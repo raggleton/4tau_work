@@ -156,6 +156,11 @@ void massPlots(int argc, char* argv[])
 	TH1D* histM1_Ntk2_4                      = new TH1D("hM1_Ntk2_4", "Inv. Mass of 1st system, full selection with N_{tk,2} = 4; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
 	TH1D* histM1_Ntk2_2or3                   = new TH1D("hM1_Ntk2_2or3", "Inv. Mass of 1st system, full selection with N_{tk,2} = 2 or 3; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
 
+	TH1D* histM1_Ntk2_2_loosetau             = new TH1D("hM1_Ntk2_2_loosietau", "Inv. Mass of 1st system, full selection with N_{tk,2} = 2; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
+	TH1D* histM1_Ntk2_3_loosetau             = new TH1D("hM1_Ntk2_3_loosietau", "Inv. Mass of 1st system, full selection with N_{tk,2} = 3; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
+	TH1D* histM1_Ntk2_4_loosetau             = new TH1D("hM1_Ntk2_4_loosietau", "Inv. Mass of 1st system, full selection with N_{tk,2} = 4; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
+	TH1D* histM1_Ntk2_2or3_loosetau          = new TH1D("hM1_Ntk2_2or3_loosietau", "Inv. Mass of 1st system, full selection with N_{tk,2} = 2 or 3; m(#mu_{1}-tk) [GeV];A.U.",10,0,10);
+
 	TH1D* histM1_fine                        = new TH1D("hM1Fine", "Inv. Mass of 1st system, full selection; m(#mu_{1}-tk) [GeV];A.U.",50,0,10);
 	TH1D* histM2_fine                        = new TH1D("hM2Fine", "Inv. Mass of 2st system, full selection; m(#mu_{2}-tk) [GeV];A.U.",50,0,10);
 
@@ -522,6 +527,10 @@ void massPlots(int argc, char* argv[])
 		std::vector<Track*> tk1_1to2p5_taucand;
 		std::vector<Track*> tk2_1to2p5_taucand;
 
+		// same but with 1 < pT < 2.5 (for sideband) with looser IP cuts (tau candidate IP)
+		std::vector<Track*> tk1_1to2p5_taucand_looseip;
+		std::vector<Track*> tk2_1to2p5_taucand_looseip;
+
 		// same but with 1 < pT < 1.5 (for sideband)
 		std::vector<Track*> tk1_1to1p5;
 		std::vector<Track*> tk2_1to1p5;
@@ -569,10 +578,15 @@ void massPlots(int argc, char* argv[])
 					}
 				}
 				// for loose IP on signal tracks
-				if (checkTrackIPTightAlt(candTk) && checkTrackPTTight(candTk)){ // alternate IP cut on 1-prong tracks
-					fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_looseip, &tk2_2p5_looseip, rescaleFactor);
-					if (checkTkMuOS(candTk, mu1)) {
-						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_OS_looseip, &tk2_2p5_OS_looseip, rescaleFactor);
+				if (checkTrackIPTightAlt(candTk)){
+					// for N_trk = 2or3
+					fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_1to2p5_taucand_looseip, &tk2_1to2p5_taucand_looseip, rescaleFactor);
+
+					if (checkTrackPTTight(candTk)){ // alternate IP cut on 1-prong tracks
+						fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_looseip, &tk2_2p5_looseip, rescaleFactor);
+						if (checkTkMuOS(candTk, mu1)) {
+							fillTrackVectorsWithRescale(candTk, mu1, mu2, &tk1_2p5_OS_looseip, &tk2_2p5_OS_looseip, rescaleFactor);
+						}
 					}
 				}
 			} // End of track selection criteria
@@ -809,6 +823,90 @@ void massPlots(int argc, char* argv[])
 					// m1 = (mu1Mom+tk2_2p5_OS[0]->P4()).M();
 
 					histM1_Ntk2_4->Fill(m1);
+				}
+		}
+
+
+		//////////////////////////////////////////////////////////////////////
+		// SIDEBAND REGION - where mu2 has 1, 2, 3 additional soft tracks with tight IP cuts//
+		// and mu1 satisfies signal selection
+		// BUT FOR LOOSE IP CUTS ON 1-PRONG TRACKS
+		//////////////////////////////////////////////////////////////////////
+		if (   tk1_1.size() == 1
+			&& tk1_2p5_looseip.size() == 1 && tk1_2p5_OS_looseip.size() == 1
+			&& tk2_2p5_looseip.size() == 1 && tk2_2p5_OS_looseip.size() == 1
+			){
+
+			double m1(0);
+
+			m1 = (mu1Mom+tk1_2p5_OS_looseip[0]->P4()).M();
+
+			if ( //tk2_1.size() == 2
+				tk2_1to2p5_taucand_looseip.size() == 1
+				&& tk2_1to2p5.size() == 1
+				) {
+
+					histM1_Ntk2_2_loosetau->Fill(m1);
+					histM1_Ntk2_2or3_loosetau->Fill(m1);
+
+				}
+
+			if (// tk2_1.size() == 3
+				tk2_1to2p5_taucand_looseip.size() == 2
+				&& tk2_1to2p5.size() == 2
+				) {
+					// m1 = (mu1Mom+tk1_2p5_OS_looseip[0]->P4()).M();
+
+					histM1_Ntk2_3_loosetau->Fill(m1);
+					histM1_Ntk2_2or3_loosetau->Fill(m1);
+				}
+
+			if ( //tk2_1.size() == 4
+				tk2_1to2p5_taucand_looseip.size() == 3
+				&& tk2_1to2p5.size() == 3
+				) {
+					// m1 = (mu1Mom+tk1_2p5_OS_looseip[0]->P4()).M();
+
+					histM1_Ntk2_4_loosetau->Fill(m1);
+				}
+		}
+
+		if (   tk2_1.size() == 1
+			&& tk2_2p5_looseip.size() == 1 && tk2_2p5_OS_looseip.size() == 1
+			&& tk1_2p5_looseip.size() == 1 && tk1_2p5_OS_looseip.size() == 1
+			){
+
+			double m1(0);
+
+			m1 = (mu2Mom+tk2_2p5_OS_looseip[0]->P4()).M();
+
+			if ( //tk1_1.size() == 2
+				tk1_1to2p5_taucand_looseip.size() == 1
+				&& tk1_1to2p5.size() == 1
+				) {
+
+					histM1_Ntk2_2_loosetau->Fill(m1);
+					histM1_Ntk2_2or3_loosetau->Fill(m1);
+
+				}
+
+			if (// tk1_1.size() == 3
+				tk1_1to2p5_taucand_looseip.size() == 2
+				&& tk1_1to2p5.size() == 2
+				) {
+					// m1 = (mu1Mom+tk2_2p5_OS_looseip[0]->P4()).M();
+
+					histM1_Ntk2_3_loosetau->Fill(m1);
+					histM1_Ntk2_2or3_loosetau->Fill(m1);
+				}
+
+			if ( //tk1_1.size() == 4
+				tk1_1to2p5_taucand_looseip.size() == 3
+				&& tk1_1to2p5.size() == 3
+				) {
+					// m1 = (mu1Mom+tk2_2p5_OS_looseip[0]->P4()).M();
+
+					histM1_Ntk2_4_loosetau->Fill(m1);
 				}
 		}
 
@@ -1074,6 +1172,11 @@ void massPlots(int argc, char* argv[])
 	printIntegral(histM1_Ntk2_2or3);
 	printIntegral(histM1_Ntk2_4);
 
+	printIntegral(histM1_Ntk2_2_loosetau);
+	printIntegral(histM1_Ntk2_3_loosetau);
+	printIntegral(histM1_Ntk2_2or3_loosetau);
+	printIntegral(histM1_Ntk2_4_loosetau);
+
 	/////////////////
 	// PLOT THINGS //
 	/////////////////
@@ -1097,7 +1200,7 @@ void massPlots(int argc, char* argv[])
 		app += "_rescaleQuantile";
 	}
 
-	app += "_1912";
+	app += "_2000";
 
 	app += "_dR";
 	app += boost::lexical_cast<std::string>(deltaR);
@@ -1163,6 +1266,18 @@ void massPlots(int argc, char* argv[])
 
 	makeCopySave(histM1_Ntk2_4);
 	normaliseHist(histM1_Ntk2_4);
+
+	makeCopySave(histM1_Ntk2_2_loosetau);
+	normaliseHist(histM1_Ntk2_2_loosetau);
+
+	makeCopySave(histM1_Ntk2_3_loosetau);
+	normaliseHist(histM1_Ntk2_3_loosetau);
+
+	makeCopySave(histM1_Ntk2_2or3_loosetau);
+	normaliseHist(histM1_Ntk2_2or3_loosetau);
+
+	makeCopySave(histM1_Ntk2_4_loosetau);
+	normaliseHist(histM1_Ntk2_4_loosetau);
 
 	makeCopySave(histM1_fine);
 	normaliseHist(histM1_fine);
@@ -1386,6 +1501,12 @@ void massPlots(int argc, char* argv[])
 	drawHistAndSave(histM1_Ntk2_2or3, "HISTE", "M1_Ntk2_2or3", directory, app);
 	drawHistAndSave(histM1_Ntk2_4, "HISTE", "M1_Ntk2_4", directory, app);
 
+	// Extra tracks around mu2 - looser IP on 1-prong track (IP option 2)
+	drawHistAndSave(histM1_Ntk2_2_loosetau, "HISTE", "M1_Ntk2_2_loosetau", directory, app);
+	drawHistAndSave(histM1_Ntk2_3_loosetau, "HISTE", "M1_Ntk2_3_loosetau", directory, app);
+	drawHistAndSave(histM1_Ntk2_2or3_loosetau, "HISTE", "M1_Ntk2_2or3_loosetau", directory, app);
+	drawHistAndSave(histM1_Ntk2_4_loosetau, "HISTE", "M1_Ntk2_4_loosetau", directory, app);
+
 	// Testing hists
 	// -------------
 
@@ -1497,6 +1618,10 @@ void massPlots(int argc, char* argv[])
 	histM1timesM1_loosetau->Write("",TObject::kOverwrite);
 	histM1vsM2_correlations_loosetau->Write("",TObject::kOverwrite);
 	histCorr1D_loosetau->Write("",TObject::kOverwrite);
+	histM1_Ntk2_2_loosetau->Write("",TObject::kOverwrite);
+	histM1_Ntk2_3_loosetau->Write("",TObject::kOverwrite);
+	histM1_Ntk2_2or3_loosetau->Write("",TObject::kOverwrite);
+	histM1_Ntk2_4_loosetau->Write("",TObject::kOverwrite);
 
 	histN_JPsi->Write("", TObject::kOverwrite);
 	histN_JPsi_side_1to2p5->Write("", TObject::kOverwrite);
