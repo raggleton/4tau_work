@@ -1200,7 +1200,7 @@ void massPlots(int argc, char* argv[])
 		app += "_rescaleQuantile";
 	}
 
-	app += "_2000";
+	app += "_2500";
 
 	app += "_dR";
 	app += boost::lexical_cast<std::string>(deltaR);
