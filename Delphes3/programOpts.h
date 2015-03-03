@@ -281,6 +281,7 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 	MCsource source = pOpts->getSource();
 	bool doMu       = pOpts->getQCDMu();
 	bool doHLT      = pOpts->getHLT();
+	int nEvents     = pOpts->getNEvents();
 
 	////////////////
 	// SIGNAL MC //
@@ -305,7 +306,9 @@ void addInputFiles(TChain* chain, ProgramOpts* pOpts) {
 		if (doMu) {
 			if(doHLT) {
 				cout << "Doing QCDb_mu with HLT cuts" << endl;
-				addFilesFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", 25000);
+				int n = 2500;
+				if (nEvents != -1) n = 1+(nEvents/2000); // so you don't load every file just for testing
+				addFilesFromFolder(chain, "QCDb_HLT_bare/", "QCDb_HLT_", n);
 			} else{
 				cout << "Doing QCDb_mu without HLT cuts" << endl;
 				throw std::invalid_argument("DON'T USE QCDb_mu");
